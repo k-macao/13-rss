@@ -1,0 +1,83 @@
+name: WeChat digest
+
+# Beijing time (UTC+8) 09:00 and 18:00 -> 01:00 and 10:00 UTC.
+# GitHub cron runs on UTC and can be delayed by a few minutes under load.
+on:
+  schedule:
+    - cron: "0 1 * * *"
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: "Which edition to render"
+        type: choice
+        options: [auto, morning, evening]
+        default: auto
+      pack:
+        description: "OPML pack to read (top200, ai, news, ...)"
+        type: string
+        default: top200
+      window_hours:
+        description: "Lookback window in hours (0 = edition default)"
+        type: string
+        default: "0"
+      dry_run:
+        description: "Render only, do not call pushplus"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wechat-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve edition
+        id: edition
+        env:
+          INPUT_EDITION: ${{ inputs.edition }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          if [ -n "$INPUT_EDITION" ] && [ "$INPUT_EDITION" != "auto" ]; then
+            echo "name=$INPUT_EDITION" >> "$GITHUB_OUTPUT"
+          elif [ "$SCHEDULE" = "0 10 * * *" ]; then
+            echo "name=evening" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=morning" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and push digest
+        env:
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
+        run: |
+          python scripts/wechat_digest.py \
+            --pack "${{ inputs.pack || 'top200' }}" \
+            --edition "${{ steps.edition.outputs.name }}" \
+            --window-hours "${{ inputs.window_hours || '0' }}" \
+            --max-per-feed 3 \
+            --max-items 120 \
+            --concurrency 12 \
+            --timeout 20 \
+            --out build/digest \
+            ${{ (inputs.dry_run == true) && '--dry-run' || '' }}
+
+      - name: Upload rendered pages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wechat-digest-${{ steps.edition.outputs.name }}
+          path: build/digest
+          if-no-files-found: ignore
+          retention-days: 7
