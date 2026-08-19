@@ -58,6 +58,12 @@
 
 RSS 地址可能随时迁移或失效，所以目录会持续复查。发现漏收、失效或分类不合适，可以直接[提交建议](CONTRIBUTING.zh-CN.md)。
 
+## 每日推送到微信
+
+仓库自带一个可选的推送流程：每天北京时间 09:00 和 18:00，GitHub Actions 抓取目录里的新文章，渲染成国际杂志风格的竖屏简报，通过 pushplus 发到微信。内容超出 pushplus 的 10 万字上限时会自动分页发送。
+
+配置 `PUSHPLUS_TOKEN` 这一个 Secret 即可启用，详见 [微信推送说明](WECHAT-DIGEST.zh-CN.md)。
+
 ## 用 Tidings 阅读
 
 **官网：[tidings.info](https://tidings.info/)**

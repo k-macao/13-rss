@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Added a twice-daily WeChat digest workflow that pushes new catalog articles through pushplus at 09:00 and 18:00 Beijing time.
+- Rendered the digest in an international-magazine style: portrait single column, light grey paper, black small body copy, dark grey metadata, and a fluorescent green accent, using inline styles only so WeChat webviews render it unchanged.
+- Paginated long issues under the 100,000-character pushplus limit, with continuous article numbering, repeated section headers, page counters, and numbered titles.
+- Added dependency-free RSS, Atom, and JSON Feed parsing with time-window filtering, per-feed caps, link and title deduplication, and per-feed failure isolation.
+- Added 24 unit tests covering parsing, deduplication, edition windows, pagination, escaping, palette, and the workflow schedule.
+
 ## v1.4.0 — 2026-08-13
 
 - Added `tidings-top200.opml` as the recommended first import, with all 14 primary categories represented.
