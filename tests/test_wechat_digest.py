@@ -3,6 +3,7 @@ import re
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts.wechat_digest import (
     AUTHOR_LINE,
@@ -19,7 +20,9 @@ from scripts.wechat_digest import (
     page_title,
     parse_datetime,
     parse_feed_payload,
+    is_english,
     render_pages,
+    translate_to_chinese,
     resolve_edition,
     strip_html,
 )
@@ -60,6 +63,24 @@ class ParsingTests(unittest.TestCase):
     def test_strip_html_removes_markup_scripts_and_whitespace(self):
         raw = "<p>Hello <b>world</b></p><script>alert(1)</script>\n  &amp; more\u00a0text"
         self.assertEqual(strip_html(raw), "Hello world & more text")
+
+    def test_english_detection_skips_chinese_and_translates_english(self):
+        self.assertTrue(is_english("A new model improves reasoning"))
+        self.assertFalse(is_english("一个新的模型"))
+        self.assertFalse(is_english("https://example.com"))
+
+        class Response:
+            def read(self):
+                return '[[["一个新的模型", "A new model", null, null, 1]], null, "en"]'.encode()
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        with patch("scripts.wechat_digest.urlopen", return_value=Response()):
+            self.assertEqual(translate_to_chinese("A new model"), "一个新的模型")
 
     def test_parse_datetime_accepts_rfc822_and_iso8601(self):
         rfc = parse_datetime("Tue, 19 Aug 2026 09:30:00 +0800")
@@ -144,6 +165,11 @@ class RenderTests(unittest.TestCase):
         self.assertEqual(len(pages), 1)
         self.assertIn("01 / 01", pages[0])
         self.assertIn("本期结束", pages[0])
+
+    def test_footer_hides_generation_time_and_source_attribution(self):
+        page = render(make_items(1), generated_at="2026-08-20 00:11")[0]
+        self.assertNotIn("GENERATED", page)
+        self.assertNotIn("SOURCE github.com/fuxiaoai/tidings-rss", page)
 
     def test_pages_stay_within_the_pushplus_content_limit(self):
         pages = render(make_items(400, summary="摘要内容 " * 25))
