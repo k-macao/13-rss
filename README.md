@@ -50,6 +50,12 @@ Chinese independent blogs are judged mainly on recent writing and useful article
 
 Feeds move and disappear, so the directory is checked regularly. If a source is missing, broken, or misclassified, [send a suggestion](CONTRIBUTING.md).
 
+## Daily digest to WeChat
+
+The repository ships an optional delivery workflow: twice a day, at 09:00 and 18:00 Beijing time, GitHub Actions collects new articles from the catalog, renders them as a portrait, international-magazine style briefing, and sends it to WeChat through pushplus. Long issues are paginated automatically to stay inside the 100,000-character pushplus limit.
+
+Set the single `PUSHPLUS_TOKEN` secret to enable it. See the [WeChat digest guide](WECHAT-DIGEST.zh-CN.md) for details.
+
 ## Read with Tidings
 
 **Website: [tidings.info](https://tidings.info/)**
