@@ -94,6 +94,17 @@ EDITIONS = {
     "evening": {"title": "晚间简报", "kicker": "EVENING EDITION", "window_hours": 9},
 }
 
+# Digest branding — the title no longer carries the date or pushplus branding.
+DIGEST_TITLE = "章鱼 AI 全景分析"
+DIGEST_SUBTITLE = "全网 AI 调研境内境外数据，由多个大模型混合部署。"
+DIGEST_INTRO = (
+    "全网境内外为你寻找蛛丝马迹 - 提供全景视野分析，由多模型协同推理决策。"
+    "底层所使用的大语言模型（LLM）多模式背后结合使用了多种不同的先进模型，"
+    "包括但不限于 Claude、ChatGPT、Gemini、Grok、Qwen 以及 Kimi。"
+    "根据不同的资产管理任务需求，更好地发挥各个模型的优势来提供数据支持！[加油]"
+)
+AUTHOR_LINE = "作者：章鱼 ai · 仅供参考，分析研究"
+
 
 # ---------------------------------------------------------------------------
 # Feed fetching and parsing
@@ -321,14 +332,14 @@ def render_header(*, title, kicker, stamp, page_index, page_count, item_count, s
     return f"""
 <div style="padding:26px 0 0;">
   <div style="font-family:{MONO};font-size:10px;letter-spacing:.28em;color:{GRAPHITE};text-transform:uppercase;">
-    TIDINGS&nbsp;RSS&nbsp;&nbsp;·&nbsp;&nbsp;{esc(kicker)}
+    OCTOPUS&nbsp;AI&nbsp;&nbsp;·&nbsp;&nbsp;章鱼 AI&nbsp;&nbsp;·&nbsp;&nbsp;{esc(kicker)}
   </div>
   <div style="margin:10px 0 0;">
     <span style="display:inline-block;background:{NEON};color:{INK};font-family:{SANS};font-size:26px;
       font-weight:800;letter-spacing:.04em;line-height:1.15;padding:2px 10px 4px;">{esc(title)}</span>
   </div>
   <div style="margin:12px 0 0;font-family:{SANS};font-size:11px;letter-spacing:.16em;color:{GRAPHITE};">
-    每日精选 · CURATED FEED DIGEST
+    {esc(DIGEST_SUBTITLE)}
   </div>
   {rule(INK, "2px", "16px", "10px")}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
@@ -340,6 +351,16 @@ def render_header(*, title, kicker, stamp, page_index, page_count, item_count, s
     </tr>
   </table>
   {rule(HAIRLINE, "1px", "10px", "22px")}
+</div>
+""".strip()
+
+
+def render_intro():
+    return f"""
+<div style="margin:0 0 20px;padding:14px 14px;background:{CARD};">
+  <div style="font-family:{SANS};font-size:13px;line-height:1.85;color:{INK};letter-spacing:.01em;">
+    {esc(DIGEST_INTRO)}
+  </div>
 </div>
 """.strip()
 
@@ -409,6 +430,12 @@ def render_footer(*, page_index, page_count, generated_at, window_hours):
         if page_index == page_count
         else f"续下页 · CONTINUED IN {page_index + 1:02d}/{page_count:02d}"
     )
+    author = (
+        f'<div style="margin:12px 0 0;font-family:{SANS};font-size:11px;color:{GRAPHITE};'
+        f'letter-spacing:.06em;">{esc(AUTHOR_LINE)}</div>'
+        if page_index == page_count
+        else ""
+    )
     return f"""
 <div style="margin:28px 0 0;">
   {rule(INK, "2px", "0", "10px")}
@@ -417,6 +444,7 @@ def render_footer(*, page_index, page_count, generated_at, window_hours):
     WINDOW {window_hours}H · GENERATED {esc(generated_at)} CST<br>
     SOURCE github.com/fuxiaoai/tidings-rss
   </div>
+  {author}
   <div style="margin:12px 0 0;height:6px;background:{NEON};"></div>
 </div>
 """.strip()
@@ -463,7 +491,7 @@ def render_pages(items, *, title, kicker, generated_at, window_hours, page_budge
             item_count=len(items),
             source_count=source_count,
         )
-    ) + len(render_footer(page_index=99, page_count=99, generated_at=stamp, window_hours=window_hours)) + 400
+    ) + len(render_intro()) + len(render_footer(page_index=99, page_count=99, generated_at=stamp, window_hours=window_hours)) + 400
     budget = max(4_000, page_budget - chrome)
 
     pages: list[list[str]] = []
@@ -504,6 +532,8 @@ def render_pages(items, *, title, kicker, generated_at, window_hours, page_budge
             item_count=len(items),
             source_count=source_count,
         )
+        if index == 1:
+            body += render_intro()
         body += "".join(body_blocks)
         body += render_footer(
             page_index=index,
@@ -624,10 +654,10 @@ def main(argv=None):
     )
     items = items[: args.max_items]
 
-    base_title = args.title or f"{local_now.strftime('%m月%d日')} {profile['title']}"
+    base_title = args.title or DIGEST_TITLE
     pages = render_pages(
         items,
-        title=profile["title"],
+        title=DIGEST_TITLE,
         kicker=profile["kicker"],
         generated_at=local_now.strftime("%Y-%m-%d %H:%M"),
         window_hours=int(window_hours) if float(window_hours).is_integer() else window_hours,
