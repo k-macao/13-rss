@@ -48,6 +48,30 @@
 
 [RSS 使用指南](RSS-GUIDE.zh-CN.md) · [浏览 OPML](opml/) · [SHA-256 校验文件](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/SHA256SUMS.txt) · [目录统计](reports/catalog-summary.md) · [机器可读目录](data/feeds.json)
 
+## 微信日报推送
+
+仓库自带 [GitHub Actions 工作流](.github/workflows/wechat-push.yml)，每天按北京时间 **09:00（晨报）** 和 **18:00（晚报）** 自动抓取精选 200 源的新文章，排成简报后通过 [PushPlus](https://www.pushplus.plus/) 推送到微信。晨报覆盖前一天 18:00 至今，晚报覆盖当天 09:00 至今，两次推送互不重复。
+
+版面按「归藏 · 电子杂志风」排版：竖屏杂志栏、浅灰底、黑色正文、深灰元信息、荧光绿（`#00FF9C`）单色强调、小字号高密度阅读；无阴影无圆角，信息全部靠字体对比与网格留白支撑。
+
+### 配置
+
+1. 在 [PushPlus](https://www.pushplus.plus/) 登录后复制你的 `token`；
+2. 在仓库 **Settings → Secrets and variables → Actions** 添加 `PUSHPLUS_TOKEN`；
+3. （可选）推送到群组加 `PUSHPLUS_TOPIC`，多人群发单独接收加 `PUSHPLUS_TO`；
+4. 工作流随默认分支 `main` 运行，合并后每天自动推送两次，也可在 **Actions → WeChat digest push → Run workflow** 手动触发（可指定合集 `pack`、时间窗口 `lookback_hours` 等）。
+
+> **长度限制**：PushPlus 单条消息实名用户上限 2 万字、会员 10 万字。脚本默认按 10 万字分页，超长内容自动拆成多条连续推送（标题带 `（2/3）` 页码，每条间隔 13 秒以符合接口限频）。实名用户请添加 Secret `PUSHPLUS_MAX_CHARS=20000`。
+
+### 本地预览
+
+```bash
+pip install feedparser
+python scripts/wechat_digest.py --dry-run --save-pages digest-preview --lookback-hours 24
+```
+
+`--dry-run` 只渲染不发送，每页 HTML 会存到 `digest-preview/`；渲染好的页面也会随每次工作流运行上传为 Artifact 供排查。
+
 ## 我们怎么选
 
 精选 200 先看内容是谁在写：大机构的官方一手信息、有长期作品积累的作者、在社区里有稳定认可的创作者优先。最近更新、正文信息量和 Feed 稳定性仍是硬条件；同一机构的相近栏目只留更有代表性的一份，发布记录、榜单和查询聚合不会因为更新频繁就排到前面。
