@@ -34,7 +34,7 @@ from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree as ET
 
@@ -49,6 +49,9 @@ PUSHPLUS_CONTENT_LIMIT = 100_000
 PUSHPLUS_TITLE_LIMIT = 100
 # Leave room for the page wrapper that is added after content is packed.
 DEFAULT_PAGE_BUDGET = 92_000
+# Public Google Translate endpoint. It needs no API key; translation failures leave
+# the original text intact so a digest is never blocked by this convenience feature.
+TRANSLATE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
 
 CHINA = timezone(timedelta(hours=8))
 
@@ -119,6 +122,48 @@ def strip_html(value: str) -> str:
     text = html.unescape(text)
     text = text.replace("\u200b", "").replace("\xa0", " ")
     return re.sub(r"\s+", " ", text).strip()
+
+
+def is_english(text: str) -> bool:
+    """Return whether text is predominantly English and needs translation."""
+    if not text or re.search(r"[\u3400-\u9fff]", text) or re.fullmatch(r"https?://\S+", text.strip()):
+        return False
+    letters = re.findall(r"[A-Za-z]", text)
+    # Avoid sending version numbers, URLs, source names, and punctuation alone.
+    words = re.findall(r"[A-Za-z]+", text)
+    return len(letters) >= 3 and len(words) >= 1
+
+
+def translate_to_chinese(text: str, *, timeout: int = 8, endpoint: str = TRANSLATE_ENDPOINT) -> str:
+    """Translate English text to Simplified Chinese, retaining it on any failure."""
+    if not is_english(text):
+        return text
+    query = urlencode({"client": "gtx", "sl": "en", "tl": "zh-CN", "dt": "t", "q": text})
+    request = Request(f"{endpoint}?{query}", headers={"User-Agent": USER_AGENT})
+    try:
+        with urlopen(request, timeout=timeout, context=ssl.create_default_context()) as response:
+            payload = json.loads(response.read().decode("utf-8", "replace"))
+        translated = "".join(part[0] for part in payload[0] if part and part[0]).strip()
+        return translated or text
+    except (HTTPError, URLError, TimeoutError, OSError, ValueError, TypeError, IndexError, json.JSONDecodeError):
+        return text
+
+
+def translate_items(items, *, timeout: int, concurrency: int):
+    """Translate English titles and summaries concurrently before rendering."""
+    fields = [(item, field) for item in items for field in ("title", "summary") if is_english(item.get(field, ""))]
+    if not fields:
+        return items
+    with ThreadPoolExecutor(max_workers=max(1, min(concurrency, len(fields)))) as pool:
+        futures = {pool.submit(translate_to_chinese, item[field], timeout=timeout): (item, field) for item, field in fields}
+        for future in as_completed(futures):
+            item, field = futures[future]
+            try:
+                item[field] = future.result()
+            except (HTTPError, URLError, TimeoutError, OSError, ValueError):
+                # Keep the original RSS value if an unexpected translation error occurs.
+                pass
+    return items
 
 
 def display_width(text: str) -> int:
@@ -424,7 +469,7 @@ def render_item(index, item):
 """.strip()
 
 
-def render_footer(*, page_index, page_count, generated_at, window_hours):
+def render_footer(*, page_index, page_count):
     tail = (
         "本期结束 · END OF ISSUE"
         if page_index == page_count
@@ -440,9 +485,7 @@ def render_footer(*, page_index, page_count, generated_at, window_hours):
 <div style="margin:28px 0 0;">
   {rule(INK, "2px", "0", "10px")}
   <div style="font-family:{MONO};font-size:10px;color:{GRAPHITE};letter-spacing:.14em;line-height:1.9;">
-    {esc(tail)}<br>
-    WINDOW {window_hours}H · GENERATED {esc(generated_at)} CST<br>
-    SOURCE github.com/fuxiaoai/tidings-rss
+    {esc(tail)}
   </div>
   {author}
   <div style="margin:12px 0 0;height:6px;background:{NEON};"></div>
@@ -491,7 +534,7 @@ def render_pages(items, *, title, kicker, generated_at, window_hours, page_budge
             item_count=len(items),
             source_count=source_count,
         )
-    ) + len(render_intro()) + len(render_footer(page_index=99, page_count=99, generated_at=stamp, window_hours=window_hours)) + 400
+    ) + len(render_intro()) + len(render_footer(page_index=99, page_count=99)) + 400
     budget = max(4_000, page_budget - chrome)
 
     pages: list[list[str]] = []
@@ -535,12 +578,7 @@ def render_pages(items, *, title, kicker, generated_at, window_hours, page_budge
         if index == 1:
             body += render_intro()
         body += "".join(body_blocks)
-        body += render_footer(
-            page_index=index,
-            page_count=page_count,
-            generated_at=stamp,
-            window_hours=window_hours,
-        )
+        body += render_footer(page_index=index, page_count=page_count)
         rendered.append(page_wrapper(body))
     return rendered
 
@@ -627,6 +665,8 @@ def main(argv=None):
     parser.add_argument("--max-items", type=int, default=120)
     parser.add_argument("--concurrency", type=int, default=12)
     parser.add_argument("--timeout", type=int, default=20)
+    parser.add_argument("--translate", action=argparse.BooleanOptionalAction, default=True,
+                        help="translate English titles and summaries to Chinese (default: enabled)")
     parser.add_argument("--page-budget", type=int, default=DEFAULT_PAGE_BUDGET)
     parser.add_argument("--title", default="", help="override the digest title")
     parser.add_argument("--topic", default=os.environ.get("PUSHPLUS_TOPIC", ""))
@@ -653,6 +693,8 @@ def main(argv=None):
         max_per_feed=args.max_per_feed,
     )
     items = items[: args.max_items]
+    if args.translate:
+        translate_items(items, timeout=min(args.timeout, 8), concurrency=args.concurrency)
 
     base_title = args.title or DIGEST_TITLE
     pages = render_pages(
