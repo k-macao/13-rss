@@ -5,7 +5,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from scripts.wechat_digest import (
+    AUTHOR_LINE,
     CHINA,
+    DIGEST_INTRO,
+    DIGEST_SUBTITLE,
+    DIGEST_TITLE,
     EDITIONS,
     NEON,
     PUSHPLUS_CONTENT_LIMIT,
@@ -43,7 +47,7 @@ def make_items(count, *, category="News", summary="摘要内容，用于测试�
 
 def render(items, **kwargs):
     options = {
-        "title": "晚间简报",
+        "title": DIGEST_TITLE,
         "kicker": "EVENING EDITION",
         "generated_at": "2026-08-19 18:00",
         "window_hours": 9,
@@ -196,6 +200,29 @@ class RenderTests(unittest.TestCase):
         pages = render([])
         self.assertEqual(len(pages), 1)
         self.assertIn("没有新的文章", pages[0])
+
+    def test_branding_title_subtitle_intro_and_author_are_rendered(self):
+        page = render(make_items(4))[0]
+        self.assertIn(DIGEST_TITLE, page)
+        self.assertIn(DIGEST_SUBTITLE, page)
+        self.assertIn("全网境内外为你寻找蛛丝马迹", page)
+        self.assertIn("Claude、ChatGPT、Gemini、Grok、Qwen 以及 Kimi", page)
+        self.assertIn(AUTHOR_LINE, page)
+
+    def test_intro_only_on_first_page_and_author_only_on_last(self):
+        pages = render(make_items(220, summary="摘要内容 " * 25))
+        self.assertGreater(len(pages), 1)
+        self.assertIn(DIGEST_INTRO, pages[0])
+        for page in pages[1:]:
+            self.assertNotIn(DIGEST_INTRO, page)
+        self.assertIn(AUTHOR_LINE, pages[-1])
+        for page in pages[:-1]:
+            self.assertNotIn(AUTHOR_LINE, page)
+
+    def test_digest_title_has_no_date_or_pushplus_branding(self):
+        self.assertNotIn("pushplus", DIGEST_TITLE.casefold())
+        self.assertNotRegex(DIGEST_TITLE, r"\d")
+        self.assertEqual(page_title(DIGEST_TITLE, 2, 3), "章鱼 AI 全景分析 2/3")
 
     def test_timestamps_are_rendered_in_beijing_time(self):
         item = make_items(1)[0]

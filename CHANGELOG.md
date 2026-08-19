@@ -7,6 +7,7 @@
 - Paginated long issues under the 100,000-character pushplus limit, with continuous article numbering, repeated section headers, page counters, and numbered titles.
 - Added dependency-free RSS, Atom, and JSON Feed parsing with time-window filtering, per-feed caps, link and title deduplication, and per-feed failure isolation.
 - Added 24 unit tests covering parsing, deduplication, edition windows, pagination, escaping, palette, and the workflow schedule.
+- Rebranded the digest as “章鱼 AI 全景分析”: the push title no longer carries the date or pushplus branding, the masthead and subtitle describe the cross-border, multi-model research scope, an intro paragraph runs on the first page, and a “作者：章鱼 ai · 仅供参考，分析研究” signature closes each issue.
 
 ## v1.4.0 — 2026-08-13
 
