@@ -8,6 +8,12 @@
 - Added dependency-free RSS, Atom, and JSON Feed parsing with time-window filtering, per-feed caps, link and title deduplication, and per-feed failure isolation.
 - Added 24 unit tests covering parsing, deduplication, edition windows, pagination, escaping, palette, and the workflow schedule.
 - Rebranded the digest as “章鱼 AI 全景分析”: the push title no longer carries the date or pushplus branding, the masthead and subtitle describe the cross-border, multi-model research scope, an intro paragraph runs on the first page, and a “作者：章鱼 ai · 仅供参考，分析研究” signature closes each issue.
+- Added seven hot-list, aggregator, and market-data feeds from six reader-suggested sources: 英为财情 (Investing.com's Chinese all-news wire), SoPilot's X hot-post board, 今日热榜's GitHub Trending and Product Hunt boards, the Zhihu hot list, Weibo trending searches, and Hupu's daily threads.
+- Checked NewsNow, REBANG, and 萝卜投研 and recorded them as rejected candidates instead of publishing unsubscribable pages: none exposes a feed, 萝卜投研 also requires a login, and the submitted `luobo.cn` is the 保卫萝卜 game site rather than robo.datayes.com.
+- Published fifteen-candidate evidence in `reports/hotlist-curation.json`, including the direct Weibo and Bilibili hot-search RSSHub routes that failed twice on the shared instance, TopHub's snapshot-time item stamps, and SoPilot's valid but empty channel.
+- Raised the complete-collection limit from 720 to 730 feeds so verified additions do not displace existing curated sources, and documented the hot-list rule in both contributing guides.
+- Added `sources/hotlist-curated.json` and `tools/merge_hotlist_sources.py` so the round is reproducible; regenerated all 16 OPML bundles, the catalog summary, both README appendices, and the validation summary for the 725-feed catalog.
+- Recorded that this round was verified by direct HTTP fetch plus RSS/Atom parsing rather than the Tidings parser, because Tidings was unavailable in the authoring environment.
 
 ## v1.4.0 — 2026-08-13
 

@@ -66,7 +66,7 @@ CATEGORY_EMOJI = {
 }
 KINDS = {"article", "video", "podcast"}
 LANGUAGES = {"en", "zh"}
-MAX_ALL_FEEDS = 720
+MAX_ALL_FEEDS = 730
 MAX_BLOG_FEEDS = 400
 TOP200_FEEDS = 200
 

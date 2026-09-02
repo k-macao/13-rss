@@ -2,8 +2,8 @@
 <opml version="2.0">
   <head>
     <title>Tidings Curated RSS — Engineering &amp; Technology</title>
-    <dateCreated>2026-08-13</dateCreated>
-    <dateModified>2026-08-13</dateModified>
+    <dateCreated>2026-09-03</dateCreated>
+    <dateModified>2026-09-03</dateModified>
     <ownerName>Tidings RSS Community</ownerName>
     <docs>http://opml.org/spec2.opml</docs>
   </head>
@@ -265,6 +265,7 @@
       <outline text="九仞之行" title="九仞之行" type="rss" xmlUrl="https://styunlen.cn/feed" htmlUrl="https://styunlen.cn" />
       <outline text="了迹奇有没" title="了迹奇有没" type="rss" xmlUrl="https://whrss.com/feed" htmlUrl="https://whrss.com/" />
       <outline text="二丫讲梵" title="二丫讲梵" type="rss" xmlUrl="https://wiki.eryajf.net/rss.xml" htmlUrl="https://wiki.eryajf.net" />
+      <outline text="今日热榜 · GitHub Trending" title="今日热榜 · GitHub Trending" type="rss" xmlUrl="https://rsshub.bestblogs.dev/tophub/rYqoXQ8vOD" htmlUrl="https://tophub.today/n/rYqoXQ8vOD" />
       <outline text="仲平" title="仲平" type="rss" xmlUrl="https://blog.7wate.com/rss.xml" htmlUrl="https://blog.zopiya.com/" />
       <outline text="任霏的个人博客网站" title="任霏的个人博客网站" type="rss" xmlUrl="https://blog.renfei.net/rss.xml" htmlUrl="https://blog.renfei.net" />
       <outline text="伪斜杠青年" title="伪斜杠青年" type="rss" xmlUrl="http://i.lckiss.com/?feed=rss2" htmlUrl="https://i.lckiss.com" />
