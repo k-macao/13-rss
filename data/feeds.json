@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "generated_at": "2026-08-13",
+  "generated_at": "2026-09-03",
   "validation": {
-    "engine": "Tidings parseFeedUrl",
-    "criteria": "Chinese independent blogs passed three parser rounds, had at least two dated posts and updated within 180 days; retained catalog feeds passed two current parser rounds. WeChat additions passed two two-second time-to-first-byte probes, Tidings parsing, and a 180-day freshness check. Community additions passed three current Tidings parser rounds and exposed recently dated discussions. Security, technology-media, and weekly additions passed three current Tidings parser rounds and an editorial relevance review. The Top 200 is a balanced subset whose 307-candidate pool was checked three times; every published feed returned articles and real publication dates in all three Tidings parser rounds.",
-    "candidate_count": 2279,
-    "parser_passed": 718,
-    "retained_count": 718
+    "engine": "Tidings parseFeedUrl; the 2026-09-03 hot-list and market-data additions were verified by HTTP fetch plus feed parse",
+    "criteria": "Chinese independent blogs passed three parser rounds, had at least two dated posts and updated within 180 days; retained catalog feeds passed two current parser rounds. WeChat additions passed two two-second time-to-first-byte probes, Tidings parsing, and a 180-day freshness check. Community additions passed three current Tidings parser rounds and exposed recently dated discussions. Security, technology-media, and weekly additions passed three current Tidings parser rounds and an editorial relevance review. The Top 200 is a balanced subset whose 307-candidate pool was checked three times; every published feed returned articles and real publication dates in all three Tidings parser rounds. The 2026-09-03 hot-list and market-data round was verified by direct HTTP fetch plus RSS/Atom parsing rather than Tidings; every published addition returned a parseable feed, and the SoPilot channel was valid but empty at check time because its board had no qualifying posts.",
+    "candidate_count": 2294,
+    "parser_passed": 725,
+    "retained_count": 725
   },
   "feeds": [
     {
@@ -8966,6 +8966,26 @@
       "latest_item_at": "2026-07-06T00:00:00Z"
     },
     {
+      "id": "4b9bedf8db62",
+      "title": "今日热榜 · GitHub Trending",
+      "feed_url": "https://rsshub.bestblogs.dev/tophub/rYqoXQ8vOD",
+      "site_url": "https://tophub.today/n/rYqoXQ8vOD",
+      "category": "Engineering & Technology",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "all",
+        "engineering"
+      ],
+      "sources": [
+        "hotlist-aggregators-2026-09-03"
+      ],
+      "validated_at": "2026-09-03",
+      "latest_item_at": "2026-09-02T16:10:27Z",
+      "description": "今日热榜收录的 GitHub Trending 日榜，一条 Feed 看完当天上升最快的开源项目。",
+      "description_en": "GitHub Trending's daily board as mirrored by TopHub: the fastest-rising repositories in one feed."
+    },
+    {
       "id": "597b3e93ce00",
       "title": "36氪",
       "feed_url": "https://www.36kr.com/feed",
@@ -9328,6 +9348,27 @@
       "description": "News 订阅源"
     },
     {
+      "id": "0a4dd7d1c935",
+      "title": "SoPilot · X 起爆帖监控",
+      "feed_url": "https://sopilot.net/rss/hottweets",
+      "site_url": "https://sopilot.net/zh/hot-tweets",
+      "category": "News",
+      "kind": "article",
+      "language": "zh",
+      "packs": [
+        "all",
+        "chinese",
+        "news"
+      ],
+      "sources": [
+        "hotlist-aggregators-2026-09-03"
+      ],
+      "validated_at": "2026-09-03",
+      "latest_item_at": null,
+      "description": "SoPilot 官方 RSS，盯 X 上正在快速升温的 AI 与 Web3 起爆帖，方便抢首评和观察舆论风向。",
+      "description_en": "SoPilot's official feed of fast-rising X posts in AI and Web3, useful for early replies and reading sentiment."
+    },
+    {
       "id": "7c18f6f34132",
       "title": "TechCrunch",
       "feed_url": "https://techcrunch.com/feed/",
@@ -9566,6 +9607,27 @@
       "description_en": "Digital tools, productivity methods, software experiences, and personal workflows."
     },
     {
+      "id": "6f8e3d16d2b6",
+      "title": "微博热搜榜",
+      "feed_url": "https://rsshub.bestblogs.dev/tophub/KqndgxeLl9",
+      "site_url": "https://tophub.today/n/KqndgxeLl9",
+      "category": "News",
+      "kind": "article",
+      "language": "zh",
+      "packs": [
+        "all",
+        "chinese",
+        "news"
+      ],
+      "sources": [
+        "hotlist-aggregators-2026-09-03"
+      ],
+      "validated_at": "2026-09-03",
+      "latest_item_at": "2026-09-02T17:54:46Z",
+      "description": "微博实时热搜榜，舆情风向的第一现场，由今日热榜节点通过 RSSHub 生成。",
+      "description_en": "Weibo's real-time trending-search board, generated from the matching TopHub node through RSSHub."
+    },
+    {
       "id": "d02584a35aa6",
       "title": "掘金本周最热",
       "feed_url": "https://rsshub.bestblogs.dev/juejin/trending/all/weekly",
@@ -9611,6 +9673,27 @@
       "description_en": "A Chinese weekly of technology notes, open-source projects, products, and life."
     },
     {
+      "id": "12e5d2f6e4ea",
+      "title": "知乎热榜",
+      "feed_url": "https://rsshub.bestblogs.dev/zhihu/hot",
+      "site_url": "https://www.zhihu.com/hot",
+      "category": "News",
+      "kind": "article",
+      "language": "zh",
+      "packs": [
+        "all",
+        "chinese",
+        "news"
+      ],
+      "sources": [
+        "hotlist-aggregators-2026-09-03"
+      ],
+      "validated_at": "2026-09-03",
+      "latest_item_at": "2026-09-02T12:24:15Z",
+      "description": "知乎全站热榜，按热度排序的问题和讨论，NewsNow 与 REBANG 这类聚合页覆盖的核心榜单之一。",
+      "description_en": "Zhihu's site-wide hot list of questions and discussions, one of the boards aggregator pages such as NewsNow and REBANG surface."
+    },
+    {
       "id": "4a90f525746d",
       "title": "站长之家",
       "feed_url": "https://app.chinaz.com/?app=rss",
@@ -9629,6 +9712,27 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-10T08:40:04Z",
       "description": "News 订阅源"
+    },
+    {
+      "id": "ca539e162600",
+      "title": "英为财情 · 所有资讯",
+      "feed_url": "https://cn.investing.com/rss/news.rss",
+      "site_url": "https://cn.investing.com/",
+      "category": "News",
+      "kind": "article",
+      "language": "zh",
+      "packs": [
+        "all",
+        "chinese",
+        "news"
+      ],
+      "sources": [
+        "hotlist-aggregators-2026-09-03"
+      ],
+      "validated_at": "2026-09-03",
+      "latest_item_at": "2026-09-02T15:40:52Z",
+      "description": "英为财情（Investing.com 中文站）全部资讯，A 股、港股、美股、外汇、大宗商品与宏观财经新闻实时更新。",
+      "description_en": "Investing.com's Chinese all-news feed: A-shares, Hong Kong, US equities, forex, commodities, and macro finance."
     },
     {
       "id": "48b5a6554799",
@@ -12573,6 +12677,25 @@
       "latest_item_at": "2026-06-16T11:00:04.667000Z"
     },
     {
+      "id": "c88e19180758",
+      "title": "今日热榜 · Product Hunt",
+      "feed_url": "https://rsshub.bestblogs.dev/tophub/LBwdG0jePx",
+      "site_url": "https://tophub.today/n/LBwdG0jePx",
+      "category": "Product & Design",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "all"
+      ],
+      "sources": [
+        "hotlist-aggregators-2026-09-03"
+      ],
+      "validated_at": "2026-09-03",
+      "latest_item_at": "2026-09-02T17:54:47Z",
+      "description": "今日热榜收录的 Product Hunt 当日新品榜，产品圈每天在发布什么，一条 Feed 看完。",
+      "description_en": "Product Hunt's daily launch board as mirrored by TopHub, for tracking what ships each day."
+    },
+    {
       "id": "67c0f7aede55",
       "title": "拾月的博客",
       "feed_url": "https://www.skyue.com/feed/",
@@ -15068,6 +15191,26 @@
       ],
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-12T14:43:39.000Z"
+    },
+    {
+      "id": "ac20538d3400",
+      "title": "虎扑 · 步行街每日话题",
+      "feed_url": "https://rsshub.bestblogs.dev/hupu/all/topic-daily",
+      "site_url": "https://bbs.hupu.com/topic-daily",
+      "category": "Communities",
+      "kind": "article",
+      "language": "zh",
+      "packs": [
+        "all",
+        "chinese"
+      ],
+      "sources": [
+        "hotlist-aggregators-2026-09-03"
+      ],
+      "validated_at": "2026-09-03",
+      "latest_item_at": "2026-09-02T17:28:00Z",
+      "description": "虎扑步行街每日话题热帖，体育、娱乐和街头话题的社区讨论现场。",
+      "description_en": "Hupu's daily featured hot threads from the pedestrian-street board: sports, entertainment, and community chatter."
     }
   ]
 }

@@ -2,8 +2,8 @@
 <opml version="2.0">
   <head>
     <title>Tidings Curated RSS — Complete Collection</title>
-    <dateCreated>2026-08-13</dateCreated>
-    <dateModified>2026-08-13</dateModified>
+    <dateCreated>2026-09-03</dateCreated>
+    <dateModified>2026-09-03</dateModified>
     <ownerName>Tidings RSS Community</ownerName>
     <docs>http://opml.org/spec2.opml</docs>
   </head>
@@ -265,6 +265,7 @@
       <outline text="九仞之行" title="九仞之行" type="rss" xmlUrl="https://styunlen.cn/feed" htmlUrl="https://styunlen.cn" />
       <outline text="了迹奇有没" title="了迹奇有没" type="rss" xmlUrl="https://whrss.com/feed" htmlUrl="https://whrss.com/" />
       <outline text="二丫讲梵" title="二丫讲梵" type="rss" xmlUrl="https://wiki.eryajf.net/rss.xml" htmlUrl="https://wiki.eryajf.net" />
+      <outline text="今日热榜 · GitHub Trending" title="今日热榜 · GitHub Trending" type="rss" xmlUrl="https://rsshub.bestblogs.dev/tophub/rYqoXQ8vOD" htmlUrl="https://tophub.today/n/rYqoXQ8vOD" />
       <outline text="仲平" title="仲平" type="rss" xmlUrl="https://blog.7wate.com/rss.xml" htmlUrl="https://blog.zopiya.com/" />
       <outline text="任霏的个人博客网站" title="任霏的个人博客网站" type="rss" xmlUrl="https://blog.renfei.net/rss.xml" htmlUrl="https://blog.renfei.net" />
       <outline text="伪斜杠青年" title="伪斜杠青年" type="rss" xmlUrl="http://i.lckiss.com/?feed=rss2" htmlUrl="https://i.lckiss.com" />
@@ -465,13 +466,17 @@
       <outline text="NYT &gt; Technology" title="NYT &gt; Technology" type="rss" xmlUrl="https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml" htmlUrl="https://www.nytimes.com/section/technology" />
       <outline text="NYT &gt; World News" title="NYT &gt; World News" type="rss" xmlUrl="https://rss.nytimes.com/services/xml/rss/nyt/World.xml" htmlUrl="https://www.nytimes.com/section/world" />
       <outline text="ProPublica" title="ProPublica" type="rss" xmlUrl="https://www.propublica.org/feeds/propublica/main" htmlUrl="https://www.propublica.org/" />
+      <outline text="SoPilot · X 起爆帖监控" title="SoPilot · X 起爆帖监控" type="rss" xmlUrl="https://sopilot.net/rss/hottweets" htmlUrl="https://sopilot.net/zh/hot-tweets" />
       <outline text="Top stories - Google News" title="Top stories - Google News" type="rss" xmlUrl="https://news.google.com/rss" htmlUrl="https://news.google.com/?hl=en-US&amp;gl=US&amp;ceid=US:en" />
       <outline text="World" title="World" type="rss" xmlUrl="https://feeds.washingtonpost.com/rss/world" htmlUrl="https://www.washingtonpost.com" />
       <outline text="World news | The Guardian" title="World news | The Guardian" type="rss" xmlUrl="https://www.theguardian.com/world/rss" htmlUrl="https://www.theguardian.com/world" />
       <outline text="World News, Today World News, Latest International News, World Breaking News, Trending News of World - Times of India" title="World News, Today World News, Latest International News, World Breaking News, Trending News of World - Times of India" type="rss" xmlUrl="https://timesofindia.indiatimes.com/rssfeeds/296589292.cms" htmlUrl="https://timesofindia.indiatimes.com/world" />
       <outline text="奇客Solidot–传递最新科技情报" title="奇客Solidot–传递最新科技情报" type="rss" xmlUrl="https://www.solidot.org/index.rss" htmlUrl="https://www.solidot.org" />
+      <outline text="微博热搜榜" title="微博热搜榜" type="rss" xmlUrl="https://rsshub.bestblogs.dev/tophub/KqndgxeLl9" htmlUrl="https://tophub.today/n/KqndgxeLl9" />
       <outline text="掘金本周最热" title="掘金本周最热" type="rss" xmlUrl="https://rsshub.bestblogs.dev/juejin/trending/all/weekly" htmlUrl="https://juejin.im/recommended?sort=weekly_hottest" />
+      <outline text="知乎热榜" title="知乎热榜" type="rss" xmlUrl="https://rsshub.bestblogs.dev/zhihu/hot" htmlUrl="https://www.zhihu.com/hot" />
       <outline text="站长之家" title="站长之家" type="rss" xmlUrl="https://app.chinaz.com/?app=rss" htmlUrl="http://www.chinaz.com" />
+      <outline text="英为财情 · 所有资讯" title="英为财情 · 所有资讯" type="rss" xmlUrl="https://cn.investing.com/rss/news.rss" htmlUrl="https://cn.investing.com/" />
       <outline text="蓝点网" title="蓝点网" type="rss" xmlUrl="https://www.landiannews.com/feed" htmlUrl="https://www.landian.news" />
       <outline text="虎嗅" title="虎嗅" type="rss" xmlUrl="https://rss.huxiu.com/" htmlUrl="https://www.huxiu.com" />
       <outline text="钛媒体：引领未来商业与生活新知" title="钛媒体：引领未来商业与生活新知" type="rss" xmlUrl="https://www.tmtpost.com/feed" htmlUrl="http://www.tmtpost.com" />
@@ -480,6 +485,7 @@
       <outline text="61’s life" title="61’s life" type="rss" xmlUrl="https://61.life/feed.xml" htmlUrl="https://61.life/" />
       <outline text="jax" title="jax" type="rss" xmlUrl="https://cdjax.com/?feed=rss2" htmlUrl="https://cdjax.com" />
       <outline text="Velas电波站" title="Velas电波站" type="rss" xmlUrl="https://www.velasx.com/feed" htmlUrl="https://www.velasx.com/" />
+      <outline text="今日热榜 · Product Hunt" title="今日热榜 · Product Hunt" type="rss" xmlUrl="https://rsshub.bestblogs.dev/tophub/LBwdG0jePx" htmlUrl="https://tophub.today/n/LBwdG0jePx" />
       <outline text="拾月的博客" title="拾月的博客" type="rss" xmlUrl="https://www.skyue.com/feed/" htmlUrl="https://www.skyue.com/" />
       <outline text="阿里云设计中心" title="阿里云设计中心" type="rss" xmlUrl="https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml" htmlUrl="https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml" />
     </outline>
@@ -571,6 +577,7 @@
       <outline text="V2EX" title="V2EX" type="rss" xmlUrl="https://v2ex.com/index.xml" htmlUrl="https://www.v2ex.com/" />
       <outline text="V2EX · 创意" title="V2EX · 创意" type="rss" xmlUrl="https://www.v2ex.com/feed/tab/creative.xml" htmlUrl="https://www.v2ex.com/?tab=creative" />
       <outline text="V2EX · 技术" title="V2EX · 技术" type="rss" xmlUrl="https://www.v2ex.com/feed/tab/tech.xml" htmlUrl="https://www.v2ex.com/?tab=tech" />
+      <outline text="虎扑 · 步行街每日话题" title="虎扑 · 步行街每日话题" type="rss" xmlUrl="https://rsshub.bestblogs.dev/hupu/all/topic-daily" htmlUrl="https://bbs.hupu.com/topic-daily" />
     </outline>
     <outline text="📚 Culture &amp; Ideas" title="📚 Culture &amp; Ideas">
       <outline text="KAIX.IN" title="KAIX.IN" type="rss" xmlUrl="https://kaix.in/feed/" htmlUrl="https://kaix.in/" />

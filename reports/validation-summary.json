@@ -1,9 +1,9 @@
 {
   "validated_at": "2026-08-13",
   "engine": "Tidings parseFeedUrl",
-  "published": 718,
+  "published": 725,
   "limits": {
-    "complete_collection_maximum": 720,
+    "complete_collection_maximum": 730,
     "chinese_independent_blogs_maximum": 400,
     "top200_exact": 200
   },
@@ -65,13 +65,13 @@
   },
   "by_pack": {
     "ai": 99,
-    "all": 718,
+    "all": 725,
     "blogs": 349,
-    "chinese": 469,
+    "chinese": 474,
     "communities": 14,
     "company-tech": 40,
-    "engineering": 419,
-    "news": 44,
+    "engineering": 420,
+    "news": 48,
     "podcasts": 73,
     "research": 27,
     "security": 8,
@@ -92,5 +92,17 @@
     "selected_chinese": 122,
     "selected_first_party_or_direct_endpoints": 180,
     "selection_evidence": "reports/top200-curation.json"
+  },
+  "hotlist_aggregator_review": {
+    "validated_at": "2026-09-03",
+    "engine": "HTTP fetch + RSS/Atom/JSON Feed parse",
+    "requested_sources": 6,
+    "candidates": 15,
+    "published_additions": 7,
+    "rejected_without_public_feed": 4,
+    "rejected_after_failed_endpoints": 4,
+    "published_with_empty_channel": 1,
+    "tidings_parser_rounds": 0,
+    "selection_evidence": "reports/hotlist-curation.json"
   }
 }

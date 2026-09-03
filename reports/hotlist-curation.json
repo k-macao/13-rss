@@ -1,0 +1,387 @@
+{
+  "review": "hotlist-aggregators-2026-09-03",
+  "validated_at": "2026-09-03",
+  "engine": "HTTP fetch + RSS/Atom/JSON Feed parse",
+  "engine_note": "Each candidate endpoint was fetched directly and its payload parsed as RSS, Atom, or JSON Feed. Captures are recorded with the number of items actually read; large hot lists were captured partially, which is noted per candidate. Tidings parser rounds were not available in the authoring environment, so this round records HTTP fetch plus feed-parse evidence only.",
+  "requested_sources": [
+    "NewsNow（多平台聚合）newsnow.busiyi.world",
+    "SoPilot（X 爆帖专用）sopilot.net/zh/hot-tweets",
+    "今日热榜（类目最全）tophub.today/c/tech",
+    "英为财情（全球行情）investing.com",
+    "萝卜投研（智能投研）luobo.cn",
+    "REBANG（极简风）rebang.open2hub.com"
+  ],
+  "candidate_count": 15,
+  "selected_count": 7,
+  "rejected_count": 8,
+  "published_total": 725,
+  "decisions": [
+    {
+      "requested_source": "SoPilot（X 爆帖专用）",
+      "title": "SoPilot · X 起爆帖监控",
+      "feed_url": "https://sopilot.net/rss/hottweets",
+      "site_url": "https://sopilot.net/zh/hot-tweets",
+      "selected": true,
+      "reason": "First-party RSS endpoint documented on the product page; channel parses as RSS 2.0.",
+      "checks": [
+        {
+          "checked_at": "2026-09-03T00:05+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 0,
+          "capture_complete": true,
+          "channel_title": "SoPilot Hot Tweets",
+          "channel_language": "zh-CN",
+          "latest_item_at": null,
+          "channel_build_date": "2026-09-02T16:05:27Z",
+          "notes": "Product page states 暂无帖子 for the AI board."
+        },
+        {
+          "checked_at": "2026-09-03T00:09+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 0,
+          "capture_complete": true,
+          "channel_title": "SoPilot Hot Tweets",
+          "channel_language": "zh-CN",
+          "latest_item_at": null,
+          "channel_build_date": "2026-09-02T16:09:34Z",
+          "notes": "Repeat fetch; still an empty channel, feed-level query parameters do not change the payload."
+        },
+        {
+          "checked_at": "2026-09-03T02:08+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 0,
+          "capture_complete": true,
+          "channel_title": "SoPilot Hot Tweets",
+          "channel_language": "zh-CN",
+          "latest_item_at": null,
+          "channel_build_date": "2026-09-02T18:08:12Z",
+          "notes": "Third fetch roughly two hours after the first two; the channel rebuilt but still lists no posts."
+        }
+      ],
+      "caveat": "Three checks over two hours returned a valid but empty channel because the AI board had no qualifying posts, so the weekly live check reports 'feed has no items' until the board fills again."
+    },
+    {
+      "requested_source": "今日热榜（类目最全）",
+      "title": "今日热榜 · GitHub Trending",
+      "feed_url": "https://rsshub.bestblogs.dev/tophub/rYqoXQ8vOD",
+      "site_url": "https://tophub.today/n/rYqoXQ8vOD",
+      "selected": true,
+      "reason": "TopHub publishes no first-party feed, so the catalog uses the publicly documented RSSHub node route already relied on elsewhere in this collection.",
+      "checks": [
+        {
+          "checked_at": "2026-09-03T00:10+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 19,
+          "capture_complete": true,
+          "channel_title": "GitHub ‧ Trending Today",
+          "channel_language": "en",
+          "latest_item_at": "2026-09-02T16:10:27Z",
+          "notes": "Items link directly to github.com repositories; no TopHub redirect."
+        }
+      ],
+      "caveat": "TopHub node routes stamp items with the snapshot build time instead of per-item publication dates."
+    },
+    {
+      "requested_source": "今日热榜（类目最全）",
+      "title": "今日热榜 · Product Hunt",
+      "feed_url": "https://rsshub.bestblogs.dev/tophub/LBwdG0jePx",
+      "site_url": "https://tophub.today/n/LBwdG0jePx",
+      "selected": true,
+      "reason": "Same public RSSHub node route as the GitHub Trending board; adds the product-launch use case the complete collection lacked.",
+      "checks": [
+        {
+          "checked_at": "2026-09-03T01:54+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 50,
+          "capture_complete": true,
+          "channel_title": "Product Hunt ‧ 今日新产品",
+          "channel_language": "en",
+          "latest_item_at": "2026-09-02T17:54:47Z",
+          "notes": "Items link directly to producthunt.com product pages."
+        }
+      ],
+      "caveat": "TopHub node routes stamp items with the snapshot build time instead of per-item publication dates."
+    },
+    {
+      "requested_source": "英为财情（全球行情）",
+      "title": "英为财情 · 所有资讯",
+      "feed_url": "https://cn.investing.com/rss/news.rss",
+      "site_url": "https://cn.investing.com/",
+      "selected": true,
+      "reason": "First-party RSS endpoint with dated items published minutes before the check.",
+      "checks": [
+        {
+          "checked_at": "2026-09-02T23:52+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 10,
+          "capture_complete": true,
+          "channel_title": "所有资讯",
+          "channel_language": "zh-CN",
+          "latest_item_at": "2026-09-02T15:40:52Z",
+          "notes": "Newest item was published minutes before the fetch; Investing.com stamps pubDate in GMT."
+        }
+      ]
+    },
+    {
+      "requested_source": "NewsNow（多平台聚合）",
+      "title": "知乎热榜",
+      "feed_url": "https://rsshub.bestblogs.dev/zhihu/hot",
+      "site_url": "https://www.zhihu.com/hot",
+      "selected": true,
+      "reason": "NewsNow and REBANG expose no feed, so the underlying board is collected through the publicly documented RSSHub route; items carry real publication dates.",
+      "checks": [
+        {
+          "checked_at": "2026-09-02T23:11+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 20,
+          "capture_complete": false,
+          "channel_title": "知乎热榜",
+          "channel_language": "en",
+          "latest_item_at": "2026-09-02T12:24:15Z",
+          "notes": "Capture truncated by the reader tool; per-item pubDate values span the previous 24 hours and link to zhihu.com questions."
+        }
+      ]
+    },
+    {
+      "requested_source": "NewsNow（多平台聚合）、REBANG（极简风）",
+      "title": "微博热搜榜",
+      "feed_url": "https://rsshub.bestblogs.dev/tophub/KqndgxeLl9",
+      "site_url": "https://tophub.today/n/KqndgxeLl9",
+      "selected": true,
+      "reason": "The direct Weibo route failed twice on the shared RSSHub instance, while the TopHub node route for the same board returned a full list.",
+      "checks": [
+        {
+          "checked_at": "2026-09-03T01:54+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 27,
+          "capture_complete": false,
+          "channel_title": "微博 ‧ 热搜榜",
+          "channel_language": "en",
+          "latest_item_at": "2026-09-02T17:54:46Z",
+          "notes": "Capture truncated by the reader tool; items link to s.weibo.com searches and include heat values."
+        }
+      ],
+      "caveat": "TopHub node routes stamp items with the snapshot build time instead of per-item publication dates."
+    },
+    {
+      "requested_source": "NewsNow（多平台聚合）",
+      "title": "虎扑 · 步行街每日话题",
+      "feed_url": "https://rsshub.bestblogs.dev/hupu/all/topic-daily",
+      "site_url": "https://bbs.hupu.com/topic-daily",
+      "selected": true,
+      "reason": "Covers the Hupu board that NewsNow advertises; items carry real publication dates.",
+      "checks": [
+        {
+          "checked_at": "2026-09-03T01:30+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 5,
+          "capture_complete": false,
+          "channel_title": "虎扑社区 - #步行街主干道",
+          "channel_language": "en",
+          "latest_item_at": "2026-09-02T17:28:00Z",
+          "notes": "Capture truncated by the reader tool because item bodies embed full thread HTML; links point at m.hupu.com threads."
+        }
+      ],
+      "caveat": "Kept out of the technical-communities bundle on purpose: this board is sports and general discussion, not engineering."
+    },
+    {
+      "requested_source": "NewsNow（多平台聚合）",
+      "title": "NewsNow 最热聚合页",
+      "feed_url": "",
+      "site_url": "https://newsnow.busiyi.world/",
+      "selected": false,
+      "reason": "No public RSS, Atom, or JSON Feed endpoint: the app is a Nuxt front end over /api/s JSON, and /rss falls back to the server-rendered homepage. RSSHub has no newsnow route in master. Its advertised boards are collected individually instead (Zhihu, Weibo, Hupu; V2EX is already in the catalog).",
+      "checks": [
+        {
+          "checked_at": "2026-09-02T23:47+08:00",
+          "ok": false,
+          "format": "html",
+          "items_captured": 0,
+          "capture_complete": true,
+          "latest_item_at": null,
+          "notes": "https://newsnow.busiyi.world/rss returned the homepage HTML instead of a feed."
+        },
+        {
+          "checked_at": "2026-09-02T23:55+08:00",
+          "ok": false,
+          "format": "error",
+          "items_captured": 0,
+          "capture_complete": true,
+          "latest_item_at": null,
+          "notes": "RSSHub master has no lib/routes/newsnow directory, and /newsnow/hottest on the shared instance returns NotFoundError."
+        }
+      ]
+    },
+    {
+      "requested_source": "REBANG（极简风）",
+      "title": "REBANG 极简热榜",
+      "feed_url": "",
+      "site_url": "https://rebang.open2hub.com/",
+      "selected": false,
+      "reason": "Static hot-list pages with no feed: rebang.open2hub.com redirects to top.open2hub.com, and /rss.xml returns the site's 404 page. The boards it mirrors are collected individually instead.",
+      "checks": [
+        {
+          "checked_at": "2026-09-02T23:50+08:00",
+          "ok": false,
+          "format": "html",
+          "items_captured": 0,
+          "capture_complete": false,
+          "latest_item_at": null,
+          "notes": "Homepage renders 50+ platform boards as HTML with no alternate feed link."
+        },
+        {
+          "checked_at": "2026-09-03T00:02+08:00",
+          "ok": false,
+          "format": "html",
+          "items_captured": 0,
+          "capture_complete": true,
+          "latest_item_at": null,
+          "notes": "https://top.open2hub.com/rss.xml returned 非常抱歉，没有找到您要查看的页面."
+        }
+      ]
+    },
+    {
+      "requested_source": "萝卜投研（智能投研）",
+      "title": "萝卜投研",
+      "feed_url": "",
+      "site_url": "https://robo.datayes.com/",
+      "selected": false,
+      "reason": "No public feed and no anonymous access. The submitted address luobo.cn is the 保卫萝卜 game site, not the investment platform; robo.datayes.com answers with a WeChat QR and password login wall, so nothing can be validated or subscribed without credentials.",
+      "checks": [
+        {
+          "checked_at": "2026-09-02T23:58+08:00",
+          "ok": false,
+          "format": "html",
+          "items_captured": 0,
+          "capture_complete": true,
+          "latest_item_at": null,
+          "notes": "luobo.cn resolves to 《保卫萝卜4》手游官方预约开启 — a different publisher entirely."
+        },
+        {
+          "checked_at": "2026-09-03T00:01+08:00",
+          "ok": false,
+          "format": "html",
+          "items_captured": 0,
+          "capture_complete": true,
+          "latest_item_at": null,
+          "notes": "robo.datayes.com returns only the login surface (微信扫码登录 / 密码登录); credentialed feeds are out of scope for this catalog."
+        }
+      ]
+    },
+    {
+      "requested_source": "今日热榜（类目最全）",
+      "title": "今日热榜 科技分类页",
+      "feed_url": "",
+      "site_url": "https://tophub.today/c/tech",
+      "selected": false,
+      "reason": "The category page has no feed of its own: it is an HTML index of 415 boards, and per-node paths such as /n/<id>/feed return the site 404 page. Substituted by the node-level RSSHub routes for GitHub Trending and Product Hunt.",
+      "checks": [
+        {
+          "checked_at": "2026-09-02T23:45+08:00",
+          "ok": false,
+          "format": "html",
+          "items_captured": 0,
+          "capture_complete": false,
+          "latest_item_at": null,
+          "notes": "Category page lists boards but exposes no alternate feed link."
+        },
+        {
+          "checked_at": "2026-09-03T00:04+08:00",
+          "ok": false,
+          "format": "html",
+          "items_captured": 0,
+          "capture_complete": true,
+          "latest_item_at": null,
+          "notes": "https://tophub.today/n/KqndgxeLl9/feed returned 哎呀！页面被黑洞吸走了 (404)."
+        }
+      ]
+    },
+    {
+      "requested_source": "NewsNow（多平台聚合）",
+      "title": "微博热搜（RSSHub 直连路由）",
+      "feed_url": "https://rsshub.bestblogs.dev/weibo/search/hot",
+      "site_url": "https://s.weibo.com/top/summary",
+      "selected": false,
+      "reason": "Route failed twice on the shared instance, so the TopHub node route for the same board is used instead.",
+      "checks": [
+        {
+          "checked_at": "2026-09-03T01:40+08:00",
+          "ok": false,
+          "format": "error",
+          "items_captured": 0,
+          "capture_complete": true,
+          "latest_item_at": null,
+          "notes": "Fetch failed with no payload on two attempts."
+        }
+      ]
+    },
+    {
+      "requested_source": "NewsNow（多平台聚合）",
+      "title": "哔哩哔哩热搜（RSSHub 直连路由）",
+      "feed_url": "https://rsshub.bestblogs.dev/bilibili/hot-search",
+      "site_url": "https://search.bilibili.com/",
+      "selected": false,
+      "reason": "Route failed twice on the shared instance and no reliable public mirror of the board was found this round; left out rather than published unverified.",
+      "checks": [
+        {
+          "checked_at": "2026-09-03T01:41+08:00",
+          "ok": false,
+          "format": "error",
+          "items_captured": 0,
+          "capture_complete": true,
+          "latest_item_at": null,
+          "notes": "Fetch failed with no payload on two attempts."
+        }
+      ]
+    },
+    {
+      "requested_source": "英为财情（全球行情）",
+      "title": "Investing.com All News（英文站）",
+      "feed_url": "https://www.investing.com/rss/news.rss",
+      "site_url": "https://www.investing.com/",
+      "selected": false,
+      "reason": "Parses fine, but the Chinese edition requested by the submitter covers the same wire; one edition per publisher is kept this round.",
+      "checks": [
+        {
+          "checked_at": "2026-09-02T23:46+08:00",
+          "ok": true,
+          "format": "rss",
+          "items_captured": 10,
+          "capture_complete": true,
+          "channel_title": "All News",
+          "channel_language": "en",
+          "latest_item_at": "2026-09-02T15:45:03Z",
+          "notes": "Retained as evidence that the English endpoint is live, not as a catalog entry."
+        }
+      ]
+    },
+    {
+      "requested_source": "英为财情（全球行情）",
+      "title": "英为财情 股市资讯（分栏目）",
+      "feed_url": "https://cn.investing.com/rss/stock_market_news.rss",
+      "site_url": "https://cn.investing.com/news/stock-market-news",
+      "selected": false,
+      "reason": "Endpoint does not exist on the Chinese edition: the path returns the site 404 page, so only /rss/news.rss is published.",
+      "checks": [
+        {
+          "checked_at": "2026-09-03T02:05+08:00",
+          "ok": false,
+          "format": "html",
+          "items_captured": 0,
+          "capture_complete": true,
+          "latest_item_at": null,
+          "notes": "错误404：找不到网页."
+        }
+      ]
+    }
+  ]
+}

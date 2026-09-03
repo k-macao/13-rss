@@ -2,7 +2,7 @@
   <img src="https://tidings.info/apple-touch-icon.png" width="96" height="96" alt="Tidings app icon">
   <h1>Tidings RSS</h1>
   <p><strong>High-quality feeds, organized into OPML bundles you can import directly.</strong></p>
-  <p>Start with the Top 200, then use topic bundles or the 718-source directory when you want more. Top 200 last checked: 2026-08-13.</p>
+  <p>Start with the Top 200, then use topic bundles or the 725-source directory when you want more. Top 200 last checked: 2026-08-13.</p>
   <p><a href="README.zh-CN.md">简体中文</a> · <a href="#downloads">Download OPML</a> · <a href="RSS-GUIDE.md">RSS guide</a> · <a href="#complete-source-directory">Browse every source</a> · <a href="CONTRIBUTING.md">Suggest a feed</a> · <a href="#wechat-user-group">WeChat group</a> · <a href="https://tidings.info/">Get Tidings</a></p>
   <p>
     <a href="https://github.com/fuxiaoai/tidings-rss/actions/workflows/validate.yml"><img alt="Catalog validation" src="https://github.com/fuxiaoai/tidings-rss/actions/workflows/validate.yml/badge.svg"></a>
@@ -11,7 +11,7 @@
   </p>
 </div>
 
-For a first import, choose the Top 200. It keeps established publishers, long-running independent writers, first-party sources, and authors with strong community recognition from the 718-source directory. All 14 categories are represented, without leaving you hundreds of subscriptions to prune.
+For a first import, choose the Top 200. It keeps established publishers, long-running independent writers, first-party sources, and authors with strong community recognition from the 725-source directory. All 14 categories are represented, without leaving you hundreds of subscriptions to prune.
 
 The Top 200 balances Chinese and English sources across AI, engineering, security, technology media, newsletters, research, news, product, business, blogs, communities, culture, video, and podcasts. Use a topic bundle when you want more depth, or the complete collection when you want an archive to organize yourself.
 
@@ -22,7 +22,7 @@ If you are unsure, choose the Top 200. Topic bundles overlap; the complete colle
 | Collection | Feeds | Download | Best for |
 | --- | ---: | --- | --- |
 | ⭐ Top 200 (recommended) | `200` | [Download `tidings-top200.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-top200.opml) | Broad, high-quality coverage with a much smaller cleanup cost |
-| 📚 Complete collection | `718` | [Download `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | Keeping the full directory or pruning it yourself |
+| 📚 Complete collection | `725` | [Download `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | Keeping the full directory or pruning it yourself |
 | ✍️ Chinese independent blogs | `349` | [Download `tidings-blogs.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-blogs.opml) | Active Chinese personal writing |
 | 👥 Technical communities | `14` | [Download `tidings-communities.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-communities.opml) | V2EX, LINUX DO, Reddit, Hacker News, and other active discussions |
 | 🔐 Security | `8` | [Download `tidings-security.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-security.opml) | Vulnerabilities, defensive guidance, security research, and news |
@@ -31,12 +31,12 @@ If you are unsure, choose the Top 200. Topic bundles overlap; the complete colle
 | 💬 WeChat official accounts | `30` | [Download `tidings-wechat.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-wechat.opml) | Reading selected WeChat articles outside the app |
 | 🏢 Company technology | `40` | [Download `tidings-company-tech.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-company-tech.opml) | First-party engineering, AI, security, and research writing |
 | 🤖 Artificial intelligence | `99` | [Download `tidings-ai.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-ai.opml) | Models, research, tools, and technical viewpoints |
-| 🗞️ Fresh news | `44` | [Download `tidings-news.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-news.opml) | International, technology, security, and Chinese news |
+| 🗞️ Fresh news | `48` | [Download `tidings-news.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-news.opml) | International, technology, security, Chinese news, and trending boards |
 | 🔬 Research and science | `27` | [Download `tidings-research.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-research.opml) | Papers, journals, labs, and science reporting |
-| 🛠️ Engineering and technology | `419` | [Download `tidings-engineering.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-engineering.opml) | Software, architecture, developer tools, and engineering practice |
+| 🛠️ Engineering and technology | `420` | [Download `tidings-engineering.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-engineering.opml) | Software, architecture, developer tools, and engineering practice |
 | 🎬 Video channels | `93` | [Download `tidings-videos.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-videos.opml) | AI, software, science, and business video |
 | 🎧 Podcasts | `73` | [Download `tidings-podcasts.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-podcasts.opml) | Technology, business, science, and Chinese shows |
-| 🀄 Chinese-language sources | `469` | [Download `tidings-chinese.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-chinese.opml) | Chinese articles, communities, video, and audio |
+| 🀄 Chinese-language sources | `474` | [Download `tidings-chinese.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-chinese.opml) | Chinese articles, communities, video, and audio |
 
 [RSS guide](RSS-GUIDE.md) · [Browse OPML](opml/) · [SHA-256 checksums](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/SHA256SUMS.txt) · [Catalog summary](reports/catalog-summary.md) · [Machine-readable catalog](data/feeds.json)
 
@@ -47,6 +47,8 @@ The Top 200 begins with authorship and editorial reputation: first-party institu
 Candidates are checked through the Tidings production parser three times. A Top 200 feed must return articles and real publication dates in every round. This review ran on the current network and preferred official, directly reachable endpoints; it is not a permanent availability guarantee for every mainland region or carrier, and a few overseas sources may still depend on local network conditions. See the [selection report](reports/top200-curation.json) for the recorded results.
 
 Chinese independent blogs are judged mainly on recent writing and useful article content. WeChat feeds must connect quickly and produce recent articles in Tidings. Company technology feeds are unique by organization and technical direction; when an official website covers the same direction, it replaces the matching WeChat feed.
+
+Trending boards and market data follow the same evidence rule. Investing.com's Chinese edition and SoPilot publish first-party feeds, while TopHub's GitHub Trending and Product Hunt boards, Weibo trending searches, the Zhihu hot list, and Hupu's daily threads are collected through publicly documented RSSHub routes because those pages expose no feed of their own. NewsNow, REBANG, and Luobo (DataYes Robo) publish no feed at all, and Luobo also sits behind a login, so the 2026-09-03 round records them as rejected candidates with reasons in the [hot-list report](reports/hotlist-curation.json) instead of listing pages that cannot be subscribed. SoPilot's channel parsed correctly but held no items at check time; that caveat is recorded with the feed rather than hidden.
 
 Feeds move and disappear, so the directory is checked regularly. If a source is missing, broken, or misclassified, [send a suggestion](CONTRIBUTING.md).
 
@@ -100,7 +102,7 @@ The complete directory follows, with source names, descriptions, categories, and
 <!-- SOURCE_APPENDIX_START -->
 ## Complete source directory
 
-All 718 feeds in the complete collection are listed below with their primary category and bundles. This appendix is generated from `data/feeds.json`.
+All 725 feeds in the complete collection are listed below with their primary category and bundles. This appendix is generated from `data/feeds.json`.
 
 <details>
 <summary>🤖 Artificial Intelligence · 38</summary>
@@ -149,7 +151,7 @@ All 718 feeds in the complete collection are listed below with their primary cat
 </details>
 
 <details>
-<summary>🛠️ Engineering & Technology · 348</summary>
+<summary>🛠️ Engineering & Technology · 349</summary>
 
 | Source | Description | Primary category | Feed | Bundles |
 | --- | --- | --- | --- | --- |
@@ -501,6 +503,7 @@ All 718 feeds in the complete collection are listed below with their primary cat
 | [鸟窝](https://colobu.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://colobu.com/atom.xml) | all, blogs, chinese, engineering, top200 |
 | [黑羽的个人博客](https://blog.thetbw.xyz) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.thetbw.xyz/atom.xml) | all, blogs, chinese, engineering, top200 |
 | [𝟞𝟙𝟡'𝕤 𝔹𝕃𝕆𝔾](https://619.pp.ua) | Chinese independent blog. | Engineering & Technology | [RSS](https://66619.eu.org/feed/) | all, blogs, chinese, engineering |
+| [今日热榜 · GitHub Trending](https://tophub.today/n/rYqoXQ8vOD) | GitHub Trending's daily board as mirrored by TopHub: the fastest-rising repositories in one feed. | Engineering & Technology | [RSS](https://rsshub.bestblogs.dev/tophub/rYqoXQ8vOD) | all, engineering |
 
 </details>
 
@@ -583,7 +586,7 @@ All 718 feeds in the complete collection are listed below with their primary cat
 </details>
 
 <details>
-<summary>🗞️ News · 22</summary>
+<summary>🗞️ News · 26</summary>
 
 | Source | Description | Primary category | Feed | Bundles |
 | --- | --- | --- | --- | --- |
@@ -599,13 +602,17 @@ All 718 feeds in the complete collection are listed below with their primary cat
 | [NYT > Technology](https://www.nytimes.com/section/technology) | News feed. | News | [RSS](https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml) | all, news, top200 |
 | [NYT > World News](https://www.nytimes.com/section/world) | News feed. | News | [RSS](https://rss.nytimes.com/services/xml/rss/nyt/World.xml) | all, news |
 | [ProPublica](https://www.propublica.org/) | News feed. | News | [RSS](https://www.propublica.org/feeds/propublica/main) | all, news, top200 |
+| [SoPilot · X 起爆帖监控](https://sopilot.net/zh/hot-tweets) | SoPilot's official feed of fast-rising X posts in AI and Web3, useful for early replies and reading sentiment. | News | [RSS](https://sopilot.net/rss/hottweets) | all, chinese, news |
 | [Top stories - Google News](https://news.google.com/?hl=en-US&gl=US&ceid=US:en) | News feed. | News | [RSS](https://news.google.com/rss) | all, news |
 | [World](https://www.washingtonpost.com) | News feed. | News | [RSS](https://feeds.washingtonpost.com/rss/world) | all, news |
 | [World news \| The Guardian](https://www.theguardian.com/world) | News feed. | News | [RSS](https://www.theguardian.com/world/rss) | all, news, top200 |
 | [World News, Today World News, Latest International News, World Breaking News, Trending News of World - Times of India](https://timesofindia.indiatimes.com/world) | News feed. | News | [RSS](https://timesofindia.indiatimes.com/rssfeeds/296589292.cms) | all, news |
 | [奇客Solidot–传递最新科技情报](https://www.solidot.org) | News feed. | News | [RSS](https://www.solidot.org/index.rss) | all, chinese, news, top200 |
+| [微博热搜榜](https://tophub.today/n/KqndgxeLl9) | Weibo's real-time trending-search board, generated from the matching TopHub node through RSSHub. | News | [RSS](https://rsshub.bestblogs.dev/tophub/KqndgxeLl9) | all, chinese, news |
 | [掘金本周最热](https://juejin.im/recommended?sort=weekly_hottest) | News feed. | News | [RSS](https://rsshub.bestblogs.dev/juejin/trending/all/weekly) | all, chinese, news |
+| [知乎热榜](https://www.zhihu.com/hot) | Zhihu's site-wide hot list of questions and discussions, one of the boards aggregator pages such as NewsNow and REBANG surface. | News | [RSS](https://rsshub.bestblogs.dev/zhihu/hot) | all, chinese, news |
 | [站长之家](http://www.chinaz.com) | News feed. | News | [RSS](https://app.chinaz.com/?app=rss) | all, chinese, news |
+| [英为财情 · 所有资讯](https://cn.investing.com/) | Investing.com's Chinese all-news feed: A-shares, Hong Kong, US equities, forex, commodities, and macro finance. | News | [RSS](https://cn.investing.com/rss/news.rss) | all, chinese, news |
 | [蓝点网](https://www.landian.news) | News feed. | News | [RSS](https://www.landiannews.com/feed) | all, chinese, news |
 | [虎嗅](https://www.huxiu.com) | News feed. | News | [RSS](https://rss.huxiu.com/) | all, chinese, news, top200 |
 | [钛媒体：引领未来商业与生活新知](http://www.tmtpost.com) | News feed. | News | [RSS](https://www.tmtpost.com/feed) | all, chinese, news, top200 |
@@ -613,13 +620,14 @@ All 718 feeds in the complete collection are listed below with their primary cat
 </details>
 
 <details>
-<summary>🎨 Product & Design · 5</summary>
+<summary>🎨 Product & Design · 6</summary>
 
 | Source | Description | Primary category | Feed | Bundles |
 | --- | --- | --- | --- | --- |
 | [61’s life](https://61.life/) | Chinese independent blog. | Product & Design | [RSS](https://61.life/feed.xml) | all, blogs, chinese, top200 |
 | [jax](https://cdjax.com) | Chinese independent blog. | Product & Design | [RSS](https://cdjax.com/?feed=rss2) | all, blogs, chinese, top200 |
 | [Velas电波站](https://www.velasx.com/) | Chinese independent blog. | Product & Design | [RSS](https://www.velasx.com/feed) | all, blogs, chinese, top200 |
+| [今日热榜 · Product Hunt](https://tophub.today/n/LBwdG0jePx) | Product Hunt's daily launch board as mirrored by TopHub, for tracking what ships each day. | Product & Design | [RSS](https://rsshub.bestblogs.dev/tophub/LBwdG0jePx) | all |
 | [拾月的博客](https://www.skyue.com/) | Chinese independent blog. | Product & Design | [RSS](https://www.skyue.com/feed/) | all, blogs, chinese, top200 |
 | [阿里云设计中心](https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml) | WeChat article feed covering 产品设计与用户体验. | Product & Design | [RSS](https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml) | all, chinese, company-tech, top200, wechat |
 
@@ -711,7 +719,7 @@ All 718 feeds in the complete collection are listed below with their primary cat
 </details>
 
 <details>
-<summary>👥 Communities · 14</summary>
+<summary>👥 Communities · 15</summary>
 
 | Source | Description | Primary category | Feed | Bundles |
 | --- | --- | --- | --- | --- |
@@ -729,6 +737,7 @@ All 718 feeds in the complete collection are listed below with their primary cat
 | [Show HN](https://news.ycombinator.com/shownew) | New products, open-source projects, and personal work shared on Hacker News. | Communities | [RSS](https://hnrss.org/show) | all, communities, engineering |
 | [Ask HN](https://news.ycombinator.com/ask) | Hacker News questions on technical choices, career experience, and the industry. | Communities | [RSS](https://hnrss.org/ask) | all, communities, engineering |
 | [Hacker News](https://news.ycombinator.com/) | Popular technology, startup, and product discussions from the Hacker News front page. | Communities | [RSS](https://news.ycombinator.com/rss) | all, communities, engineering, top200 |
+| [虎扑 · 步行街每日话题](https://bbs.hupu.com/topic-daily) | Hupu's daily featured hot threads from the pedestrian-street board: sports, entertainment, and community chatter. | Communities | [RSS](https://rsshub.bestblogs.dev/hupu/all/topic-daily) | all, chinese |
 
 </details>
 

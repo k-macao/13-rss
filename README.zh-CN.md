@@ -2,7 +2,7 @@
   <img src="https://tidings.info/apple-touch-icon.png" width="96" height="96" alt="Tidings 应用图标">
   <h1>Tidings RSS</h1>
   <p><strong>把真正值得长期订阅的内容，整理成可以直接导入阅读器的 RSS 合集。</strong></p>
-  <p>先从精选 200 开始；需要更多选择时，再按主题下载或浏览 718 个全量源。精选包最近检查：2026-08-13。</p>
+  <p>先从精选 200 开始；需要更多选择时，再按主题下载或浏览 725 个全量源。精选包最近检查：2026-08-13。</p>
   <p>
     <a href="README.md">English</a> ·
     <a href="#直接下载">下载 OPML</a> ·
@@ -19,7 +19,7 @@
   </p>
 </div>
 
-第一次导入，建议直接选“精选 200”。它从 718 个全量源里留下大机构、长期创作者、官方一手内容和社区认可度较高的作者，14 个分类都有覆盖，导入后不用再面对几百个订阅逐一删减。
+第一次导入，建议直接选“精选 200”。它从 725 个全量源里留下大机构、长期创作者、官方一手内容和社区认可度较高的作者，14 个分类都有覆盖，导入后不用再面对几百个订阅逐一删减。
 
 精选包兼顾中文和英文内容，覆盖 AI、工程、安全、科技媒体、周刊、科研、新闻、产品、商业、博客、社区、文化、视频和播客。想把某个方向看得更全，可以继续选下面的主题包；“综合全集”更适合收藏和二次整理。
 
@@ -30,7 +30,7 @@
 | 合集 | 数量 | 下载 | 适合你，如果你想看…… |
 | --- | ---: | --- | --- |
 | ⭐ 精选 200（首选） | `200` | [下载 `tidings-top200.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-top200.opml) | 一次导入，各个方向都有高质量内容，后续整理成本也更低 |
-| 📚 综合全集 | `718` | [下载 `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | 完整收藏，或导入后自行删减 |
+| 📚 综合全集 | `725` | [下载 `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | 完整收藏，或导入后自行删减 |
 | ✍️ 中文独立博客 | `349` | [下载 `tidings-blogs.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-blogs.opml) | 仍在认真写作的中文个人博客 |
 | 👥 技术社区 | `14` | [下载 `tidings-communities.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-communities.opml) | V2EX、LINUX DO、Reddit、Hacker News 等社区讨论 |
 | 🔐 安全 | `8` | [下载 `tidings-security.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-security.opml) | 漏洞、攻防研究、安全通告与行业动态 |
@@ -39,12 +39,12 @@
 | 💬 微信公众号 | `30` | [下载 `tidings-wechat.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-wechat.opml) | 在阅读器里集中阅读公众号文章 |
 | 🏢 大厂技术号 | `40` | [下载 `tidings-company-tech.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-company-tech.opml) | 国内外技术团队的一手工程、AI、安全与研究文章 |
 | 🤖 AI / 人工智能 | `99` | [下载 `tidings-ai.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-ai.opml) | 模型进展、研究、工具和技术观点 |
-| 🗞️ 最新新闻 | `44` | [下载 `tidings-news.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-news.opml) | 国际、科技、安全和中文新闻 |
+| 🗞️ 最新新闻 | `48` | [下载 `tidings-news.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-news.opml) | 国际、科技、安全、中文新闻与全网热榜 |
 | 🔬 科研与科学 | `27` | [下载 `tidings-research.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-research.opml) | 论文、期刊、实验室和科学报道 |
-| 🛠️ 工程与技术 | `419` | [下载 `tidings-engineering.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-engineering.opml) | 编程、架构、开发工具和工程实践 |
+| 🛠️ 工程与技术 | `420` | [下载 `tidings-engineering.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-engineering.opml) | 编程、架构、开发工具和工程实践 |
 | 🎬 视频频道 | `93` | [下载 `tidings-videos.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-videos.opml) | AI、编程、科学和商业视频 |
 | 🎧 播客 | `73` | [下载 `tidings-podcasts.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-podcasts.opml) | 科技、商业、科学与中文节目 |
-| 🀄 中文订阅源 | `469` | [下载 `tidings-chinese.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-chinese.opml) | 中文文章、社区、视频和音频 |
+| 🀄 中文订阅源 | `474` | [下载 `tidings-chinese.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-chinese.opml) | 中文文章、社区、视频和音频 |
 
 [RSS 使用指南](RSS-GUIDE.zh-CN.md) · [浏览 OPML](opml/) · [SHA-256 校验文件](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/SHA256SUMS.txt) · [目录统计](reports/catalog-summary.md) · [机器可读目录](data/feeds.json)
 
@@ -55,6 +55,8 @@
 候选源会用 Tidings 的实际解析器连续检查三轮。只有三轮都能读到文章和真实发布日期，才进入精选包。本轮在当前网络环境下完成，优先保留官方地址和直连稳定的源；这不等于对中国大陆所有地区和运营商作永久可用承诺，少量海外源仍可能受网络环境影响。完整结果见[精选报告](reports/top200-curation.json)。
 
 中文独立博客会更看重近几个月的写作情况和 Feed 中的正文信息量。微信公众号要能快速建立连接，并能在 Tidings 中读出近期文章。大厂技术号按“机构 + 技术方向”去重：官网技术博客能够覆盖的内容，不再重复收同方向的公众号。
+
+热榜和行情类源用同一套证据标准。英为财情中文站和 SoPilot 有官方 Feed；今日热榜的 GitHub Trending、Product Hunt 榜单，以及微博热搜、知乎热榜、虎扑每日话题本身没有官方 Feed，改用公开说明的 RSSHub 路由收录。NewsNow、REBANG 和萝卜投研完全没有公开 Feed（萝卜投研还需登录，提交里的 luobo.cn 其实是《保卫萝卜》游戏官网），2026-09-03 这一轮把它们记为未收录候选，原因写在[热榜来源报告](reports/hotlist-curation.json)，而不是放一个无法订阅的页面进目录。SoPilot 的频道能正常解析，但检查时没有条目，这一点也如实记录在报告里。
 
 RSS 地址可能随时迁移或失效，所以目录会持续复查。发现漏收、失效或分类不合适，可以直接[提交建议](CONTRIBUTING.zh-CN.md)。
 
@@ -108,7 +110,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 <!-- SOURCE_APPENDIX_START -->
 ## 全量源清单
 
-下面列出全集中的 718 个订阅源。每项都标明主分类与所属合集；内容由 `data/feeds.json` 生成。
+下面列出全集中的 725 个订阅源。每项都标明主分类与所属合集；内容由 `data/feeds.json` 生成。
 
 <details>
 <summary>🤖 人工智能 · 38</summary>
@@ -157,7 +159,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 </details>
 
 <details>
-<summary>🛠️ 工程与技术 · 348</summary>
+<summary>🛠️ 工程与技术 · 349</summary>
 
 | 名称 | 介绍 | 主分类 | Feed | 所属合集 |
 | --- | --- | --- | --- | --- |
@@ -509,6 +511,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 | [鸟窝](https://colobu.com/) | 主要写编程。 | 工程与技术 | [RSS](https://colobu.com/atom.xml) | 全集、中文独立博客、中文、工程、精选 200 |
 | [黑羽的个人博客](https://blog.thetbw.xyz) | 主要写编程、随笔、生活。 | 工程与技术 | [RSS](https://blog.thetbw.xyz/atom.xml) | 全集、中文独立博客、中文、工程、精选 200 |
 | [𝟞𝟙𝟡'𝕤 𝔹𝕃𝕆𝔾](https://619.pp.ua) | 主要写学习、编程、随笔。 | 工程与技术 | [RSS](https://66619.eu.org/feed/) | 全集、中文独立博客、中文、工程 |
+| [今日热榜 · GitHub Trending](https://tophub.today/n/rYqoXQ8vOD) | 今日热榜收录的 GitHub Trending 日榜，一条 Feed 看完当天上升最快的开源项目。 | 工程与技术 | [RSS](https://rsshub.bestblogs.dev/tophub/rYqoXQ8vOD) | 全集、工程 |
 
 </details>
 
@@ -591,7 +594,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 </details>
 
 <details>
-<summary>🗞️ 新闻 · 22</summary>
+<summary>🗞️ 新闻 · 26</summary>
 
 | 名称 | 介绍 | 主分类 | Feed | 所属合集 |
 | --- | --- | --- | --- | --- |
@@ -607,13 +610,17 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 | [NYT > Technology](https://www.nytimes.com/section/technology) | 新闻资讯 | 新闻 | [RSS](https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml) | 全集、新闻、精选 200 |
 | [NYT > World News](https://www.nytimes.com/section/world) | 新闻资讯 | 新闻 | [RSS](https://rss.nytimes.com/services/xml/rss/nyt/World.xml) | 全集、新闻 |
 | [ProPublica](https://www.propublica.org/) | 新闻资讯 | 新闻 | [RSS](https://www.propublica.org/feeds/propublica/main) | 全集、新闻、精选 200 |
+| [SoPilot · X 起爆帖监控](https://sopilot.net/zh/hot-tweets) | SoPilot 官方 RSS，盯 X 上正在快速升温的 AI 与 Web3 起爆帖，方便抢首评和观察舆论风向。 | 新闻 | [RSS](https://sopilot.net/rss/hottweets) | 全集、中文、新闻 |
 | [Top stories - Google News](https://news.google.com/?hl=en-US&gl=US&ceid=US:en) | 新闻资讯 | 新闻 | [RSS](https://news.google.com/rss) | 全集、新闻 |
 | [World](https://www.washingtonpost.com) | 新闻资讯 | 新闻 | [RSS](https://feeds.washingtonpost.com/rss/world) | 全集、新闻 |
 | [World news \| The Guardian](https://www.theguardian.com/world) | 新闻资讯 | 新闻 | [RSS](https://www.theguardian.com/world/rss) | 全集、新闻、精选 200 |
 | [World News, Today World News, Latest International News, World Breaking News, Trending News of World - Times of India](https://timesofindia.indiatimes.com/world) | 新闻资讯 | 新闻 | [RSS](https://timesofindia.indiatimes.com/rssfeeds/296589292.cms) | 全集、新闻 |
 | [奇客Solidot–传递最新科技情报](https://www.solidot.org) | 新闻资讯 | 新闻 | [RSS](https://www.solidot.org/index.rss) | 全集、中文、新闻、精选 200 |
+| [微博热搜榜](https://tophub.today/n/KqndgxeLl9) | 微博实时热搜榜，舆情风向的第一现场，由今日热榜节点通过 RSSHub 生成。 | 新闻 | [RSS](https://rsshub.bestblogs.dev/tophub/KqndgxeLl9) | 全集、中文、新闻 |
 | [掘金本周最热](https://juejin.im/recommended?sort=weekly_hottest) | 新闻资讯 | 新闻 | [RSS](https://rsshub.bestblogs.dev/juejin/trending/all/weekly) | 全集、中文、新闻 |
+| [知乎热榜](https://www.zhihu.com/hot) | 知乎全站热榜，按热度排序的问题和讨论，NewsNow 与 REBANG 这类聚合页覆盖的核心榜单之一。 | 新闻 | [RSS](https://rsshub.bestblogs.dev/zhihu/hot) | 全集、中文、新闻 |
 | [站长之家](http://www.chinaz.com) | 新闻资讯 | 新闻 | [RSS](https://app.chinaz.com/?app=rss) | 全集、中文、新闻 |
+| [英为财情 · 所有资讯](https://cn.investing.com/) | 英为财情（Investing.com 中文站）全部资讯，A 股、港股、美股、外汇、大宗商品与宏观财经新闻实时更新。 | 新闻 | [RSS](https://cn.investing.com/rss/news.rss) | 全集、中文、新闻 |
 | [蓝点网](https://www.landian.news) | 新闻资讯 | 新闻 | [RSS](https://www.landiannews.com/feed) | 全集、中文、新闻 |
 | [虎嗅](https://www.huxiu.com) | 新闻资讯 | 新闻 | [RSS](https://rss.huxiu.com/) | 全集、中文、新闻、精选 200 |
 | [钛媒体：引领未来商业与生活新知](http://www.tmtpost.com) | 新闻资讯 | 新闻 | [RSS](https://www.tmtpost.com/feed) | 全集、中文、新闻、精选 200 |
@@ -621,13 +628,14 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 </details>
 
 <details>
-<summary>🎨 产品与设计 · 5</summary>
+<summary>🎨 产品与设计 · 6</summary>
 
 | 名称 | 介绍 | 主分类 | Feed | 所属合集 |
 | --- | --- | --- | --- | --- |
 | [61’s life](https://61.life/) | 主要写创业、管理、产品。 | 产品与设计 | [RSS](https://61.life/feed.xml) | 全集、中文独立博客、中文、精选 200 |
 | [jax](https://cdjax.com) | 主要写产品、数码、随笔。 | 产品与设计 | [RSS](https://cdjax.com/?feed=rss2) | 全集、中文独立博客、中文、精选 200 |
 | [Velas电波站](https://www.velasx.com/) | 主要写动画、游戏、小说、设计。 | 产品与设计 | [RSS](https://www.velasx.com/feed) | 全集、中文独立博客、中文、精选 200 |
+| [今日热榜 · Product Hunt](https://tophub.today/n/LBwdG0jePx) | 今日热榜收录的 Product Hunt 当日新品榜，产品圈每天在发布什么，一条 Feed 看完。 | 产品与设计 | [RSS](https://rsshub.bestblogs.dev/tophub/LBwdG0jePx) | 全集 |
 | [拾月的博客](https://www.skyue.com/) | 主要写生活、股票投资、产品经理、软件数码。 | 产品与设计 | [RSS](https://www.skyue.com/feed/) | 全集、中文独立博客、中文、精选 200 |
 | [阿里云设计中心](https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml) | 公众号，主要关注产品设计与用户体验。 | 产品与设计 | [RSS](https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml) | 全集、中文、大厂技术号、精选 200、微信公众号 |
 
@@ -719,7 +727,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 </details>
 
 <details>
-<summary>👥 社区 · 14</summary>
+<summary>👥 社区 · 15</summary>
 
 | 名称 | 介绍 | 主分类 | Feed | 所属合集 |
 | --- | --- | --- | --- | --- |
@@ -737,6 +745,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 | [Show HN](https://news.ycombinator.com/shownew) | Hacker News 上的新产品、开源项目与个人作品展示。 | 社区 | [RSS](https://hnrss.org/show) | 全集、社区、工程 |
 | [Ask HN](https://news.ycombinator.com/ask) | Hacker News 的问答主题，聚焦技术选择、职业经验与行业讨论。 | 社区 | [RSS](https://hnrss.org/ask) | 全集、社区、工程 |
 | [Hacker News](https://news.ycombinator.com/) | Hacker News 首页的热门技术、创业与产品讨论。 | 社区 | [RSS](https://news.ycombinator.com/rss) | 全集、社区、工程、精选 200 |
+| [虎扑 · 步行街每日话题](https://bbs.hupu.com/topic-daily) | 虎扑步行街每日话题热帖，体育、娱乐和街头话题的社区讨论现场。 | 社区 | [RSS](https://rsshub.bestblogs.dev/hupu/all/topic-daily) | 全集、中文 |
 
 </details>
 

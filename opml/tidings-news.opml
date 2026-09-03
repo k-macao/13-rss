@@ -2,8 +2,8 @@
 <opml version="2.0">
   <head>
     <title>Tidings Curated RSS — Fresh News</title>
-    <dateCreated>2026-08-13</dateCreated>
-    <dateModified>2026-08-13</dateModified>
+    <dateCreated>2026-09-03</dateCreated>
+    <dateModified>2026-09-03</dateModified>
     <ownerName>Tidings RSS Community</ownerName>
     <docs>http://opml.org/spec2.opml</docs>
   </head>
@@ -48,13 +48,17 @@
       <outline text="NYT &gt; Technology" title="NYT &gt; Technology" type="rss" xmlUrl="https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml" htmlUrl="https://www.nytimes.com/section/technology" />
       <outline text="NYT &gt; World News" title="NYT &gt; World News" type="rss" xmlUrl="https://rss.nytimes.com/services/xml/rss/nyt/World.xml" htmlUrl="https://www.nytimes.com/section/world" />
       <outline text="ProPublica" title="ProPublica" type="rss" xmlUrl="https://www.propublica.org/feeds/propublica/main" htmlUrl="https://www.propublica.org/" />
+      <outline text="SoPilot · X 起爆帖监控" title="SoPilot · X 起爆帖监控" type="rss" xmlUrl="https://sopilot.net/rss/hottweets" htmlUrl="https://sopilot.net/zh/hot-tweets" />
       <outline text="Top stories - Google News" title="Top stories - Google News" type="rss" xmlUrl="https://news.google.com/rss" htmlUrl="https://news.google.com/?hl=en-US&amp;gl=US&amp;ceid=US:en" />
       <outline text="World" title="World" type="rss" xmlUrl="https://feeds.washingtonpost.com/rss/world" htmlUrl="https://www.washingtonpost.com" />
       <outline text="World news | The Guardian" title="World news | The Guardian" type="rss" xmlUrl="https://www.theguardian.com/world/rss" htmlUrl="https://www.theguardian.com/world" />
       <outline text="World News, Today World News, Latest International News, World Breaking News, Trending News of World - Times of India" title="World News, Today World News, Latest International News, World Breaking News, Trending News of World - Times of India" type="rss" xmlUrl="https://timesofindia.indiatimes.com/rssfeeds/296589292.cms" htmlUrl="https://timesofindia.indiatimes.com/world" />
       <outline text="奇客Solidot–传递最新科技情报" title="奇客Solidot–传递最新科技情报" type="rss" xmlUrl="https://www.solidot.org/index.rss" htmlUrl="https://www.solidot.org" />
+      <outline text="微博热搜榜" title="微博热搜榜" type="rss" xmlUrl="https://rsshub.bestblogs.dev/tophub/KqndgxeLl9" htmlUrl="https://tophub.today/n/KqndgxeLl9" />
       <outline text="掘金本周最热" title="掘金本周最热" type="rss" xmlUrl="https://rsshub.bestblogs.dev/juejin/trending/all/weekly" htmlUrl="https://juejin.im/recommended?sort=weekly_hottest" />
+      <outline text="知乎热榜" title="知乎热榜" type="rss" xmlUrl="https://rsshub.bestblogs.dev/zhihu/hot" htmlUrl="https://www.zhihu.com/hot" />
       <outline text="站长之家" title="站长之家" type="rss" xmlUrl="https://app.chinaz.com/?app=rss" htmlUrl="http://www.chinaz.com" />
+      <outline text="英为财情 · 所有资讯" title="英为财情 · 所有资讯" type="rss" xmlUrl="https://cn.investing.com/rss/news.rss" htmlUrl="https://cn.investing.com/" />
       <outline text="蓝点网" title="蓝点网" type="rss" xmlUrl="https://www.landiannews.com/feed" htmlUrl="https://www.landian.news" />
       <outline text="虎嗅" title="虎嗅" type="rss" xmlUrl="https://rss.huxiu.com/" htmlUrl="https://www.huxiu.com" />
       <outline text="钛媒体：引领未来商业与生活新知" title="钛媒体：引领未来商业与生活新知" type="rss" xmlUrl="https://www.tmtpost.com/feed" htmlUrl="http://www.tmtpost.com" />

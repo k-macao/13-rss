@@ -16,11 +16,13 @@ Open a **Feed suggestion** issue or edit `data/feeds.json` in a pull request. In
 
 We favor original reporting, first-party research, practitioner writing, official project blogs, and channels with a clear editorial identity. Scraped mirrors, credentialed feeds, spam, SEO farms, copied content, and sources that primarily promote affiliate links are not accepted.
 
-Chinese independent blogs must have published within the last 180 days, return at least two reliably dated articles, and pass repeated Tidings parser checks. `tidings-blogs.opml` is capped at 400 feeds and the complete collection at 720; once a cap is reached, a new source must displace a weaker one.
+Chinese independent blogs must have published within the last 180 days, return at least two reliably dated articles, and pass repeated Tidings parser checks. `tidings-blogs.opml` is capped at 400 feeds and the complete collection at 730; once a cap is reached, a new source must displace a weaker one.
 
 Community feeds must use an official endpoint or a publicly documented fallback, contain recent discussions, and pass three current Tidings parser rounds. A parseable forum feed does not imply that Tidings can fetch its full reply thread; describe that capability separately when proposing a source.
 
 Security, technology-media, and technical-newsletter feeds must also pass three current Tidings parser rounds and return recently dated items. Near-duplicate sections are not collected unless each feed serves a clear, distinct reading use case.
+
+Trending boards, aggregator pages, and market-data sources need a real feed endpoint. A first-party RSS feed wins; otherwise use a publicly documented bridge route such as RSSHub and state which board the feed carries. Aggregators that only render HTML — NewsNow, REBANG, and login-walled research platforms such as DataYes Robo — are recorded as rejected candidates in that round's report instead of being published as feeds. When a bridge stamps every item with the snapshot build time instead of a publication date, say so in the report.
 
 WeChat feeds must respond quickly, expose recent articles, and parse through Tidings. For company technology feeds, include the organization and technical direction. Only one feed is kept for each organization/direction pair, and an official website RSS feed takes priority over a matching WeChat bridge.
 
@@ -39,6 +41,18 @@ python tools/select_top200.py --date 2026-08-13 \
   --video-validation reports/top200-video-validation-round-2.json \
   --video-validation reports/top200-video-validation-round-3.json \
   --apply
+```
+
+Reproduce the 2026-09-03 hot-list and market-data round:
+
+```bash
+python tools/merge_hotlist_sources.py --date 2026-09-03 \
+  --curated sources/hotlist-curated.json \
+  --output data/feeds.json \
+  --report reports/hotlist-curation.json \
+  --summary reports/validation-summary.json
+python scripts/catalog.py generate
+python tools/generate_source_appendix.py
 ```
 
 ## Update the generated files

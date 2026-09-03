@@ -2,8 +2,8 @@
 <opml version="2.0">
   <head>
     <title>Tidings Curated RSS — Chinese Sources</title>
-    <dateCreated>2026-08-13</dateCreated>
-    <dateModified>2026-08-13</dateModified>
+    <dateCreated>2026-09-03</dateCreated>
+    <dateModified>2026-09-03</dateModified>
     <ownerName>Tidings RSS Community</ownerName>
     <docs>http://opml.org/spec2.opml</docs>
   </head>
@@ -335,9 +335,13 @@
       <outline text="HackerNews每日摘要 on SuperTechFans" title="HackerNews每日摘要 on SuperTechFans" type="rss" xmlUrl="https://www.supertechfans.com/cn/index.xml" htmlUrl="https://supertechfans.com/cn/" />
       <outline text="InfoQ 推荐" title="InfoQ 推荐" type="rss" xmlUrl="https://plink.anyfeeder.com/infoq/recommend" htmlUrl="https://www.infoq.cn" />
       <outline text="MIT 科技评论 - 本周热榜" title="MIT 科技评论 - 本周热榜" type="rss" xmlUrl="https://rsshub.bestblogs.dev/mittrchina/hot" htmlUrl="https://www.mittrchina.com/hot" />
+      <outline text="SoPilot · X 起爆帖监控" title="SoPilot · X 起爆帖监控" type="rss" xmlUrl="https://sopilot.net/rss/hottweets" htmlUrl="https://sopilot.net/zh/hot-tweets" />
       <outline text="奇客Solidot–传递最新科技情报" title="奇客Solidot–传递最新科技情报" type="rss" xmlUrl="https://www.solidot.org/index.rss" htmlUrl="https://www.solidot.org" />
+      <outline text="微博热搜榜" title="微博热搜榜" type="rss" xmlUrl="https://rsshub.bestblogs.dev/tophub/KqndgxeLl9" htmlUrl="https://tophub.today/n/KqndgxeLl9" />
       <outline text="掘金本周最热" title="掘金本周最热" type="rss" xmlUrl="https://rsshub.bestblogs.dev/juejin/trending/all/weekly" htmlUrl="https://juejin.im/recommended?sort=weekly_hottest" />
+      <outline text="知乎热榜" title="知乎热榜" type="rss" xmlUrl="https://rsshub.bestblogs.dev/zhihu/hot" htmlUrl="https://www.zhihu.com/hot" />
       <outline text="站长之家" title="站长之家" type="rss" xmlUrl="https://app.chinaz.com/?app=rss" htmlUrl="http://www.chinaz.com" />
+      <outline text="英为财情 · 所有资讯" title="英为财情 · 所有资讯" type="rss" xmlUrl="https://cn.investing.com/rss/news.rss" htmlUrl="https://cn.investing.com/" />
       <outline text="蓝点网" title="蓝点网" type="rss" xmlUrl="https://www.landiannews.com/feed" htmlUrl="https://www.landian.news" />
       <outline text="虎嗅" title="虎嗅" type="rss" xmlUrl="https://rss.huxiu.com/" htmlUrl="https://www.huxiu.com" />
       <outline text="钛媒体：引领未来商业与生活新知" title="钛媒体：引领未来商业与生活新知" type="rss" xmlUrl="https://www.tmtpost.com/feed" htmlUrl="http://www.tmtpost.com" />
@@ -426,6 +430,7 @@
       <outline text="V2EX" title="V2EX" type="rss" xmlUrl="https://v2ex.com/index.xml" htmlUrl="https://www.v2ex.com/" />
       <outline text="V2EX · 创意" title="V2EX · 创意" type="rss" xmlUrl="https://www.v2ex.com/feed/tab/creative.xml" htmlUrl="https://www.v2ex.com/?tab=creative" />
       <outline text="V2EX · 技术" title="V2EX · 技术" type="rss" xmlUrl="https://www.v2ex.com/feed/tab/tech.xml" htmlUrl="https://www.v2ex.com/?tab=tech" />
+      <outline text="虎扑 · 步行街每日话题" title="虎扑 · 步行街每日话题" type="rss" xmlUrl="https://rsshub.bestblogs.dev/hupu/all/topic-daily" htmlUrl="https://bbs.hupu.com/topic-daily" />
     </outline>
     <outline text="📚 Culture &amp; Ideas" title="📚 Culture &amp; Ideas">
       <outline text="KAIX.IN" title="KAIX.IN" type="rss" xmlUrl="https://kaix.in/feed/" htmlUrl="https://kaix.in/" />

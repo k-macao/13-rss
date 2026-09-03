@@ -14,7 +14,7 @@ RSS brings updates from different websites into one reader, in chronological ord
 
 Open Tidings and choose **Import OPML** from Add Subscription or Feed Management. Tidings preserves the bundle groups, skips duplicate feed URLs, and reports how many subscriptions were added, skipped, or failed.
 
-The Top 200 is the default everyday bundle. The 718-feed complete collection creates a larger unread queue and many more network requests, so it is better suited to readers who plan to curate it themselves.
+The Top 200 is the default everyday bundle. The 725-feed complete collection creates a larger unread queue and many more network requests, so it is better suited to readers who plan to curate it themselves.
 
 ## Which bundle should I choose?
 

@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
-from scripts.catalog import CATEGORIES, CATEGORY_EMOJI, PACKS, TOP200_FEEDS
+from scripts.catalog import CATEGORIES, CATEGORY_EMOJI, MAX_ALL_FEEDS, PACKS, TOP200_FEEDS
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -75,7 +75,7 @@ class RepositoryTests(unittest.TestCase):
 
     def test_catalog_size_limits_and_complete_appendix(self):
         catalog = json.loads((ROOT / "data/feeds.json").read_text(encoding="utf-8"))
-        self.assertLessEqual(len(catalog["feeds"]), 720)
+        self.assertLessEqual(len(catalog["feeds"]), 730)
         self.assertLessEqual(sum("blogs" in feed["packs"] for feed in catalog["feeds"]), 400)
         expected_urls = {feed["feed_url"] for feed in catalog["feeds"]}
         for name in ("README.md", "README.zh-CN.md"):
@@ -201,6 +201,46 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(len(selected), report["selected_count"])
         self.assertTrue(all(len(item["parser_rounds"]) == 3 for item in selected))
         self.assertTrue(all(all(round_["ok"] for round_ in item["parser_rounds"]) for item in selected))
+
+    def test_hotlist_additions_match_curation_report(self):
+        catalog = json.loads((ROOT / "data/feeds.json").read_text(encoding="utf-8"))
+        report = json.loads((ROOT / "reports/hotlist-curation.json").read_text(encoding="utf-8"))
+        selected = [item for item in report["decisions"] if item["selected"]]
+        selected_urls = {item["feed_url"] for item in selected}
+        catalog_urls = {
+            feed["feed_url"]
+            for feed in catalog["feeds"]
+            if report["review"] in feed["sources"]
+        }
+        self.assertEqual(selected_urls, catalog_urls)
+        self.assertEqual(len(selected), report["selected_count"])
+        self.assertEqual(report["candidate_count"], len(report["decisions"]))
+        self.assertEqual(report["rejected_count"], len(report["decisions"]) - len(selected))
+        self.assertEqual(report["published_total"], len(catalog["feeds"]))
+        self.assertEqual(report["engine"], "HTTP fetch + RSS/Atom/JSON Feed parse")
+        for item in selected:
+            self.assertTrue(item["reason"], item["title"])
+            self.assertTrue(item["checks"], item["title"])
+            self.assertTrue(any(check["ok"] for check in item["checks"]), item["title"])
+            if (item["checks"][-1].get("items_captured") or 0) == 0:
+                self.assertTrue(item.get("caveat"), item["title"])
+        rejected = [item for item in report["decisions"] if not item["selected"]]
+        self.assertTrue(all(item["reason"] for item in rejected))
+        self.assertEqual(
+            {item["title"] for item in rejected if not item["feed_url"]},
+            {"NewsNow 最热聚合页", "REBANG 极简热榜", "萝卜投研", "今日热榜 科技分类页"},
+        )
+        summary = json.loads((ROOT / "reports/validation-summary.json").read_text(encoding="utf-8"))
+        review = summary["hotlist_aggregator_review"]
+        self.assertEqual(summary["published"], len(catalog["feeds"]))
+        self.assertEqual(summary["limits"]["complete_collection_maximum"], MAX_ALL_FEEDS)
+        self.assertEqual(review["published_additions"], report["selected_count"])
+        self.assertEqual(review["candidates"], report["candidate_count"])
+        self.assertEqual(review["selection_evidence"], "reports/hotlist-curation.json")
+        self.assertEqual(
+            summary["by_pack"],
+            {pack: sum(pack in feed["packs"] for feed in catalog["feeds"]) for pack in sorted(PACKS)},
+        )
 
     def test_wechat_and_company_technology_bundles_are_curated(self):
         catalog = json.loads((ROOT / "data/feeds.json").read_text(encoding="utf-8"))

@@ -2,7 +2,7 @@
 
 The published catalog is a new compilation: URLs were normalized, fetched, parsed through Tidings, deduplicated, and independently regrouped. Titles and website links prefer the live feed's own metadata. Upstream descriptions and category layouts are not copied.
 
-Discovery inputs checked on 2026-07-28 and 2026-08-12:
+Discovery inputs checked on 2026-07-28, 2026-08-12, and 2026-09-03:
 
 | Input | How it was used | License / boundary |
 | --- | --- | --- |
@@ -15,6 +15,10 @@ Discovery inputs checked on 2026-07-28 and 2026-08-12:
 | [LINUX DO RSS fallback](https://linuxdorss.longpink.com/) | Public fallback for LINUX DO categories affected by the site's Cloudflare policy; only the documentation category is included | Community-maintained endpoint documented publicly on LINUX DO. We link to the feed and do not copy article bodies. |
 | Tidings AI Radar OPML | Existing personal collection supplied by the project maintainer | URLs were independently revalidated and reclassified. |
 | Publisher-owned feeds | Official publisher and community endpoints | Public endpoints only; no article content is redistributed. |
+| [SoPilot](https://sopilot.net/zh/hot-tweets) | Reader suggestion of 2026-09-03; the product page documents its own RSS endpoint for the X hot-post board | Public first-party endpoint; we link to the feed and redistribute no post content. |
+| [Investing.com / 英为财情](https://cn.investing.com/) | Reader suggestion of 2026-09-03; the Chinese edition's first-party all-news RSS endpoint | Public first-party endpoint; headlines and links only. |
+| [今日热榜 TopHub](https://tophub.today/) | Reader suggestion of 2026-09-03; board identifiers used to subscribe to GitHub Trending, Product Hunt, and Weibo trending searches through RSSHub | TopHub publishes no first-party feed. We link to the boards and to the AGPL-3.0 RSSHub route without copying article content. |
+| [NewsNow](https://newsnow.busiyi.world/), [REBANG](https://rebang.open2hub.com/), [萝卜投研](https://robo.datayes.com/) | Reader suggestions of 2026-09-03 that were checked and rejected: no public feed endpoint, and 萝卜投研 additionally requires a login | Not published. The boards NewsNow and REBANG mirror are collected individually where a documented route exists; see `reports/hotlist-curation.json`. |
 
 ## Validation boundary
 
@@ -27,5 +31,7 @@ The company-technology bundle is keyed by organization and technical direction. 
 Community additions had to pass three current Tidings parser rounds and expose recently dated discussions. Reddit is represented by one combined official Atom feed to reduce duplicate posts and rate-limit pressure. LINUX DO's first-party feeds returned HTTP 403 through the production parser, so the catalog uses a publicly documented community fallback for the documentation category. Feed import and structured reply extraction are separate capabilities; this catalog check only claims the former unless a report says otherwise. Candidate-level evidence is published in `reports/community-curation.json`.
 
 The community, security, technology-media, and newsletter candidates reviewed on 2026-08-12 had to complete three Tidings parser rounds, return dated recent items, and add a distinct reading use case. V2EX keeps its main feed plus the technology and creative sections by design; the narrower feeds are optional alternatives, not deduplicated replacements. Naixi, NodeSeek, and the V2EX hot feed failed the three-round gate and were not published. Candidate-level results are in `reports/theme-curation.json`.
+
+The 2026-09-03 hot-list and market-data round started from six reader-suggested sources. Three of them publish no feed at all. NewsNow (newsnow.busiyi.world) is a Nuxt front end over a JSON API, its `/rss` path falls back to the server-rendered homepage, and RSSHub master has no `newsnow` route; REBANG (rebang.open2hub.com, which redirects to top.open2hub.com) renders static board pages and its `/rss.xml` returns the site 404 page; 萝卜投研 answers with a WeChat QR and password login wall, and the submitted address `luobo.cn` is the 保卫萝卜 game site rather than robo.datayes.com. Rather than publish pages that cannot be subscribed, the round collected the boards those aggregators mirror: the Zhihu hot list and Hupu's daily threads through RSSHub, and Weibo trending searches, GitHub Trending, and Product Hunt through TopHub board routes. The direct RSSHub routes for Weibo and Bilibili hot searches failed twice on the shared instance, so Weibo uses the TopHub node and Bilibili was left out this round. TopHub node routes stamp every item with the snapshot build time instead of a per-item publication date, which is recorded per candidate. SoPilot's first-party channel parsed in both checks but carried no items because its AI board was empty, so it is published with that caveat and will report `feed has no items` in the weekly live check until the board fills. Evidence for all fifteen candidates is in `reports/hotlist-curation.json`.
 
 This is a dated health check, not a promise of permanent uptime. Publishers can move or retire feeds, and third-party RSSHub or WeChat bridges can fail independently. The weekly workflow provides a fresh machine-readable health report without silently rewriting the curated catalog.
