@@ -98,8 +98,13 @@ EDITIONS = {
 }
 
 # Digest branding — the title no longer carries the date or pushplus branding.
-DIGEST_TITLE = "章鱼 AI 全景分析"
-DIGEST_SUBTITLE = "全网 AI 调研境内境外数据，由多个大模型混合部署。"
+DIGEST_TITLE = "章鱼 AI · 营销热点聚合助手"
+DIGEST_SUBTITLE = "每天三分钟！去噪音！留干货！"
+# Scope note rendered with the intro block on the first page.
+DIGEST_SCOPE = (
+    "全网兼顾中文和英文内容，覆盖 AI、工程、安全、科技媒体、周刊、科研、"
+    "新闻、产品、商业、博客、社区、文化、视频和播客。"
+)
 DIGEST_INTRO = (
     "全网境内外为你寻找蛛丝马迹 - 提供全景视野分析，由多模型协同推理决策。"
     "底层所使用的大语言模型（LLM）多模式背后结合使用了多种不同的先进模型，"
@@ -405,6 +410,10 @@ def render_intro():
 <div style="margin:0 0 20px;padding:14px 14px;background:{CARD};">
   <div style="font-family:{SANS};font-size:13px;line-height:1.85;color:{INK};letter-spacing:.01em;">
     {esc(DIGEST_INTRO)}
+  </div>
+  <div style="margin:10px 0 0;padding:9px 0 0;border-top:1px solid {HAIRLINE};
+    font-family:{SANS};font-size:12px;line-height:1.8;color:{GRAPHITE};letter-spacing:.01em;">
+    {esc(DIGEST_SCOPE)}
   </div>
 </div>
 """.strip()
