@@ -9,6 +9,7 @@ from scripts.wechat_digest import (
     AUTHOR_LINE,
     CHINA,
     DIGEST_INTRO,
+    DIGEST_SCOPE,
     DIGEST_SUBTITLE,
     DIGEST_TITLE,
     EDITIONS,
@@ -30,6 +31,11 @@ from scripts.wechat_digest import (
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/wechat-digest.yml"
 NOW = datetime(2026, 8, 19, 10, 0, tzinfo=timezone.utc)
+
+
+def section_head(label):
+    """Match a rendered category header, not the same word inside intro copy."""
+    return f">{label}</span>"
 
 
 def make_items(count, *, category="News", summary="摘要内容，用于测试排版和截断。"):
@@ -190,7 +196,7 @@ class RenderTests(unittest.TestCase):
         for index, page in enumerate(pages[:-1], start=1):
             self.assertIn(f"{index:02d} / {count:02d}", page)
             self.assertIn(f"CONTINUED IN {index + 1:02d}/{count:02d}", page)
-            self.assertIn("新闻", page)  # section header repeated on every page
+            self.assertIn(section_head("新闻"), page)  # section header repeated on every page
         self.assertIn("本期结束", pages[-1])
 
     def test_items_are_numbered_continuously_across_pages(self):
@@ -201,7 +207,7 @@ class RenderTests(unittest.TestCase):
     def test_sections_are_grouped_and_ordered_by_catalog_category(self):
         items = make_items(4, category="News") + make_items(4, category="Artificial Intelligence")
         page = render(items)[0]
-        self.assertLess(page.index("人工智能"), page.index("新闻"))
+        self.assertLess(page.index(section_head("人工智能")), page.index(section_head("新闻")))
         self.assertIn("Artificial Intelligence", page)
 
     def test_style_uses_the_editorial_palette_and_small_body_copy(self):
@@ -231,16 +237,27 @@ class RenderTests(unittest.TestCase):
         page = render(make_items(4))[0]
         self.assertIn(DIGEST_TITLE, page)
         self.assertIn(DIGEST_SUBTITLE, page)
+        self.assertIn(DIGEST_SCOPE, page)
         self.assertIn("全网境内外为你寻找蛛丝马迹", page)
         self.assertIn("Claude、ChatGPT、Gemini、Grok、Qwen 以及 Kimi", page)
         self.assertIn(AUTHOR_LINE, page)
+
+    def test_scope_note_covers_all_categories_and_both_languages(self):
+        self.assertIn("中文和英文", DIGEST_SCOPE)
+        for topic in (
+            "AI", "工程", "安全", "科技媒体", "周刊", "科研", "新闻",
+            "产品", "商业", "博客", "社区", "文化", "视频", "播客",
+        ):
+            self.assertIn(topic, DIGEST_SCOPE)
 
     def test_intro_only_on_first_page_and_author_only_on_last(self):
         pages = render(make_items(220, summary="摘要内容 " * 25))
         self.assertGreater(len(pages), 1)
         self.assertIn(DIGEST_INTRO, pages[0])
+        self.assertIn(DIGEST_SCOPE, pages[0])
         for page in pages[1:]:
             self.assertNotIn(DIGEST_INTRO, page)
+            self.assertNotIn(DIGEST_SCOPE, page)
         self.assertIn(AUTHOR_LINE, pages[-1])
         for page in pages[:-1]:
             self.assertNotIn(AUTHOR_LINE, page)
@@ -248,7 +265,9 @@ class RenderTests(unittest.TestCase):
     def test_digest_title_has_no_date_or_pushplus_branding(self):
         self.assertNotIn("pushplus", DIGEST_TITLE.casefold())
         self.assertNotRegex(DIGEST_TITLE, r"\d")
-        self.assertEqual(page_title(DIGEST_TITLE, 2, 3), "章鱼 AI 全景分析 2/3")
+        self.assertEqual(DIGEST_TITLE, "章鱼 AI · 营销热点聚合助手")
+        self.assertEqual(DIGEST_SUBTITLE, "每天三分钟！去噪音！留干货！")
+        self.assertEqual(page_title(DIGEST_TITLE, 2, 3), "章鱼 AI · 营销热点聚合助手 2/3")
 
     def test_timestamps_are_rendered_in_beijing_time(self):
         item = make_items(1)[0]

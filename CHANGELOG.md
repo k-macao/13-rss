@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Renamed the digest to “章鱼 AI · 营销热点聚合助手”, replaced the subtitle with “每天三分钟！去噪音！留干货！”, and added the explicit scope note “全网兼顾中文和英文内容，覆盖 AI、工程、安全、科技媒体、周刊、科研、新闻、产品、商业、博客、社区、文化、视频和播客。” under the first-page intro.
+- Kept the scope note on the first page only, alongside the intro, so continuation pages stay lean; extended the branding tests to assert all fourteen topics and both languages appear.
+- Added a 品牌与文案 section to the WeChat digest guide documenting the title, subtitle, scope note, and signature, and shifted the later section numbers.
 - Added a twice-daily WeChat digest workflow that pushes new catalog articles through pushplus at 09:00 and 18:00 Beijing time.
 - Rendered the digest in an international-magazine style: portrait single column, light grey paper, black small body copy, dark grey metadata, and a fluorescent green accent, using inline styles only so WeChat webviews render it unchanged.
 - Paginated long issues under the 100,000-character pushplus limit, with continuous article numbering, repeated section headers, page counters, and numbered titles.
