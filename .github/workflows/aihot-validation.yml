@@ -2,54 +2,92 @@ name: AIHOT source validation
 
 # Runs the AIHOT demo-source candidates against the live web. The authoring sandbox
 # has no outbound access to feed hosts, so the checks run on a GitHub-hosted runner
-# and the round report is committed back to the branch.
+# and the round reports are committed back to the branch. A pull_request trigger is
+# used because pull_request runs take the workflow definition from the head branch,
+# which lets this round be validated before the file reaches the default branch.
 on:
   workflow_dispatch:
     inputs:
-      round:
-        description: "Validation round number (1, 2, 3)"
+      rounds:
+        description: "How many rounds to run"
         type: string
-        required: true
+        default: "3"
+      interval_seconds:
+        description: "Pause between rounds"
+        type: string
+        default: "420"
+  pull_request:
+    paths:
+      - .github/workflows/aihot-validation.yml
+      - sources/aihot-curated.json
+      - tools/validate_aihot_sources.py
 
 permissions:
   contents: write
 
+concurrency:
+  group: aihot-source-validation
+  cancel-in-progress: false
+
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Fetch and parse every candidate
+      - name: Run the validation rounds
+        env:
+          ROUNDS: ${{ inputs.rounds || '3' }}
+          INTERVAL: ${{ inputs.interval_seconds || '420' }}
         run: |
-          python tools/validate_aihot_sources.py \
-            --round "${{ inputs.round }}" \
-            --input sources/aihot-curated.json \
-            --output "reports/aihot-validation-round-${{ inputs.round }}.json"
-      - name: Show the round summary
+          set -euo pipefail
+          for round in $(seq 1 "$ROUNDS"); do
+            echo "::group::round $round"
+            python tools/validate_aihot_sources.py \
+              --round "$round" \
+              --input sources/aihot-curated.json \
+              --output "reports/aihot-validation-round-$round.json"
+            echo "::endgroup::"
+            if [ "$round" -lt "$ROUNDS" ]; then
+              echo "waiting $INTERVAL seconds before round $((round + 1))"
+              sleep "$INTERVAL"
+            fi
+          done
+      - name: Summarize the rounds
         run: |
           python - <<'PY'
           import json
-          path = "reports/aihot-validation-round-${{ inputs.round }}.json"
-          data = json.load(open(path, encoding="utf-8"))
-          print(f"round {data['round']}: {data['passed']}/{data['candidate_count']} passed")
-          for item in data["results"]:
-              status = "ok " if item["ok"] else "FAIL"
-              print(f"{status} {item['title']} :: {item.get('format', '-')} "
-                    f"items={item.get('items_captured', 0)} latest={item.get('latest_item_at')} "
-                    f"resolved={item.get('resolved_url', item['feed_url'])}")
+          from pathlib import Path
+
+          for path in sorted(Path("reports").glob("aihot-validation-round-*.json")):
+              data = json.loads(path.read_text(encoding="utf-8"))
+              print(f"\n== {path.name}: {data['passed']}/{data['candidate_count']} passed")
+              for item in data["results"]:
+                  status = "ok  " if item["ok"] else "FAIL"
+                  print(
+                      f"{status} {item['title'][:42]:44} {item.get('format', '-'):9}"
+                      f" items={item.get('items_captured', 0):>3}"
+                      f" latest={item.get('latest_item_at')}"
+                      f" resolved={item.get('resolved_url', item['feed_url'])}"
+                      f" {item.get('error', '')}"
+                  )
           PY
-      - name: Commit the round report
+      - name: Commit the round reports
+        env:
+          ROUNDS: ${{ inputs.rounds || '3' }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "reports/aihot-validation-round-${{ inputs.round }}.json"
+          for round in $(seq 1 "$ROUNDS"); do
+            git add "reports/aihot-validation-round-$round.json"
+          done
           if git diff --cached --quiet; then
             echo "no report change to commit"
             exit 0
           fi
-          git commit -m "Record AIHOT source validation round ${{ inputs.round }}"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git commit -m "Record AIHOT source validation rounds 1-$ROUNDS"
+          git push origin "HEAD:${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
