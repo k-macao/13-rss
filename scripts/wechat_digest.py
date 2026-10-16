@@ -53,6 +53,12 @@ DEFAULT_PAGE_BUDGET = 92_000
 # always kept and its Chinese translation is appended below it, so a failed or
 # unavailable translation only drops the extra line and never blocks a digest.
 TRANSLATE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
+# The free endpoint rate-limits bursts from datacenter IPs (e.g. GitHub Actions),
+# so translation retries transient failures with a short backoff and keeps its
+# own worker cap, independent of the feed-fetch concurrency.
+TRANSLATE_RETRIES = 3
+TRANSLATE_BACKOFF_SECONDS = (1.0, 2.0)
+TRANSLATE_MAX_WORKERS = 4
 
 CHINA = timezone(timedelta(hours=8))
 
@@ -169,19 +175,36 @@ def is_english(text: str) -> bool:
     return cjk / (cjk + letters) < CJK_SHARE_LIMIT
 
 
-def translate_to_chinese(text: str, *, timeout: int = 8, endpoint: str = TRANSLATE_ENDPOINT) -> str:
-    """Translate English text to Simplified Chinese, retaining it on any failure."""
+def translate_to_chinese(
+    text: str,
+    *,
+    timeout: int = 8,
+    endpoint: str = TRANSLATE_ENDPOINT,
+    retries: int = TRANSLATE_RETRIES,
+    backoff: tuple = TRANSLATE_BACKOFF_SECONDS,
+) -> str:
+    """Translate English text to Simplified Chinese, retaining it on any failure.
+
+    Network-level failures (HTTP errors, timeouts, rate limits) are retried up to
+    ``retries`` times with backoff. A malformed response is not retried.
+    """
     if not is_english(text):
         return text
     query = urlencode({"client": "gtx", "sl": "en", "tl": "zh-CN", "dt": "t", "q": text})
-    request = Request(f"{endpoint}?{query}", headers={"User-Agent": USER_AGENT})
-    try:
-        with urlopen(request, timeout=timeout, context=ssl.create_default_context()) as response:
-            payload = json.loads(response.read().decode("utf-8", "replace"))
-        translated = "".join(part[0] for part in payload[0] if part and part[0]).strip()
-        return translated or text
-    except (HTTPError, URLError, TimeoutError, OSError, ValueError, TypeError, IndexError, json.JSONDecodeError):
-        return text
+    url = f"{endpoint}?{query}"
+    for attempt in range(max(1, retries)):
+        request = Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urlopen(request, timeout=timeout, context=ssl.create_default_context()) as response:
+                payload = json.loads(response.read().decode("utf-8", "replace"))
+            translated = "".join(part[0] for part in payload[0] if part and part[0]).strip()
+            return translated or text
+        except (HTTPError, URLError, TimeoutError, OSError):
+            if attempt + 1 < max(1, retries):
+                time.sleep(backoff[min(attempt, len(backoff) - 1)] if backoff else 0)
+        except (ValueError, TypeError, IndexError):
+            return text
+    return text
 
 
 # Original field -> the field that carries its appended Chinese translation.
@@ -201,7 +224,8 @@ def translate_items(items, *, timeout: int, concurrency: int):
     fields = [(item, field) for item in items for field in TRANSLATED_FIELDS if is_english(item.get(field, ""))]
     if not fields:
         return items
-    with ThreadPoolExecutor(max_workers=max(1, min(concurrency, len(fields)))) as pool:
+    workers = max(1, min(concurrency, TRANSLATE_MAX_WORKERS, len(fields)))
+    with ThreadPoolExecutor(max_workers=workers) as pool:
         futures = {pool.submit(translate_to_chinese, item[field], timeout=timeout): (item, field) for item, field in fields}
         for future in as_completed(futures):
             item, field = futures[future]
