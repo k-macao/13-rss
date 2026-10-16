@@ -25,6 +25,10 @@ on:
         description: "Render only, do not call pushplus"
         type: boolean
         default: false
+      summarize:
+        description: "Write an AI line under each article"
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -75,6 +79,9 @@ jobs:
           TRANSLATE_LLM_MODEL: ${{ vars.TRANSLATE_LLM_MODEL }}
           TRANSLATE_PROVIDERS: ${{ vars.TRANSLATE_PROVIDERS }}
           MYMEMORY_EMAIL: ${{ secrets.MYMEMORY_EMAIL }}
+          # The AI line reuses the llm endpoint above; this variable picks a
+          # different model for it when a deeper one is wanted. Optional.
+          SUMMARY_LLM_MODEL: ${{ vars.SUMMARY_LLM_MODEL }}
         run: |
           python scripts/wechat_digest.py \
             --pack "${{ inputs.pack || 'top200' }}" \
@@ -85,9 +92,10 @@ jobs:
             --concurrency 12 \
             --timeout 20 \
             --out build/digest \
+            ${{ (inputs.summarize == false) && '--no-summarize' || '' }} \
             ${{ (inputs.dry_run == true) && '--dry-run' || '' }}
 
-      - name: Show the translation report
+      - name: Show the translation and AI summary report
         if: always()
         run: cat build/digest/translation-report.md 2>/dev/null || echo "no translation report"
 

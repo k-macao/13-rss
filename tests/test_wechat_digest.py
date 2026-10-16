@@ -13,6 +13,7 @@ from urllib.error import URLError
 from urllib.parse import parse_qs, urlsplit
 
 from scripts.wechat_digest import (
+    AI_SUMMARY_TAG,
     AUTHOR_LINE,
     CHINA,
     DEEPL_FREE_ENDPOINT,
@@ -24,12 +25,17 @@ from scripts.wechat_digest import (
     NEON,
     PUSHPLUS_CONTENT_LIMIT,
     PUSHPLUS_TITLE_LIMIT,
+    SUMMARY_MAX_CHARS,
+    SUMMARY_MAX_FAILURES,
+    SUMMARY_SKIP_TOKEN,
+    SUMMARY_SYSTEM_PROMPT,
     TRANSLATION_TAG,
     Provider,
     TranslationError,
     Translator,
     annotation_lines,
     clamp,
+    clean_summary,
     config_warnings,
     configured_providers,
     dedupe,
@@ -50,11 +56,19 @@ from scripts.wechat_digest import (
     probe_markdown,
     probe_providers,
     render_pages,
+    resolve_edition,
+    resolve_llm_config,
+    resolve_summary_config,
+    shorten_text,
+    strip_html,
+    summarize_item,
+    summarize_items,
+    summary_notes,
+    summary_report_line,
+    summary_report_markdown,
     translate_items,
     translate_to_chinese,
     write_translation_report,
-    resolve_edition,
-    strip_html,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -934,6 +948,355 @@ class TranslationProbeTests(unittest.TestCase):
         self.assertIn("### Translation probe", summary.read_text(encoding="utf-8"))
 
 
+def make_summarizable_item(index=0, *, summary=None, title=None, language="en"):
+    return {
+        "title": title or f"OpenAI ships a smaller model that runs on device #{index}",
+        "link": f"https://example.com/ai/{index}",
+        "summary": ARTICLE_BODY if summary is None else summary,
+        "published_at": NOW - timedelta(minutes=index),
+        "source": "Example Weekly",
+        "site_url": "https://example.com",
+        "category": "Artificial Intelligence",
+        "language": language,
+    }
+
+
+ARTICLE_BODY = (
+    "The new model keeps most of the reasoning quality at a tenth of the cost, and it now runs "
+    "on a phone, which changes what a small team can ship without renting a server."
+)
+CHINESE_BODY = (
+    "本周国内团队连续开源三个模型，覆盖长上下文与推理场景，权重、训练细节和评测脚本一并放出，"
+    "社区当天就跑出了可复现的结果。"
+)
+HUMAN_LINE = "价格砍到十分之一，推理几乎没掉，手机上就能跑，小团队可以先省下服务器钱。"
+AI_FLAVOURED_LINE = (
+    "本文深入探讨了该模型的架构与成本，首先介绍了注意力机制的改动，其次分析了推理开销，"
+    "最后展望了生态。值得注意的是，其前景广阔。"
+)
+SUMMARY_CONFIG = {
+    "key": "sk-test",
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "body": {"thinking": {"type": "disabled"}},
+}
+
+
+class ChatEndpoint:
+    """A fake OpenAI-compatible endpoint answering from prompt substring -> text.
+
+    Anything it has no answer for comes back as the skip token, which is what a
+    model does when it decides an article cannot be summarised honestly.
+    """
+
+    def __init__(self, answers, default=SUMMARY_SKIP_TOKEN):
+        self.answers = answers
+        self.default = default
+        self.requests = []
+
+    def __call__(self, request, **kwargs):
+        self.requests.append(request)
+        body = json.loads(request.data.decode("utf-8"))
+        prompt = body["messages"][-1]["content"]
+        answer = next((text for needle, text in self.answers.items() if needle in prompt), self.default)
+        payload = {"choices": [{"message": {"content": answer}}]}
+
+        class Response:
+            def read(self):
+                return json.dumps(payload).encode("utf-8")
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        return Response()
+
+    @property
+    def prompts(self):
+        return [json.loads(request.data.decode("utf-8"))["messages"][-1]["content"] for request in self.requests]
+
+
+def summarize(items, answers, *, default=SUMMARY_SKIP_TOKEN, concurrency=2, **kwargs):
+    """Run `summarize_items` against a fake endpoint and return (endpoint, stats)."""
+    endpoint = ChatEndpoint(answers, default=default)
+    with patch("scripts.wechat_digest.urlopen", side_effect=endpoint), \
+            patch("scripts.wechat_digest.time.sleep"):
+        stats = summarize_items(items, config=SUMMARY_CONFIG, timeout=8, concurrency=concurrency, **kwargs)
+    return endpoint, stats
+
+
+class AiSummaryTests(unittest.TestCase):
+    """One human line per article — and nothing at all when there is nothing to say."""
+
+    def test_a_real_body_gains_exactly_one_ai_line(self):
+        items = [make_summarizable_item()]
+        endpoint, stats = summarize(items, {ARTICLE_BODY[:30]: HUMAN_LINE})
+
+        self.assertEqual(items[0]["ai_summary"], HUMAN_LINE)
+        self.assertEqual(stats["written"], 1)
+        self.assertEqual(stats["candidates"], 1)
+        # The source's own summary is never overwritten by the AI line.
+        self.assertEqual(items[0]["summary"], ARTICLE_BODY)
+        self.assertEqual(len(endpoint.requests), 1)
+        self.assertIn("/chat/completions", endpoint.requests[0].full_url)
+
+    def test_chinese_body_is_summarised_too(self):
+        items = [make_summarizable_item(summary=CHINESE_BODY, language="zh")]
+        _, stats = summarize(items, {CHINESE_BODY[:20]: "三个模型一次放出，权重和评测脚本都在，社区当天就复现了。"})
+
+        self.assertEqual(stats["written"], 1)
+        self.assertIn("三个模型", items[0]["ai_summary"])
+
+    def test_too_little_source_text_never_reaches_the_endpoint(self):
+        items = [make_summarizable_item(summary="一句话")]
+        endpoint, stats = summarize(items, {})
+
+        self.assertEqual(endpoint.requests, [])  # 内容太稀少，不总结
+        self.assertNotIn("ai_summary", items[0])
+        self.assertEqual(stats["thin"], 1)
+        self.assertEqual(stats["candidates"], 0)
+
+    def test_a_headline_echoed_as_the_body_is_not_summarised(self):
+        headline = "国产大模型开源周：三个新权重同时发布，覆盖长上下文与推理"
+        items = [make_summarizable_item(title=headline, summary=headline, language="zh")]
+        endpoint, stats = summarize(items, {})
+
+        self.assertEqual(endpoint.requests, [])
+        self.assertEqual(stats["thin"], 1)
+
+    def test_a_click_teaser_is_not_summarised(self):
+        items = [make_summarizable_item(summary="阅读全文请扫码加入社群，更多内容点击查看", language="zh")]
+        endpoint, stats = summarize(items, {})
+
+        self.assertEqual(endpoint.requests, [])
+        self.assertEqual(stats["thin"], 1)
+
+    def test_the_model_can_decline_an_article(self):
+        items = [make_summarizable_item()]
+        _, stats = summarize(items, {})
+
+        self.assertNotIn("ai_summary", items[0])
+        self.assertEqual(stats["declined"], 1)
+        self.assertEqual(stats["written"], 0)
+
+    def test_stock_ai_phrasing_is_dropped_rather_than_printed(self):
+        items = [make_summarizable_item()]
+        _, stats = summarize(items, {ARTICLE_BODY[:30]: AI_FLAVOURED_LINE})
+
+        # 去 AI 味：宁可留空，也不印一段机器腔。
+        self.assertNotIn("ai_summary", items[0])
+        self.assertEqual(stats["flavored"], 1)
+        self.assertEqual(stats["written"], 0)
+
+    def test_the_line_is_cut_to_the_character_limit(self):
+        items = [make_summarizable_item()]
+        _, stats = summarize(items, {ARTICLE_BODY[:30]: "这一行故意写得非常长，用来测试脚本是否会把超出一百字的模型回答裁到上限之内。" * 4})
+
+        self.assertLessEqual(len(items[0]["ai_summary"]), SUMMARY_MAX_CHARS)
+        self.assertEqual(stats["written"], 1)
+
+    def test_a_limit_set_on_the_command_line_is_honoured(self):
+        items = [make_summarizable_item()]
+        _, stats = summarize(items, {ARTICLE_BODY[:30]: "一二三四五六七八九十一二三四五六七八九十一二三四五。"}, max_chars=20)
+
+        self.assertLessEqual(len(items[0]["ai_summary"]), 20)
+        self.assertEqual(stats["max_chars"], 20)
+
+    def test_clean_summary_strips_quotes_lead_ins_and_markdown(self):
+        self.assertEqual(clean_summary("“价格砍到十分之一。”")[0], "价格砍到十分之一。")
+        self.assertEqual(clean_summary("AI总结：价格砍到十分之一。")[0], "价格砍到十分之一。")
+        self.assertEqual(clean_summary("**价格砍到十分之一。**")[0], "价格砍到十分之一。")
+        self.assertEqual(clean_summary("  \n 要点：价格砍到十分之一。 ")[0], "价格砍到十分之一。")
+
+    def test_clean_summary_reports_why_a_line_was_dropped(self):
+        self.assertEqual(clean_summary(SUMMARY_SKIP_TOKEN)[1], "declined")
+        self.assertEqual(clean_summary("SKIP.")[1], "declined")
+        self.assertEqual(clean_summary("")[1], "empty")
+        self.assertEqual(clean_summary("太短")[1], "empty")
+        self.assertEqual(clean_summary(AI_FLAVOURED_LINE)[1], "flavored")
+        self.assertEqual(clean_summary(HUMAN_LINE)[1], "written")
+
+    def test_shorten_text_prefers_a_sentence_boundary_and_stays_in_the_limit(self):
+        self.assertLessEqual(len(shorten_text("一二三四五六七八九十" * 20, 100)), 100)
+        self.assertTrue(shorten_text("第一句说成本下降。第二句说质量没掉。第三句还没说完", 20).endswith("。"))
+        self.assertEqual(shorten_text("短句", 100), "短句")
+
+    def test_a_dead_endpoint_costs_three_failures_not_one_per_card(self):
+        items = [make_summarizable_item(index) for index in range(10)]
+        endpoint = ChatEndpoint({})
+        with patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen), \
+                patch("scripts.wechat_digest.time.sleep"):
+            stats = summarize_items(items, config=SUMMARY_CONFIG, timeout=1, concurrency=4)
+
+        self.assertEqual(stats["failed"], SUMMARY_MAX_FAILURES)
+        self.assertLess(stats["failed"] + stats["written"], len(items))
+        self.assertEqual(stats["last_error"].split(":")[0], "TranslationError")
+
+    def test_a_transient_failure_is_retried_once(self):
+        item = make_summarizable_item()
+        endpoint = ChatEndpoint({ARTICLE_BODY[:30]: HUMAN_LINE})
+        calls = []
+
+        def flaky(request, **kwargs):
+            calls.append(request)
+            if len(calls) == 1:
+                raise HTTPError(request.full_url, 429, "Too Many Requests", {}, None)
+            return endpoint(request, **kwargs)
+
+        with patch("scripts.wechat_digest.urlopen", side_effect=flaky), \
+                patch("scripts.wechat_digest.time.sleep") as sleep:
+            line, outcome = summarize_item(item, SUMMARY_CONFIG, timeout=8)
+
+        self.assertEqual(outcome, "written")
+        self.assertEqual(line, HUMAN_LINE)
+        self.assertEqual(len(calls), 2)
+        sleep.assert_called_once_with(1.0)
+
+    def test_without_a_configured_endpoint_nothing_is_written_or_asked(self):
+        items = [make_summarizable_item()]
+        with patch.dict("os.environ", {}, clear=True), \
+                patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen) as mocked:
+            stats = summarize_items(items, timeout=8)
+
+        mocked.assert_not_called()
+        self.assertFalse(stats["configured"])
+        self.assertEqual(stats["written"], 0)
+        self.assertIn("off", summary_report_line(stats))
+
+    def test_the_summary_reuses_the_translation_endpoint(self):
+        with patch.dict("os.environ", {"DEEPSEEK_API_KEY": "sk-deepseek"}, clear=True):
+            config = resolve_summary_config()
+
+        self.assertEqual(config["model"], "deepseek-flash")
+        self.assertEqual(config["base_url"], "https://api.deepseek.com/v1")
+        self.assertEqual(config["source"], "DEEPSEEK_API_KEY")
+
+    def test_a_model_override_applies_to_the_summary_only(self):
+        env = {"DEEPSEEK_API_KEY": "sk-deepseek", "SUMMARY_LLM_MODEL": "deepseek-v4-pro"}
+        with patch.dict("os.environ", env, clear=True):
+            self.assertEqual(resolve_summary_config()["model"], "deepseek-v4-pro")
+            self.assertEqual(resolve_llm_config()["model"], "deepseek-flash")
+
+    def test_the_prompt_sets_a_limit_a_skip_token_and_the_banned_phrases(self):
+        self.assertIn(str(SUMMARY_MAX_CHARS), SUMMARY_SYSTEM_PROMPT)
+        self.assertIn(SUMMARY_SKIP_TOKEN, SUMMARY_SYSTEM_PROMPT)
+        for banned in ("综上所述", "赋能", "深度解析", "首先", "值得注意的是", "一文读懂"):
+            self.assertIn(banned, SUMMARY_SYSTEM_PROMPT)
+        self.assertIn("像人写给同事的口信", SUMMARY_SYSTEM_PROMPT)
+
+    def test_the_prompt_carries_the_source_the_title_and_the_body(self):
+        items = [make_summarizable_item()]
+        endpoint, _ = summarize(items, {})
+        prompt = endpoint.prompts[0]
+
+        self.assertIn("Example Weekly", prompt)
+        self.assertIn(items[0]["title"], prompt)
+        self.assertIn(ARTICLE_BODY, prompt)
+        self.assertIn(str(SUMMARY_MAX_CHARS), prompt)
+
+    def test_a_long_body_is_trimmed_before_it_reaches_the_endpoint(self):
+        item = make_summarizable_item(summary=ARTICLE_BODY * 100)
+        endpoint, _ = summarize([item], {})
+
+        prompt = endpoint.prompts[0]
+        self.assertLess(len(prompt), len(ARTICLE_BODY) * 100)
+        self.assertIn(ARTICLE_BODY[:100], prompt)
+
+    def test_the_card_prints_the_ai_line_underneath_the_source_summary(self):
+        item = make_summarizable_item()
+        item["ai_summary"] = HUMAN_LINE
+        page = render([item])[0]
+
+        self.assertIn(HUMAN_LINE, page)
+        self.assertIn(f">{AI_SUMMARY_TAG}</span>", page)
+        self.assertIn(f"border-left:2px solid {NEON}", page)
+        # Source first, the machine's take last: a reader can tell them apart.
+        self.assertLess(page.index(ARTICLE_BODY[:40]), page.index(HUMAN_LINE))
+        self.assertLess(page.index(HUMAN_LINE), page.index("Example Weekly"))
+
+    def test_a_card_without_an_ai_line_shows_no_ai_block(self):
+        page = render([make_summarizable_item()])[0]
+
+        self.assertNotIn(f">{AI_SUMMARY_TAG}</span>", page)
+        self.assertNotIn(f"border-left:2px solid {NEON}", page)
+
+    def test_the_ai_line_is_escaped_and_clamped(self):
+        item = make_summarizable_item()
+        item["ai_summary"] = '<script>alert("x")</script> & ' + "很长的一行中文摘要" * 30
+        page = render([item])[0]
+
+        self.assertNotIn("<script>", page)
+        self.assertIn("&lt;script&gt;", page)
+        self.assertIn("&amp;", page)
+
+    def test_an_issue_full_of_ai_lines_still_fits_the_pushplus_limit(self):
+        items = make_items(400, summary=ARTICLE_BODY)
+        for item in items:
+            item["ai_summary"] = HUMAN_LINE
+        pages = render(items)
+
+        self.assertGreater(len(pages), 1)
+        for page in pages:
+            self.assertLessEqual(len(page), PUSHPLUS_CONTENT_LIMIT)
+        combined = "".join(pages)
+        for item in items:
+            self.assertEqual(combined.count(f'href="{item["link"]}"'), 1, item["link"])
+
+    def test_the_report_says_how_many_lines_were_written_and_why(self):
+        items = [make_summarizable_item(0), make_summarizable_item(1, summary="一句话")]
+        _, stats = summarize(items, {ARTICLE_BODY[:30]: HUMAN_LINE})
+        markdown = summary_report_markdown(stats)
+
+        self.assertIn("### AI summary", markdown)
+        self.assertIn("**1**", markdown)
+        self.assertIn("deepseek-flash", markdown)
+        self.assertIn("stock AI phrasing", markdown)
+        self.assertIn("written=1/1", summary_report_line(stats))
+
+    def test_the_notes_name_the_model_the_endpoint_and_the_skip_rule(self):
+        _, stats = summarize([make_summarizable_item()], {ARTICLE_BODY[:30]: HUMAN_LINE})
+        note = summary_notes(stats)[0]
+
+        self.assertIn("deepseek-flash", note)
+        self.assertIn("api.deepseek.com", note)
+        self.assertIn(SUMMARY_SKIP_TOKEN, note)
+
+    def test_an_unconfigured_run_says_how_to_turn_the_feature_on(self):
+        with patch.dict("os.environ", {}, clear=True):
+            stats = summarize_items([make_summarizable_item()], timeout=8)
+
+        self.assertIn("DEEPSEEK_API_KEY", summary_notes(stats)[0])
+        self.assertIn("Off", summary_report_markdown(stats))
+
+    def test_a_run_that_wrote_nothing_annotates_a_warning(self):
+        items = [make_summarizable_item()]
+        _, stats = summarize(items, {})
+        lines = annotation_lines({"attempted": 0, "ai_summary": stats})
+
+        self.assertIn(("notice", summary_report_line(stats)), lines)
+        self.assertEqual([level for level, _ in lines], ["notice", "warning"])
+        self.assertIn("wrote no line", lines[1][1])
+        self.assertIn("declined=1", lines[1][1])
+
+    def test_a_run_that_wrote_something_reports_it_without_a_warning(self):
+        items = [make_summarizable_item()]
+        _, stats = summarize(items, {ARTICLE_BODY[:30]: HUMAN_LINE})
+        lines = annotation_lines({"attempted": 0, "ai_summary": stats})
+
+        self.assertEqual([level for level, _ in lines], ["notice"])
+        self.assertIn("ai-summary: written=1/1", lines[0][1])
+
+    def test_an_unconfigured_run_is_annotated_once_and_only_as_a_notice(self):
+        with patch.dict("os.environ", {}, clear=True):
+            stats = summarize_items([make_summarizable_item()], timeout=8)
+        lines = annotation_lines({"attempted": 0, "ai_summary": stats})
+
+        self.assertEqual([level for level, _ in lines], ["notice"])
+        self.assertIn("off", lines[0][1])
+
+
 class EditionTests(unittest.TestCase):
     def test_editions_cover_the_two_scheduled_pushes(self):
         self.assertEqual(set(EDITIONS), {"morning", "evening"})
@@ -1161,6 +1524,13 @@ class WorkflowTests(unittest.TestCase):
         # A missing key must not fail the job: every provider is optional.
         self.assertIn("secrets.DEEPL_API_KEY", self.text)
         self.assertNotIn("required: true", self.text)
+
+    def test_workflow_offers_the_ai_summary_switch_without_requiring_it(self):
+        # The AI line reuses the translation endpoint, so the only new knob is
+        # an optional model override and a switch to turn the line off.
+        self.assertIn("SUMMARY_LLM_MODEL: ${{ vars.SUMMARY_LLM_MODEL }}", self.text)
+        self.assertIn("--no-summarize", self.text)
+        self.assertIn("summarize:", self.text)
 
     def test_workflow_accepts_a_bare_deepseek_secret(self):
         self.assertIn("DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY", self.text)
