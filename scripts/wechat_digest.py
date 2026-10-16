@@ -7,6 +7,7 @@ Usage examples
 --------------
     python scripts/wechat_digest.py --dry-run --out build/digest
     PUSHPLUS_TOKEN=xxx python scripts/wechat_digest.py --pack top200
+    python scripts/wechat_digest.py --probe-translators --out build/probe
 
 Design notes
 ------------
@@ -15,6 +16,12 @@ portrait, single-column canvas on light grey paper, black body copy at a small
 size, dark grey metadata, and a fluorescent green accent used sparingly for
 kickers, indices and rules. All styling is inline so pushplus/WeChat webviews
 render it without a stylesheet.
+
+English titles and summaries are translated by walking a provider chain (keyed
+providers first, then the keyless endpoints) and stopping at the first endpoint
+that answers; a provider that fails twice is retired for the rest of the run. The
+English original is never overwritten, so a failed translation only drops the
+appended line, and every run reports which provider answered.
 """
 
 from __future__ import annotations
@@ -32,6 +39,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
+from functools import partial
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlsplit
@@ -49,16 +57,35 @@ PUSHPLUS_CONTENT_LIMIT = 100_000
 PUSHPLUS_TITLE_LIMIT = 100
 # Leave room for the page wrapper that is added after content is packed.
 DEFAULT_PAGE_BUDGET = 92_000
-# Public Google Translate endpoint. It needs no API key. An English original is
-# always kept and its Chinese translation is appended below it, so a failed or
-# unavailable translation only drops the extra line and never blocks a digest.
-TRANSLATE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
-# The free endpoint rate-limits bursts from datacenter IPs (e.g. GitHub Actions),
-# so translation retries transient failures with a short backoff and keeps its
-# own worker cap, independent of the feed-fetch concurrency.
+# Translation runs through a chain of providers instead of a single endpoint:
+# Google's public gtx endpoint answered for the first releases of this digest but
+# rate-limits and often refuses datacenter addresses such as GitHub-hosted
+# runners, which silently removed every appended translation. The chain tries
+# the configured keyed providers first, then the keyless ones, retires a provider
+# that fails twice, and remembers the provider that worked, so one reachable
+# endpoint keeps a whole issue bilingual at one request per string.
+GOOGLE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
+# Google's dictionary client, a separate endpoint with its own quota.
+GOOGLE_CHROME_ENDPOINT = "https://clients5.google.com/translate_a/t"
+# Microsoft Edge's keyless translator: the successor of the removed
+# edge.microsoft.com/translate/auth + api-edge flow. The body is a bare JSON
+# array of strings; from/to are the only parameters it honors.
+EDGE_ENDPOINT = "https://edge.microsoft.com/translate/translatetext"
+MYMEMORY_ENDPOINT = "https://api.mymemory.translated.net/get"
+DEEPL_FREE_ENDPOINT = "https://api-free.deepl.com/v2/translate"
+DEEPL_PRO_ENDPOINT = "https://api.deepl.com/v2/translate"
+LLM_BASE_URL_DEFAULT = "https://api.openai.com/v1"
+LLM_MODEL_DEFAULT = "gpt-4o-mini"
+TRANSLATE_SOURCE = "en"
+TRANSLATE_TARGET = "zh-CN"
+# Network-level failures are retried with a short backoff, while a malformed
+# answer is not retried because the next attempt returns the same garbage.
 TRANSLATE_RETRIES = 3
 TRANSLATE_BACKOFF_SECONDS = (1.0, 2.0)
 TRANSLATE_MAX_WORKERS = 4
+# Retire a provider after this many consecutive failures, so a blocked endpoint
+# costs a couple of timeouts per run instead of a couple per translated string.
+TRANSLATE_MAX_FAILURES = 2
 
 CHINA = timezone(timedelta(hours=8))
 
@@ -175,36 +202,381 @@ def is_english(text: str) -> bool:
     return cjk / (cjk + letters) < CJK_SHARE_LIMIT
 
 
-def translate_to_chinese(
-    text: str,
-    *,
-    timeout: int = 8,
-    endpoint: str = TRANSLATE_ENDPOINT,
-    retries: int = TRANSLATE_RETRIES,
-    backoff: tuple = TRANSLATE_BACKOFF_SECONDS,
-) -> str:
-    """Translate English text to Simplified Chinese, retaining it on any failure.
+class TranslationError(RuntimeError):
+    """A provider could not translate a string.
 
-    Network-level failures (HTTP errors, timeouts, rate limits) are retried up to
-    ``retries`` times with backoff. A malformed response is not retried.
+    ``retryable`` separates a transient fault (timeout, rate limit, connection
+    reset) from an answer that will never be usable (an HTML block page, a
+    missing translation field), so the chain only sleeps on the former.
     """
-    if not is_english(text):
-        return text
-    query = urlencode({"client": "gtx", "sl": "en", "tl": "zh-CN", "dt": "t", "q": text})
-    url = f"{endpoint}?{query}"
-    for attempt in range(max(1, retries)):
-        request = Request(url, headers={"User-Agent": USER_AGENT})
-        try:
-            with urlopen(request, timeout=timeout, context=ssl.create_default_context()) as response:
-                payload = json.loads(response.read().decode("utf-8", "replace"))
-            translated = "".join(part[0] for part in payload[0] if part and part[0]).strip()
-            return translated or text
-        except (HTTPError, URLError, TimeoutError, OSError):
-            if attempt + 1 < max(1, retries):
-                time.sleep(backoff[min(attempt, len(backoff) - 1)] if backoff else 0)
-        except (ValueError, TypeError, IndexError):
+
+    def __init__(self, message: str, *, retryable: bool = True):
+        super().__init__(message)
+        self.retryable = retryable
+
+
+def _translate_request(url: str, *, data=None, headers=None, timeout: int = 8) -> bytes:
+    """Fetch one translation URL, turning network faults into retryable errors."""
+    request = Request(url, data=data, headers={"User-Agent": USER_AGENT, **(headers or {})})
+    try:
+        with urlopen(request, timeout=timeout, context=ssl.create_default_context()) as response:
+            return response.read()
+    except (HTTPError, URLError, TimeoutError, OSError) as error:
+        raise TranslationError(f"{type(error).__name__}: {error}") from error
+
+
+def _translate_json(payload: bytes):
+    try:
+        return json.loads(payload.decode("utf-8", "replace"))
+    except ValueError as error:
+        raise TranslationError(f"malformed response: {error}", retryable=False) from error
+
+
+def google_translate(text: str, *, timeout: int) -> str:
+    """Google's public gtx endpoint.
+
+    The payload is ``[[["你好", "Hello", …]], null, "en"]``; long input comes
+    back as several segments that are concatenated in order.
+    """
+    query = urlencode({"client": "gtx", "sl": TRANSLATE_SOURCE, "tl": TRANSLATE_TARGET, "dt": "t", "q": text})
+    payload = _translate_json(_translate_request(f"{GOOGLE_ENDPOINT}?{query}", timeout=timeout))
+    try:
+        return "".join(part[0] for part in payload[0] if part and part[0])
+    except (TypeError, IndexError, KeyError) as error:
+        raise TranslationError(f"unexpected payload: {payload!r}"[:200], retryable=False) from error
+
+
+def google_chrome_translate(text: str, *, timeout: int) -> str:
+    """Google's dictionary client (``dict-chrome-ex``).
+
+    A separate service from the gtx endpoint, with its own quota. One string
+    comes back either as ``[["你好", "en"]]`` or as the gtx-style nested shape,
+    depending on which edge node answers, so both are accepted.
+    """
+    query = urlencode({"client": "dict-chrome-ex", "sl": TRANSLATE_SOURCE, "tl": TRANSLATE_TARGET, "q": text})
+    payload = _translate_json(_translate_request(f"{GOOGLE_CHROME_ENDPOINT}?{query}", timeout=timeout))
+    try:
+        if isinstance(payload[0][0], str):
+            return payload[0][0]
+        return "".join(part[0] for part in payload[0] if part and part[0])
+    except (TypeError, IndexError, KeyError) as error:
+        raise TranslationError(f"unexpected payload: {payload!r}"[:200], retryable=False) from error
+
+
+def edge_translate(text: str, *, timeout: int) -> str:
+    """Microsoft Edge's keyless translator, the current Bing fallback.
+
+    The endpoint runs an HTML tag aligner over every request, so a bare ``<``
+    fuses into a pseudo-tag and tag names get translated; escaped entities
+    round-trip verbatim, so markup characters are escaped before the call and
+    the answer is unescaped once afterwards.
+    """
+    escaped = "<" in text or ">" in text
+    body = json.dumps([html.escape(text, quote=False) if escaped else text]).encode("utf-8")
+    query = urlencode({"from": TRANSLATE_SOURCE, "to": "zh-Hans", "isEnterpriseClient": "false"})
+    payload = _translate_json(
+        _translate_request(
+            f"{EDGE_ENDPOINT}?{query}",
+            data=body,
+            headers={"Content-Type": "application/json"},
+            timeout=timeout,
+        )
+    )
+    try:
+        translated = payload[0]["translations"][0]["text"]
+    except (TypeError, IndexError, KeyError) as error:
+        raise TranslationError(f"unexpected payload: {payload!r}"[:200], retryable=False) from error
+    if not isinstance(translated, str) or not translated.strip():
+        raise TranslationError("no translation in response", retryable=False)
+    return html.unescape(translated.strip()) if escaped else translated.strip()
+
+
+def mymemory_translate(text: str, *, timeout: int) -> str:
+    """MyMemory's public translation memory, keyed by nothing but the text.
+
+    Quota and language errors arrive as ordinary sentences inside
+    ``translatedText``, so those are turned back into failures.
+    """
+    query = {"q": text, "langpair": f"{TRANSLATE_SOURCE}|{TRANSLATE_TARGET}"}
+    email = os.environ.get("MYMEMORY_EMAIL", "").strip()
+    if email:
+        query["de"] = email
+    payload = _translate_json(_translate_request(f"{MYMEMORY_ENDPOINT}?{urlencode(query)}", timeout=timeout))
+    if not isinstance(payload, dict):
+        raise TranslationError(f"unexpected payload: {payload!r}"[:200], retryable=False)
+    data = payload.get("responseData") or {}
+    translated = html.unescape(str(data.get("translatedText", ""))).strip()
+    if not translated:
+        raise TranslationError(f"no translation in response (status {payload.get('responseStatus')!r})", retryable=False)
+    if "MYMEMORY WARNING" in translated.upper():
+        raise TranslationError(f"quota reached: {translated[:120]}")
+    return translated
+
+
+def deepl_translate(text: str, *, timeout: int, api_key: str, endpoint: str) -> str:
+    """DeepL's translate API; the free keys (``…:fx``) use the api-free host."""
+    body = urlencode({"text": text, "target_lang": "ZH", "source_lang": "EN"}).encode("utf-8")
+    payload = _translate_json(
+        _translate_request(
+            endpoint,
+            data=body,
+            headers={"Content-Type": "application/x-www-form-urlencoded", "Authorization": f"DeepL-Auth-Key {api_key}"},
+            timeout=timeout,
+        )
+    )
+    try:
+        return payload["translations"][0]["text"]
+    except (TypeError, IndexError, KeyError) as error:
+        raise TranslationError(f"unexpected payload: {payload!r}"[:200], retryable=False) from error
+
+
+LLM_SYSTEM_PROMPT = (
+    "You are a professional translator. Translate the user's text into Simplified Chinese. "
+    "Keep product names, brands, and code identifiers in their original form. "
+    "Reply with the translation only: no quotes, no notes, no extra lines."
+)
+
+
+def llm_translate(text: str, *, timeout: int, api_key: str, base_url: str, model: str) -> str:
+    """Any OpenAI-compatible chat endpoint, for a key the user already owns.
+
+    The same call reaches DeepSeek, Qwen/DashScope, Moonshot, Zhipu, or any
+    gateway, which makes it the most reliable option when the keyless endpoints
+    refuse GitHub's runner addresses.
+    """
+    body = json.dumps(
+        {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": LLM_SYSTEM_PROMPT},
+                {"role": "user", "content": text},
+            ],
+            "temperature": 0,
+            "stream": False,
+        }
+    ).encode("utf-8")
+    payload = _translate_json(
+        _translate_request(
+            f"{base_url.rstrip('/')}/chat/completions",
+            data=body,
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
+            timeout=timeout,
+        )
+    )
+    try:
+        answer = payload["choices"][0]["message"]["content"]
+    except (TypeError, IndexError, KeyError) as error:
+        raise TranslationError(f"unexpected payload: {payload!r}"[:200], retryable=False) from error
+    if not isinstance(answer, str) or not answer.strip():
+        raise TranslationError("empty completion", retryable=False)
+    answer = answer.strip().strip("`").strip()
+    answer = re.sub(r"^(翻译|译文|translation)\s*[:：]\s*", "", answer, flags=re.IGNORECASE)
+    return answer.strip().strip('"').strip("“”").strip()
+
+
+class Provider:
+    """One named translation backend in the chain."""
+
+    def __init__(self, name: str, call, label: str, *, keyless: bool = True):
+        self.name = name
+        self.call = call
+        self.label = label
+        self.keyless = keyless
+
+    def __repr__(self):  # pragma: no cover - debugging aid
+        return f"Provider({self.name!r})"
+
+
+class Translator:
+    """Translate through a chain of providers, remembering what works.
+
+    Providers are tried in order, a provider that fails ``TRANSLATE_MAX_FAILURES``
+    times in a row is retired for the rest of the run, and the provider that last
+    answered is tried first from then on. That keeps one broken endpoint from
+    costing a timeout per article while still letting the next endpoint take over
+    the moment the working one starts failing. A shared instance is thread-safe,
+    so concurrent workers cooperate instead of each rediscovering the chain.
+    """
+
+    def __init__(self, providers, *, timeout: int = 8, retries: int = TRANSLATE_RETRIES,
+                 backoff: tuple = TRANSLATE_BACKOFF_SECONDS):
+        self.providers = list(providers)
+        self.timeout = timeout
+        self.retries = max(1, retries)
+        self.backoff = backoff or ()
+        self._lock = threading.Lock()
+        self._failures = defaultdict(int)
+        self._retired = []
+        self._active = ""
+        self.stats = {
+            provider.name: {"attempts": 0, "ok": 0, "empty": 0, "errors": 0, "last_error": ""}
+            for provider in self.providers
+        }
+        self.attempted = 0
+        self.translated = 0
+
+    def _order(self):
+        with self._lock:
+            live = [provider for provider in self.providers if provider.name not in self._retired]
+            if self._active:
+                live.sort(key=lambda provider: provider.name != self._active)
+            return live
+
+    def _record(self, name: str, outcome: str, error: str = ""):
+        with self._lock:
+            entry = self.stats[name]
+            entry["attempts"] += 1
+            if outcome == "ok":
+                entry["ok"] += 1
+                self._failures[name] = 0
+                self._active = name
+            elif outcome == "empty":
+                entry["empty"] += 1
+                self._failures[name] = 0
+            else:
+                entry["errors"] += 1
+                entry["last_error"] = error[:160]
+                self._failures[name] += 1
+                if self._failures[name] >= TRANSLATE_MAX_FAILURES and name not in self._retired:
+                    self._retired.append(name)
+                    if self._active == name:
+                        self._active = ""
+
+    def _wait(self, attempt: int):
+        if self.backoff:
+            time.sleep(self.backoff[min(attempt, len(self.backoff) - 1)])
+
+    def _ask(self, provider: Provider, text: str) -> str:
+        """Ask one provider, retrying transient faults; "" means nothing to add."""
+        for attempt in range(self.retries):
+            try:
+                answer = provider.call(text, timeout=self.timeout)
+            except TranslationError as error:
+                self._record(provider.name, "error", str(error))
+                if not error.retryable:
+                    return ""
+            except Exception as error:  # a provider must never break the digest
+                self._record(provider.name, "error", f"{type(error).__name__}: {error}")
+            else:
+                answer = (answer or "").strip()
+                if answer and answer != text:
+                    self._record(provider.name, "ok")
+                    return answer
+                self._record(provider.name, "empty")
+                return ""
+            if attempt + 1 < self.retries:
+                self._wait(attempt)
+        return ""
+
+    def translate(self, text: str) -> str:
+        """Return the Chinese translation, or the original when nothing answers."""
+        text = (text or "").strip()
+        if not is_english(text):
             return text
-    return text
+        self.attempted += 1
+        for provider in self._order():
+            answer = self._ask(provider, text)
+            if answer:
+                self.translated += 1
+                return answer
+        return text
+
+    def summary(self) -> dict:
+        with self._lock:
+            return {
+                "attempted": self.attempted,
+                "translated": self.translated,
+                "active": self._active,
+                "retired": list(self._retired),
+                "providers": [
+                    dict(
+                        self.stats[provider.name],
+                        name=provider.name,
+                        label=provider.label,
+                        keyless=provider.keyless,
+                        retired=provider.name in self._retired,
+                    )
+                    for provider in self.providers
+                ],
+            }
+
+    def report_line(self) -> str:
+        """One log line naming the provider that answered and the ones retired."""
+        summary = self.summary()
+        parts = [f"translation: translated={summary['translated']}/{summary['attempted']}",
+                 f"provider={summary['active'] or 'none'}"]
+        if summary["retired"]:
+            parts.append("retired=" + ",".join(summary["retired"]))
+        return " ".join(parts)
+
+    def report_markdown(self) -> str:
+        """A table for the GitHub Actions step summary and the probe report."""
+        summary = self.summary()
+        rows = ["| Provider | Kind | Attempts | Translated | Empty | Errors | State | Last error |",
+                "| --- | --- | ---: | ---: | ---: | ---: | --- | --- |"]
+        for provider in summary["providers"]:
+            rows.append(
+                f"| `{provider['name']}` | {'keyless' if provider['keyless'] else 'keyed'} "
+                f"| {provider['attempts']} | {provider['ok']} | {provider['empty']} | {provider['errors']} "
+                f"| {'retired' if provider['retired'] else 'available'} | {provider['last_error'] or '—'} |"
+            )
+        return "\n".join(
+            [
+                f"Translation: **{summary['translated']}** of **{summary['attempted']}** strings via "
+                f"`{summary['active'] or 'no provider'}`.",
+                "",
+                *rows,
+            ]
+        )
+
+
+def configured_providers(names=None):
+    """Build the provider chain: configured keyed endpoints first, then keyless.
+
+    ``TRANSLATE_PROVIDERS`` (or ``--translators``) selects and orders providers by
+    name; an unknown name is reported instead of being ignored, because a typo
+    would otherwise look like a broken endpoint.
+    """
+    deepl_key = os.environ.get("DEEPL_API_KEY", "").strip()
+    llm_key = os.environ.get("TRANSLATE_LLM_API_KEY", "").strip()
+    llm_base = os.environ.get("TRANSLATE_LLM_BASE_URL", "").strip() or LLM_BASE_URL_DEFAULT
+    llm_model = os.environ.get("TRANSLATE_LLM_MODEL", "").strip() or LLM_MODEL_DEFAULT
+    providers = []
+    if deepl_key:
+        endpoint = os.environ.get("DEEPL_API_URL", "").strip() or (
+            DEEPL_FREE_ENDPOINT if deepl_key.rstrip().endswith(":fx") else DEEPL_PRO_ENDPOINT
+        )
+        providers.append(
+            Provider("deepl", partial(deepl_translate, api_key=deepl_key, endpoint=endpoint), "DeepL", keyless=False)
+        )
+    if llm_key:
+        providers.append(
+            Provider(
+                "llm",
+                partial(llm_translate, api_key=llm_key, base_url=llm_base, model=llm_model),
+                f"LLM ({llm_model})",
+                keyless=False,
+            )
+        )
+    providers.extend(
+        [
+            Provider("google", google_translate, "Google Translate (gtx)"),
+            Provider("google-chrome", google_chrome_translate, "Google Translate (chrome)"),
+            Provider("edge", edge_translate, "Microsoft Edge (Bing)"),
+            Provider("mymemory", mymemory_translate, "MyMemory"),
+        ]
+    )
+    wanted = [name.strip() for name in (names or []) if name and name.strip()]
+    if not wanted:
+        return providers
+    known = {provider.name: provider for provider in providers}
+    unknown = [name for name in wanted if name not in known]
+    if unknown:
+        raise SystemExit(
+            f"unknown translator(s): {', '.join(unknown)} "
+            f"(known: {', '.join(known)})"
+        )
+    return [known[name] for name in wanted]
 
 
 # Original field -> the field that carries its appended Chinese translation.
@@ -212,31 +584,106 @@ def translate_to_chinese(
 TRANSLATED_FIELDS = {"title": "title_zh", "summary": "summary_zh"}
 
 
-def translate_items(items, *, timeout: int, concurrency: int):
+def translate_to_chinese(
+    text: str,
+    *,
+    timeout: int = 8,
+    retries: int = TRANSLATE_RETRIES,
+    backoff: tuple = TRANSLATE_BACKOFF_SECONDS,
+    providers=None,
+) -> str:
+    """Translate one English string through the provider chain.
+
+    The original is returned whenever every provider fails, so an unavailable
+    translation only drops the extra line and never blocks a digest.
+    """
+    translator = Translator(providers or configured_providers(), timeout=timeout, retries=retries, backoff=backoff)
+    return translator.translate(text)
+
+
+def translate_items(items, *, timeout: int, concurrency: int, translator=None):
     """Append a Chinese translation to English titles and summaries.
 
     Translation runs concurrently before rendering. The source text stays in
     ``title``/``summary`` and the translation lands in ``title_zh``/``summary_zh``
     so the digest reads as original first, translation second. Nothing is
-    appended when the service fails or echoes the original back, which keeps a
-    card from printing the same sentence twice.
+    appended when every provider fails or echoes the original back, which keeps
+    a card from printing the same sentence twice. Pass a shared ``translator`` to
+    keep its statistics and its provider bookkeeping for the whole run.
     """
+    translator = translator or Translator(configured_providers(), timeout=timeout)
     fields = [(item, field) for item in items for field in TRANSLATED_FIELDS if is_english(item.get(field, ""))]
     if not fields:
         return items
     workers = max(1, min(concurrency, TRANSLATE_MAX_WORKERS, len(fields)))
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(translate_to_chinese, item[field], timeout=timeout): (item, field) for item, field in fields}
+        futures = {pool.submit(translator.translate, item[field]): (item, field) for item, field in fields}
         for future in as_completed(futures):
             item, field = futures[future]
             try:
                 translated = future.result()
-            except (HTTPError, URLError, TimeoutError, OSError, ValueError):
+            except Exception:
                 # Keep the original RSS value if an unexpected translation error occurs.
                 continue
             if translated and translated != item[field]:
                 item[TRANSLATED_FIELDS[field]] = translated
     return items
+
+
+# Two short strings are enough to tell a reachable endpoint from a blocked one.
+PROBE_TEXTS = (
+    "OpenAI ships a smaller model that runs on device",
+    "The Federal Reserve held rates steady on Wednesday, and the index closed at a record high.",
+)
+
+
+def probe_providers(providers, *, timeout: int = 10, texts=PROBE_TEXTS):
+    """Call every provider directly, so one run shows which endpoints answer.
+
+    The chain hides which endpoint failed; this bypasses it on purpose and keeps
+    the raw answer or the raw error for each provider and probe string.
+    """
+    rows = []
+    for provider in providers:
+        for text in texts:
+            started = time.monotonic()
+            try:
+                answer = (provider.call(text, timeout=timeout) or "").strip()
+                status = "ok" if answer else "empty"
+            except Exception as error:
+                answer, status = f"{type(error).__name__}: {error}", "error"
+            rows.append(
+                {
+                    "provider": provider.name,
+                    "label": provider.label,
+                    "keyless": provider.keyless,
+                    "source": text,
+                    "status": status,
+                    "seconds": round(time.monotonic() - started, 2),
+                    "output": answer[:200],
+                }
+            )
+    return rows
+
+
+def probe_markdown(rows, *, generated_at: str) -> str:
+    """Render probe rows as the markdown posted to the workflow summary."""
+    lines = [
+        f"### Translation probe · {generated_at}",
+        "",
+        "| Provider | Kind | Source | Status | Seconds | Output |",
+        "| --- | --- | --- | --- | ---: | --- |",
+    ]
+    for row in rows:
+        source = row["source"] if len(row["source"]) <= 48 else row["source"][:47] + "…"
+        output = row["output"].replace("|", "\\|").replace("\n", " ")
+        lines.append(
+            f"| `{row['provider']}` | {'keyless' if row['keyless'] else 'keyed'} | {source} "
+            f"| {row['status']} | {row['seconds']} | {output or '—'} |"
+        )
+    working = [row["provider"] for row in rows if row["status"] == "ok"]
+    lines += ["", f"Providers that answered: {', '.join(sorted(set(working))) or '**none**'}", ""]
+    return "\n".join(lines)
 
 
 def display_width(text: str) -> int:
@@ -768,6 +1215,83 @@ def load_feeds(catalog_path, pack, max_feeds):
     return feeds
 
 
+def annotation_lines(payload: dict):
+    """Turn a translation report into GitHub Actions notice/warning commands.
+
+    A missing translation is invisible in the push itself by design, so the run
+    has to say it out loud: the notice names the provider that answered, and the
+    warning names what the endpoints that did not answer actually said. Annotations
+    survive on the run page and through the checks API, unlike a log line.
+    """
+    if "rows" in payload:  # probe report
+        states = defaultdict(list)
+        errors = {}
+        for row in payload["rows"]:
+            states[row["provider"]].append(row["status"])
+            if row["status"] == "error":
+                errors.setdefault(row["provider"], row["output"])
+        if not states:
+            return []
+        summary = ", ".join(
+            f"{name}={'ok' if 'ok' in results else 'failed'}" for name, results in states.items()
+        )
+        lines = [("notice", f"translation probe: {summary}")]
+        if all("ok" not in results for results in states.values()):
+            detail = "; ".join(f"{name}: {error}" for name, error in errors.items())
+            lines.append(("warning", f"no translation provider answered | {detail}"[:900]))
+        return lines
+    if "attempted" not in payload:  # nothing to report
+        return []
+    attempted = payload.get("attempted", 0)
+    if not attempted:
+        return []
+    providers = {provider["name"]: provider for provider in payload.get("providers", [])}
+    retired = payload.get("retired", [])
+    line = f"translation: translated={payload.get('translated', 0)}/{attempted} provider={payload.get('active') or 'none'}"
+    lines = [("notice", line)]
+
+    def detail_for(names):
+        return "; ".join(
+            f"{name}: {providers.get(name, {}).get('last_error') or 'failed'}" for name in names[:4]
+        )
+
+    failing = [name for name, provider in providers.items() if provider.get("errors")]
+    if not payload.get("translated"):
+        lines.append(
+            ("warning", f"every translation endpoint failed; the card keeps the original text | {detail_for(failing)}"[:900])
+        )
+    elif retired:
+        lines.append(("warning", f"retired translation endpoints | {detail_for(retired)}"[:900]))
+    return lines
+
+
+def write_translation_report(out_dir, *, markdown: str, payload: dict):
+    """Leave a machine-readable and a human-readable translation report behind.
+
+    The artifact is what makes a silent failure visible: the pushplus card just
+    loses the extra line, and the Actions log is easy to miss, while this file
+    records which endpoint answered and what the others said. When GitHub Actions
+    sets ``GITHUB_STEP_SUMMARY``, the same markdown lands on the run page, and the
+    same summary is emitted as an annotation.
+    """
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        for level, message in annotation_lines(payload):
+            print(f"::{level}::{message}")
+    if out_dir:
+        (out_dir / "translation-report.md").write_text(markdown + "\n", encoding="utf-8")
+        (out_dir / "translation-report.json").write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"wrote {out_dir / 'translation-report.md'}")
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY", "").strip()
+    if summary_path:
+        try:
+            with open(summary_path, "a", encoding="utf-8") as handle:
+                handle.write(markdown + "\n")
+        except OSError:
+            pass
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Push an RSS digest to WeChat via pushplus.")
     parser.add_argument("--catalog", default=str(ROOT / "data/feeds.json"))
@@ -781,6 +1305,11 @@ def main(argv=None):
     parser.add_argument("--timeout", type=int, default=20)
     parser.add_argument("--translate", action=argparse.BooleanOptionalAction, default=True,
                         help="append a Chinese translation under English titles and summaries (default: enabled)")
+    parser.add_argument("--translators", default=os.environ.get("TRANSLATE_PROVIDERS", ""),
+                        help="comma-separated provider order, e.g. llm,google,edge "
+                             "(default: keyed providers first, then every keyless one)")
+    parser.add_argument("--probe-translators", action="store_true",
+                        help="call every provider directly, report which endpoints answer, and exit")
     parser.add_argument("--page-budget", type=int, default=DEFAULT_PAGE_BUDGET)
     parser.add_argument("--title", default="", help="override the digest title")
     parser.add_argument("--topic", default=os.environ.get("PUSHPLUS_TOPIC", ""))
@@ -797,6 +1326,23 @@ def main(argv=None):
     window_hours = args.window_hours or profile["window_hours"]
     window_start = now - timedelta(hours=window_hours)
     local_now = now.astimezone(CHINA)
+    stamp = local_now.strftime("%Y-%m-%d %H:%M")
+    out_dir = Path(args.out) if args.out else None
+    if out_dir:
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.probe_translators:
+        providers = configured_providers(names=args.translators.split(","))
+        rows = probe_providers(providers, timeout=min(args.timeout, 10))
+        report = probe_markdown(rows, generated_at=stamp)
+        print(report)
+        write_translation_report(out_dir, markdown=report, payload={"generated_at": stamp, "rows": rows})
+        return 0
+
+    translator = Translator(
+        configured_providers(names=args.translators.split(",")),
+        timeout=min(args.timeout, 8),
+    )
 
     feeds = load_feeds(args.catalog, args.pack, args.max_feeds)
     items, stats = collect_items(
@@ -808,14 +1354,14 @@ def main(argv=None):
     )
     items = items[: args.max_items]
     if args.translate:
-        translate_items(items, timeout=min(args.timeout, 8), concurrency=args.concurrency)
+        translate_items(items, timeout=min(args.timeout, 8), concurrency=args.concurrency, translator=translator)
 
     base_title = args.title or DIGEST_TITLE
     pages = render_pages(
         items,
         title=DIGEST_TITLE,
         kicker=profile["kicker"],
-        generated_at=local_now.strftime("%Y-%m-%d %H:%M"),
+        generated_at=stamp,
         window_hours=int(window_hours) if float(window_hours).is_integer() else window_hours,
         page_budget=args.page_budget,
     )
@@ -825,18 +1371,47 @@ def main(argv=None):
         f"ok={stats['ok']} failed={stats['failed']} items={len(items)} pages={len(pages)} "
         f"chars={[len(page) for page in pages]}"
     )
+    if args.translate:
+        # The pushplus card silently drops the appended line when translation
+        # fails, so the run has to say out loud which provider answered.
+        print(translator.report_line())
 
-    if args.out:
-        out_dir = Path(args.out)
-        out_dir.mkdir(parents=True, exist_ok=True)
+    if out_dir:
         for index, page in enumerate(pages, start=1):
             target = out_dir / f"digest-{edition}-{index:02d}.html"
             target.write_text(page, encoding="utf-8")
             print(f"wrote {target}")
+    if args.translate:
+        # The report is written even without --out, because the annotation is
+        # what makes a translation failure visible on the run page.
+        write_translation_report(
+            out_dir,
+            markdown=translator.report_markdown(),
+            payload=translator.summary(),
+        )
 
     if not items and not args.allow_empty:
         print("nothing new in this window; skipping push")
         return 0
+    if args.dry_run:
+        print("dry run; skipping push")
+        return 0
+    if not args.token:
+        raise SystemExit("PUSHPLUS_TOKEN is required (set the secret or pass --token)")
+
+    for index, page in enumerate(pages, start=1):
+        title = page_title(base_title, index, len(pages))
+        result = push_page(
+            token=args.token,
+            title=title,
+            content=page,
+            topic=args.topic,
+            channel=args.channel,
+        )
+        print(f"pushed page {index}/{len(pages)} ({len(page)} chars): {result.get('msg')}")
+        if index < len(pages):
+            time.sleep(2)
+    return 0
     if args.dry_run:
         print("dry run; skipping push")
         return 0

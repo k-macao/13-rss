@@ -1,5 +1,9 @@
+import contextlib
+import io
 import json
 import re
+import shutil
+import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -11,6 +15,7 @@ from urllib.parse import parse_qs, urlsplit
 from scripts.wechat_digest import (
     AUTHOR_LINE,
     CHINA,
+    DEEPL_FREE_ENDPOINT,
     DIGEST_INTRO,
     DIGEST_SCOPE,
     DIGEST_SUBTITLE,
@@ -20,22 +25,38 @@ from scripts.wechat_digest import (
     PUSHPLUS_CONTENT_LIMIT,
     PUSHPLUS_TITLE_LIMIT,
     TRANSLATION_TAG,
+    Provider,
+    TranslationError,
+    Translator,
+    annotation_lines,
     clamp,
+    configured_providers,
     dedupe,
+    deepl_translate,
     display_width,
+    google_chrome_translate,
+    google_translate,
+    edge_translate,
+    llm_translate,
+    main,
+    mymemory_translate,
     page_title,
     parse_datetime,
     parse_feed_payload,
     is_english,
+    probe_markdown,
+    probe_providers,
     render_pages,
     translate_items,
     translate_to_chinese,
+    write_translation_report,
     resolve_edition,
     strip_html,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/wechat-digest.yml"
+PROBE_WORKFLOW = ROOT / ".github/workflows/translate-probe.yml"
 NOW = datetime(2026, 8, 19, 10, 0, tzinfo=timezone.utc)
 
 
@@ -281,9 +302,10 @@ class TranslationTests(unittest.TestCase):
         sleep.assert_called_once_with(1.0)
 
     def test_persistent_failure_gives_up_after_retries_and_keeps_original(self):
+        translator = Translator([Provider("google", google_translate, "Google")], retries=3)
         with patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen) as mocked, \
                 patch("scripts.wechat_digest.time.sleep"):
-            result = translate_to_chinese("A new model improves reasoning", retries=3)
+            result = translator.translate("A new model improves reasoning")
 
         self.assertEqual(result, "A new model improves reasoning")
         self.assertEqual(mocked.call_count, 3)
@@ -299,12 +321,13 @@ class TranslationTests(unittest.TestCase):
             def __exit__(self, *args):
                 return False
 
+        translator = Translator([Provider("google", google_translate, "Google")])
         with patch("scripts.wechat_digest.urlopen", return_value=Response()) as mocked, \
                 patch("scripts.wechat_digest.time.sleep"):
-            result = translate_to_chinese("A new model improves reasoning")
+            result = translator.translate("A new model improves reasoning")
 
         self.assertEqual(result, "A new model improves reasoning")
-        self.assertEqual(mocked.call_count, 1)
+        self.assertEqual(mocked.call_count, 1)  # another attempt returns the same block page
 
     def test_translation_that_echoes_the_original_is_not_appended(self):
         # A proper noun or an untranslated string must not be printed twice.
@@ -324,6 +347,427 @@ class TranslationTests(unittest.TestCase):
 
         self.assertIn("title_zh", item)
         self.assertNotIn("summary_zh", item)
+
+
+class ProviderChainTests(unittest.TestCase):
+    """One endpoint that answers keeps the whole issue bilingual."""
+
+    @staticmethod
+    def dead(name="dead"):
+        def call(text, *, timeout):
+            raise TranslationError("HTTPError: 429 Too Many Requests")
+
+        return Provider(name, call, "Dead endpoint")
+
+    @staticmethod
+    def alive(answer="新模型提升了推理能力", name="alive"):
+        def call(text, *, timeout):
+            return answer
+
+        return Provider(name, call, "Alive endpoint")
+
+    def test_chain_falls_through_to_the_next_provider(self):
+        asked = []
+
+        def dead(text, *, timeout):
+            asked.append("dead")
+            raise TranslationError("HTTPError: 429")
+
+        def alive(text, *, timeout):
+            asked.append("alive")
+            return "新模型提升了推理能力"
+
+        translator = Translator([Provider("dead", dead, "Dead"), Provider("alive", alive, "Alive")], retries=1)
+        self.assertEqual(translator.translate("A new model improves reasoning"), "新模型提升了推理能力")
+        self.assertEqual(asked, ["dead", "alive"])
+        summary = translator.summary()
+        self.assertEqual(summary["active"], "alive")
+        self.assertEqual(summary["translated"], 1)
+        self.assertEqual(summary["providers"][0]["errors"], 1)
+        self.assertEqual(summary["providers"][1]["ok"], 1)
+
+    def test_provider_that_fails_twice_is_retired_for_the_rest_of_the_run(self):
+        calls = []
+
+        def dead(name):
+            def call(text, *, timeout):
+                calls.append(name)
+                raise TranslationError("URLError: connection reset")
+
+            return Provider(name, call, name)
+
+        # Nothing answers yet, so both endpoints are asked once per string until
+        # each has failed twice; after that the chain stops paying for their timeouts.
+        translator = Translator([dead("first"), dead("second")], retries=1)
+        for _ in range(3):
+            translator.translate("A new model improves reasoning")
+
+        self.assertEqual(calls, ["first", "second", "first", "second"])
+        self.assertEqual(translator.summary()["retired"], ["first", "second"])
+        self.assertEqual(translator.report_line(), "translation: translated=0/3 provider=none retired=first,second")
+
+    def test_the_provider_that_answered_is_tried_first_next_time(self):
+        order = []
+
+        def first(text, *, timeout):
+            order.append("first")
+            raise TranslationError("HTTPError: 503")
+
+        def second(text, *, timeout):
+            order.append("second")
+            return "译文"
+
+        def third(text, *, timeout):
+            order.append("third")
+            return "另一种译文"
+
+        translator = Translator(
+            [Provider("first", first, "First"), Provider("second", second, "Second"), Provider("third", third, "Third")],
+            retries=1,
+        )
+        translator.translate("A new model improves reasoning")
+        translator.translate("Another English headline")
+        self.assertEqual(order, ["first", "second", "second"])
+
+    def test_echoed_original_is_not_a_translation_and_lets_the_next_provider_try(self):
+        translator = Translator(
+            [self.alive("A new model improves reasoning", "echo"), self.alive("新模型提升了推理能力", "translator")],
+            retries=1,
+        )
+        self.assertEqual(translator.translate("A new model improves reasoning"), "新模型提升了推理能力")
+        summary = translator.summary()
+        self.assertEqual(summary["providers"][0]["empty"], 1)
+        self.assertEqual(summary["active"], "translator")
+
+    def test_retired_chain_returns_the_original_without_more_requests(self):
+        translator = Translator([self.dead()], retries=1)
+        translator.translate("A new model improves reasoning")
+        translator.translate("A second English headline")
+        self.assertEqual(translator.translate("A third English headline"), "A third English headline")
+
+        self.assertEqual(translator.summary()["providers"][0]["attempts"], 2)  # retired after two
+        self.assertEqual(translator.summary()["translated"], 0)
+
+    def test_chinese_and_urlless_text_never_reaches_a_provider(self):
+        asked = []
+
+        def spy(text, *, timeout):
+            asked.append(text)
+            return ""
+
+        translator = Translator([Provider("spy", spy, "Spy")])
+        translator.translate("国产大模型开源周：三个新权重发布")
+        translator.translate("https://example.com/article")
+        translator.translate("v1.2.3")
+        self.assertEqual(asked, [])
+        self.assertEqual(translator.summary()["attempted"], 0)
+
+    def test_concurrency_shares_the_chain_and_its_statistics(self):
+        calls = []
+
+        def slow_first(text, *, timeout):
+            calls.append("first")
+            raise TranslationError("HTTPError: 429")
+
+        def second(text, *, timeout):
+            calls.append("second")
+            return f"译文：{text}"
+
+        translator = Translator(
+            [Provider("first", slow_first, "First"), Provider("second", second, "Second")], retries=1
+        )
+        items = [make_english_item(index) for index in range(4)]
+        translate_items(items, timeout=8, concurrency=4, translator=translator)
+
+        for item in items:
+            self.assertEqual(item["title_zh"], f"译文：{item['title']}")
+        summary = translator.summary()
+        self.assertEqual(summary["translated"], len(items) * 2)  # title and summary each
+        self.assertEqual(summary["active"], "second")
+
+    def test_translator_report_names_the_provider_and_retired_endpoints(self):
+        # Two attempts in one string are enough to retire the broken endpoint,
+        # which is exactly what the log line and the run summary must say.
+        translator = Translator([self.dead(), self.alive()], retries=2)
+        translator.translate("A new model improves reasoning")
+        line = translator.report_line()
+        self.assertIn("translated=1/1", line)
+        self.assertIn("provider=alive", line)
+        self.assertIn("retired=dead", line)
+        markdown = translator.report_markdown()
+        self.assertIn("| `alive` | keyless | 1 | 1 | 0 | 0 | available |", markdown)
+        self.assertIn("| `dead` | keyless | 2 | 0 | 0 | 2 | retired |", markdown)
+
+
+class ProviderParsingTests(unittest.TestCase):
+    """Each provider understands its own wire format and nothing else."""
+
+    @staticmethod
+    def responding(payload, status=200):
+        """Answer every URL with `payload`, recording requests for inspection."""
+
+        def _urlopen(request, **kwargs):
+            _urlopen.requests.append(request)
+
+            class Response:
+                def read(self):
+                    body = payload(request) if callable(payload) else payload
+                    return body if isinstance(body, bytes) else json.dumps(body).encode("utf-8")
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *args):
+                    return False
+
+            return Response()
+
+        _urlopen.requests = []
+        return _urlopen
+
+    def test_google_joins_the_segments_of_a_long_string(self):
+        payload = [[["新模型", "A new model", None, None, 1], ["提升了推理能力", " improves reasoning", None, None, 1]], None, "en"]
+        with patch("scripts.wechat_digest.urlopen", side_effect=self.responding(payload)):
+            self.assertEqual(google_translate("A new model improves reasoning", timeout=8), "新模型提升了推理能力")
+
+    def test_google_chrome_accepts_both_edge_node_shapes(self):
+        flat = [["你好，世界", "en"]]
+        nested = [[["你好，世界", "Hello world", None, None, 1]], None, "en"]
+        for payload in (flat, nested):
+            with patch("scripts.wechat_digest.urlopen", side_effect=self.responding(payload)):
+                self.assertEqual(google_chrome_translate("Hello world", timeout=8), "你好，世界")
+
+    def test_edge_posts_a_string_array_and_unescapes_markup(self):
+        seen = self.responding([{"translations": [{"text": "5 &lt; 6 的中文说明"}]}])
+        with patch("scripts.wechat_digest.urlopen", side_effect=seen):
+            result = edge_translate("5 < 6 in Chinese", timeout=8)
+
+        self.assertEqual(result, "5 < 6 的中文说明")
+        request = seen.requests[0]
+        self.assertEqual(json.loads(request.data.decode("utf-8")), ["5 &lt; 6 in Chinese"])
+        self.assertIn("to=zh-Hans", request.full_url)
+        self.assertIn("isEnterpriseClient=false", request.full_url)
+
+    def test_edge_leaves_plain_text_unescaped_on_the_wire(self):
+        seen = self.responding([{"translations": [{"text": "你好"}]}])
+        with patch("scripts.wechat_digest.urlopen", side_effect=seen):
+            edge_translate("Hello", timeout=8)
+        self.assertEqual(json.loads(seen.requests[0].data.decode("utf-8")), ["Hello"])
+
+    def test_edge_shape_that_is_not_a_translation_fails_loudly(self):
+        with patch("scripts.wechat_digest.urlopen", side_effect=self.responding({"error": "blocked"})):
+            with self.assertRaises(TranslationError) as caught:
+                edge_translate("Hello", timeout=8)
+        self.assertFalse(caught.exception.retryable)
+
+    def test_mymemory_turns_a_quota_warning_into_a_retryable_error(self):
+        payload = {"responseData": {"translatedText": "MYMEMORY WARNING: YOU USED ALL AVAILABLE FREE TRANSLATIONS FOR TODAY"},
+                   "responseStatus": 200}
+        with patch("scripts.wechat_digest.urlopen", side_effect=self.responding(payload)):
+            with self.assertRaises(TranslationError) as caught:
+                mymemory_translate("Hello world", timeout=8)
+        self.assertTrue(caught.exception.retryable)
+
+    def test_mymemory_unescapes_entities_and_sends_the_email_when_configured(self):
+        payload = {"responseData": {"translatedText": "你好&amp;世界"}, "responseStatus": 200}
+        seen = self.responding(payload)
+        with patch.dict("os.environ", {"MYMEMORY_EMAIL": "me@example.com"}), \
+                patch("scripts.wechat_digest.urlopen", side_effect=seen):
+            self.assertEqual(mymemory_translate("Hello & world", timeout=8), "你好&世界")
+        self.assertIn("de=me%40example.com", seen.requests[0].full_url)
+
+    def test_deepl_posts_form_fields_with_the_auth_header(self):
+        seen = self.responding({"translations": [{"detected_source_language": "EN", "text": "新模型提升了推理能力"}]})
+        with patch("scripts.wechat_digest.urlopen", side_effect=seen):
+            result = deepl_translate(
+                "A new model improves reasoning",
+                timeout=8,
+                api_key="abc:fx",
+                endpoint=DEEPL_FREE_ENDPOINT,
+            )
+
+        self.assertEqual(result, "新模型提升了推理能力")
+        request = seen.requests[0]
+        self.assertEqual(request.full_url, "https://api-free.deepl.com/v2/translate")
+        self.assertEqual(request.get_header("Authorization"), "DeepL-Auth-Key abc:fx")
+        body = parse_qs(request.data.decode("utf-8"))
+        self.assertEqual(body["target_lang"], ["ZH"])
+        self.assertEqual(body["source_lang"], ["EN"])
+        self.assertEqual(body["text"], ["A new model improves reasoning"])
+
+    def test_llm_uses_an_openai_compatible_chat_endpoint(self):
+        payload = {"choices": [{"message": {"content": "  “新模型提升了推理能力”\n"}}]}
+        seen = self.responding(payload)
+        with patch("scripts.wechat_digest.urlopen", side_effect=seen):
+            result = llm_translate(
+                "A new model improves reasoning",
+                timeout=8,
+                api_key="sk-test",
+                base_url="https://api.deepseek.com/v1",
+                model="deepseek-chat",
+            )
+
+        self.assertEqual(result, "新模型提升了推理能力")
+        request = seen.requests[0]
+        self.assertEqual(request.full_url, "https://api.deepseek.com/v1/chat/completions")
+        self.assertEqual(request.get_header("Authorization"), "Bearer sk-test")
+        body = json.loads(request.data.decode("utf-8"))
+        self.assertEqual(body["model"], "deepseek-chat")
+        self.assertEqual(body["messages"][-1]["content"], "A new model improves reasoning")
+
+    def test_llm_without_a_choice_field_is_a_non_retryable_error(self):
+        with patch("scripts.wechat_digest.urlopen", side_effect=self.responding({"error": {"message": "no key"}})):
+            with self.assertRaises(TranslationError) as caught:
+                llm_translate("Hello", timeout=8, api_key="k", base_url="https://example.com/v1", model="m")
+        self.assertFalse(caught.exception.retryable)
+
+
+class TranslatorConfigTests(unittest.TestCase):
+    def test_keyless_chain_is_the_default(self):
+        with patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(
+                [provider.name for provider in configured_providers()],
+                ["google", "google-chrome", "edge", "mymemory"],
+            )
+
+    def test_configured_keys_are_tried_before_the_keyless_endpoints(self):
+        env = {
+            "DEEPL_API_KEY": "abc:fx",
+            "TRANSLATE_LLM_API_KEY": "sk-test",
+            "TRANSLATE_LLM_BASE_URL": "https://api.deepseek.com/v1",
+            "TRANSLATE_LLM_MODEL": "deepseek-chat",
+        }
+        with patch.dict("os.environ", env, clear=True):
+            providers = configured_providers()
+        self.assertEqual([provider.name for provider in providers[:2]], ["deepl", "llm"])
+        self.assertEqual([provider.keyless for provider in providers[:2]], [False, False])
+        self.assertIn("deepseek-chat", providers[1].label)
+
+    def test_free_deepl_keys_use_the_free_host_and_pro_keys_do_not(self):
+        with patch.dict("os.environ", {"DEEPL_API_KEY": "abc:fx"}, clear=True):
+            provider = configured_providers()[0]
+            self.assertEqual(provider.call.keywords["endpoint"], DEEPL_FREE_ENDPOINT)
+        with patch.dict("os.environ", {"DEEPL_API_KEY": "abc"}, clear=True):
+            provider = configured_providers()[0]
+            self.assertEqual(provider.call.keywords["endpoint"], "https://api.deepl.com/v2/translate")
+
+    def test_translate_providers_selects_and_reorders_the_chain(self):
+        with patch.dict("os.environ", {}, clear=True):
+            providers = configured_providers(names=["edge", "google"])
+        self.assertEqual([provider.name for provider in providers], ["edge", "google"])
+
+    def test_an_unknown_translator_name_is_reported_instead_of_silently_dropped(self):
+        with self.assertRaises(SystemExit) as caught:
+            configured_providers(names=["googel"])
+        self.assertIn("googel", str(caught.exception))
+
+
+class TranslationProbeTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+
+    def test_probe_reports_every_provider_even_the_broken_ones(self):
+        def dead(text, *, timeout):
+            raise TranslationError("HTTPError: 451 Unavailable For Legal Reasons")
+
+        rows = probe_providers([Provider("dead", dead, "Dead"), Provider("live", lambda text, *, timeout: "译文", "Live")])
+
+        self.assertEqual([row["status"] for row in rows], ["error", "error", "ok", "ok"])
+        markdown = probe_markdown(rows, generated_at="2026-08-19 18:00")
+        self.assertIn("### Translation probe · 2026-08-19 18:00", markdown)
+        self.assertIn("HTTPError: 451", markdown)
+        self.assertIn("Providers that answered: live", markdown)
+
+    def test_probe_reports_when_nothing_answers(self):
+        rows = probe_providers([Provider("dead", lambda text, *, timeout: (_ for _ in ()).throw(URLError("x")), "Dead")],
+                               texts=("Hello world",))
+        self.assertIn("**none**", probe_markdown(rows, generated_at="now"))
+        self.assertEqual(rows[0]["status"], "error")
+
+    def test_probe_mode_writes_a_report_and_never_calls_pushplus(self):
+        with patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen), \
+                patch("scripts.wechat_digest.time.sleep"), \
+                patch("scripts.wechat_digest.push_page") as pushed, \
+                contextlib.redirect_stdout(io.StringIO()):
+            code = main(["--probe-translators", "--translators", "google,edge", "--timeout", "1",
+                         "--out", str(self.tmp)])
+
+        pushed.assert_not_called()
+
+        self.assertEqual(code, 0)
+        report = json.loads((self.tmp / "translation-report.json").read_text(encoding="utf-8"))
+        self.assertEqual([row["provider"] for row in report["rows"]], ["google", "google", "edge", "edge"])
+        self.assertEqual({row["status"] for row in report["rows"]}, {"error"})
+        self.assertIn("Providers that answered: **none**",
+                      (self.tmp / "translation-report.md").read_text(encoding="utf-8"))
+
+    def test_a_failed_digest_run_annotates_itself(self):
+        translator = Translator([self.dead_provider("google"), self.dead_provider("edge")], retries=1)
+        translator.translate("A new model improves reasoning")
+        lines = annotation_lines(translator.summary())
+
+        self.assertEqual([level for level, _ in lines], ["notice", "warning"])
+        self.assertIn("translated=0/1 provider=none", lines[0][1])
+        self.assertIn("every translation endpoint failed", lines[1][1])
+        self.assertIn("google: HTTPError: 451", lines[1][1])
+        self.assertIn("edge: HTTPError: 451", lines[1][1])
+
+    def test_a_working_run_reports_the_provider_and_the_retired_endpoints(self):
+        translator = Translator([self.dead_provider("google"), Provider("edge", lambda text, *, timeout: "译文", "Edge")],
+                                retries=2)
+        translator.translate("A new model improves reasoning")
+        lines = annotation_lines(translator.summary())
+
+        self.assertEqual([level for level, _ in lines], ["notice", "warning"])
+        self.assertIn("translated=1/1 provider=edge", lines[0][1])
+        self.assertIn("retired translation endpoints | google: HTTPError: 451", lines[1][1])
+
+    def test_a_chinese_only_issue_produces_no_annotation(self):
+        translator = Translator([Provider("edge", lambda text, *, timeout: "译文", "Edge")])
+        translator.translate("国产大模型开源周：三个新权重发布")
+        self.assertEqual(annotation_lines(translator.summary()), [])
+
+    def test_probe_annotations_name_every_provider(self):
+        rows = probe_providers(
+            [Provider("edge", lambda text, *, timeout: "译文", "Edge"),
+             Provider("google", lambda text, *, timeout: (_ for _ in ()).throw(URLError("blocked")), "Google")],
+            texts=("Hello world",),
+        )
+        lines = annotation_lines({"generated_at": "now", "rows": rows})
+
+        self.assertEqual([level for level, _ in lines], ["notice"])
+        self.assertIn("translation probe: edge=ok, google=failed", lines[0][1])
+
+    def test_annotations_are_printed_only_inside_github_actions(self):
+        translator = Translator([Provider("edge", lambda text, *, timeout: "译文", "Edge")], retries=1)
+        translator.translate("A new model improves reasoning")
+        payload = translator.summary()
+
+        silent = io.StringIO()
+        with patch.dict("os.environ", {}, clear=True), contextlib.redirect_stdout(silent):
+            write_translation_report(None, markdown="", payload=payload)
+        self.assertEqual(silent.getvalue(), "")
+
+        spoken = io.StringIO()
+        with patch.dict("os.environ", {"GITHUB_ACTIONS": "true"}, clear=True), \
+                contextlib.redirect_stdout(spoken):
+            write_translation_report(None, markdown="", payload=payload)
+        self.assertIn("::notice::translation: translated=1/1 provider=edge", spoken.getvalue())
+
+    @staticmethod
+    def dead_provider(name):
+        def call(text, *, timeout):
+            raise TranslationError("HTTPError: 451 Unavailable For Legal Reasons")
+
+        return Provider(name, call, name)
+
+    def test_github_step_summary_receives_the_report(self):
+        summary = self.tmp / "summary.md"
+        with patch.dict("os.environ", {"GITHUB_STEP_SUMMARY": str(summary)}):
+            write_translation_report(None, markdown="### Translation probe", payload={})
+
+        self.assertIn("### Translation probe", summary.read_text(encoding="utf-8"))
 
 
 class EditionTests(unittest.TestCase):
@@ -538,6 +982,28 @@ class WorkflowTests(unittest.TestCase):
     def test_workflow_supports_manual_runs_and_calls_the_digest_script(self):
         self.assertIn("workflow_dispatch:", self.text)
         self.assertIn("scripts/wechat_digest.py", self.text)
+
+    def test_workflow_offers_translation_keys_without_requiring_them(self):
+        for name in (
+            "DEEPL_API_KEY",
+            "TRANSLATE_LLM_API_KEY",
+            "TRANSLATE_LLM_BASE_URL",
+            "TRANSLATE_LLM_MODEL",
+            "TRANSLATE_PROVIDERS",
+            "MYMEMORY_EMAIL",
+        ):
+            self.assertIn(name, self.text)
+        # A missing key must not fail the job: every provider is optional.
+        self.assertIn("secrets.DEEPL_API_KEY", self.text)
+        self.assertNotIn("required: true", self.text)
+
+    def test_probe_workflow_reports_which_endpoint_answers(self):
+        text = PROBE_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("workflow_dispatch:", text)
+        self.assertIn("--probe-translators", text)
+        self.assertIn("--out build/probe", text)
+        self.assertIn("issues: write", text)
+        self.assertIn("gh issue comment", text)
 
 
 if __name__ == "__main__":

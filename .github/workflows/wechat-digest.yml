@@ -61,6 +61,15 @@ jobs:
         env:
           PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
           PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
+          # Translation is a chain: the keyed providers below are tried first and
+          # the keyless ones follows. Keys are optional — without them the digest
+          # still renders, and the run summary says which endpoint answered.
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          TRANSLATE_LLM_API_KEY: ${{ secrets.TRANSLATE_LLM_API_KEY }}
+          TRANSLATE_LLM_BASE_URL: ${{ vars.TRANSLATE_LLM_BASE_URL }}
+          TRANSLATE_LLM_MODEL: ${{ vars.TRANSLATE_LLM_MODEL }}
+          TRANSLATE_PROVIDERS: ${{ vars.TRANSLATE_PROVIDERS }}
+          MYMEMORY_EMAIL: ${{ secrets.MYMEMORY_EMAIL }}
         run: |
           python scripts/wechat_digest.py \
             --pack "${{ inputs.pack || 'top200' }}" \
@@ -72,6 +81,10 @@ jobs:
             --timeout 20 \
             --out build/digest \
             ${{ (inputs.dry_run == true) && '--dry-run' || '' }}
+
+      - name: Show the translation report
+        if: always()
+        run: cat build/digest/translation-report.md 2>/dev/null || echo "no translation report"
 
       - name: Upload rendered pages
         if: always()
