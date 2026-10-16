@@ -3,6 +3,10 @@ name: Translation probe
 # Asks every translation provider directly and reports which endpoints answer
 # from a GitHub-hosted runner. The digest chain hides that detail on purpose, so
 # this is the diagnostic to run when a push arrives without its Chinese lines.
+#
+# A pull request that touches the translation chain gets the same table posted as
+# a comment, because whether the configured key works from a runner is exactly
+# what cannot be checked offline.
 on:
   workflow_dispatch:
     inputs:
@@ -14,6 +18,13 @@ on:
         description: "Issue or pull request number to post the report to (0 = skip)"
         type: string
         default: "0"
+  pull_request:
+    paths:
+      - scripts/wechat_digest.py
+      - .github/workflows/translate-probe.yml
+      - tests/test_wechat_digest.py
+      - WECHAT-DIGEST.md
+      - WECHAT-DIGEST.zh-CN.md
 
 permissions:
   contents: read
@@ -37,8 +48,13 @@ jobs:
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
           TRANSLATE_LLM_API_KEY: ${{ secrets.TRANSLATE_LLM_API_KEY }}
+          # The same key names the digest accepts, so the probe answers for the
+          # configuration the digest will actually use.
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY || secrets.DEEPSEEK_KEY }}
+          TRANSLATE_LLM_PROVIDER: ${{ vars.TRANSLATE_LLM_PROVIDER }}
           TRANSLATE_LLM_BASE_URL: ${{ vars.TRANSLATE_LLM_BASE_URL }}
           TRANSLATE_LLM_MODEL: ${{ vars.TRANSLATE_LLM_MODEL }}
+          TRANSLATE_PROVIDERS: ${{ vars.TRANSLATE_PROVIDERS }}
           MYMEMORY_EMAIL: ${{ secrets.MYMEMORY_EMAIL }}
         run: |
           python scripts/wechat_digest.py \
@@ -48,13 +64,31 @@ jobs:
             --out build/probe
 
       - name: Post the report as a comment
-        if: inputs.comment_on != '0' && inputs.comment_on != ''
+        # The manual run posts to whatever issue or pull request was named; a
+        # pull-request run posts to itself. Forks get a read-only token, so only
+        # branches in this repository comment.
+        if: >-
+          (inputs.comment_on != '0' && inputs.comment_on != '')
+          || (github.event_name == 'pull_request'
+              && github.event.pull_request.head.repo.full_name == github.repository)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue comment "${{ inputs.comment_on }}" \
-            --repo "${{ github.repository }}" \
-            --body-file build/probe/translation-report.md
+          target="${{ inputs.comment_on }}"
+          if [ -z "$target" ] || [ "$target" = "0" ]; then
+            target="${{ github.event.pull_request.number }}"
+          fi
+          echo "posting the probe report to #$target"
+          # A token that may not comment must not fail the probe: the table is
+          # already on the run page, in the step summary, and in the artifact.
+          # The reason goes out as a warning annotation, where it is readable.
+          if answer="$(gh issue comment "$target" \
+              --repo "${{ github.repository }}" \
+              --body-file build/probe/translation-report.md 2>&1)"; then
+            exit 0
+          fi
+          echo "::warning::could not comment on #$target: $(printf '%s' "$answer" | head -1)"
+          echo "$answer"
 
       - name: Upload the probe report
         if: always()

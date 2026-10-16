@@ -19,11 +19,12 @@ Every day at **09:00** and **18:00** Beijing time, GitHub Actions reads the cata
    | --- | --- | --- |
    | `PUSHPLUS_TOKEN` | Yes | Your personal pushplus token |
    | `PUSHPLUS_TOPIC` | No | Group code; when set, one push reaches every member of the group |
-   | `TRANSLATE_LLM_API_KEY` | No | Key for any OpenAI-compatible chat endpoint; the most reliable translation route |
+   | `DEEPSEEK_API_KEY` | No | DeepSeek key; on its own it configures the `llm` provider — endpoint and model included |
+   | `TRANSLATE_LLM_API_KEY` | No | Key for any other OpenAI-compatible chat endpoint |
    | `DEEPL_API_KEY` | No | DeepL key, free (`…:fx`) or pro |
    | `MYMEMORY_EMAIL` | No | E-mail address that raises MyMemory's anonymous quota |
 
-   `TRANSLATE_LLM_BASE_URL`, `TRANSLATE_LLM_MODEL`, and `TRANSLATE_PROVIDERS` are repository *variables* (**Settings → Secrets and variables → Actions → Variables**), not secrets. See [Translation providers](#translation-providers).
+   `TRANSLATE_LLM_PROVIDER`, `TRANSLATE_LLM_BASE_URL`, `TRANSLATE_LLM_MODEL`, and `TRANSLATE_PROVIDERS` are repository *variables* (**Settings → Secrets and variables → Actions → Variables**), not secrets. See [Translation providers](#translation-providers) and [Configuring the llm provider](#configuring-the-llm-provider).
 
 3. Confirm the workflow is enabled on the **Actions** page. Use **Run workflow** once to verify it end to end.
 
@@ -58,7 +59,7 @@ English titles and summaries are translated by walking a chain and stopping at t
 | Provider | Key | Endpoint | Notes |
 | --- | --- | --- | --- |
 | `deepl` | `DEEPL_API_KEY` | `api-free.deepl.com` (keys ending in `:fx`) or `api.deepl.com` | Highest-quality machine translation; the free tier covers 500,000 characters a month |
-| `llm` | `TRANSLATE_LLM_API_KEY` | `TRANSLATE_LLM_BASE_URL` (default `https://api.openai.com/v1`) + `TRANSLATE_LLM_MODEL` | Any OpenAI-compatible chat endpoint: DeepSeek, Qwen/DashScope, Moonshot, Zhipu, OpenRouter, …; context-aware, and the one worth setting up first |
+| `llm` | one provider key, or `TRANSLATE_LLM_API_KEY` | a preset endpoint, or `TRANSLATE_LLM_BASE_URL` + `TRANSLATE_LLM_MODEL` | Any OpenAI-compatible chat endpoint: DeepSeek, OpenAI, Qwen/DashScope, Moonshot, Zhipu, OpenRouter, …; context-aware, and the one worth setting up first |
 | `google` | — | `translate.googleapis.com` | The public gtx endpoint used before; rate-limits datacenter addresses |
 | `google-chrome` | — | `clients5.google.com` | Google's dictionary client, a separate service with its own quota |
 | `edge` | — | `edge.microsoft.com/translate/translatetext` | Microsoft Edge's keyless translator, the successor of the removed `translate/auth` + `api-edge` flow |
@@ -72,9 +73,44 @@ How the chain behaves in a run:
 - A malformed answer is not retried, only a timeout, a rate limit, or a connection error is.
 - With no key set the digest still translates through the keyless endpoints; a key simply makes the outcome dependable.
 
+### Configuring the llm provider
+
+The `llm` provider is one OpenAI-compatible chat endpoint, so a provider key alone is enough to switch it on — the preset supplies the endpoint and a current model ID. Set one secret and nothing else:
+
+| Preset | Secret | Endpoint | Model |
+| --- | --- | --- | --- |
+| `deepseek` | `DEEPSEEK_API_KEY` | `https://api.deepseek.com/v1` | `deepseek-flash` |
+| `openai` | `OPENAI_API_KEY` | `https://api.openai.com/v1` | `gpt-4o-mini` |
+| `dashscope` | `DASHSCOPE_API_KEY` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` |
+| `moonshot` | `MOONSHOT_API_KEY` | `https://api.moonshot.cn/v1` | `moonshot-v1-8k` |
+| `zhipu` | `ZHIPUAI_API_KEY` | `https://open.bigmodel.cn/api/paas/v4` | `glm-4-flash` |
+| `openrouter` | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1` | `openai/gpt-4o-mini` |
+
+```text
+# DeepSeek, exactly as it ships: one secret in the repository, nothing else
+DEEPSEEK_API_KEY = sk-…
+
+# The same key under the generic name still finds the DeepSeek preset,
+# because the endpoint gives it away
+TRANSLATE_LLM_API_KEY = sk-…
+TRANSLATE_LLM_BASE_URL = https://api.deepseek.com/v1
+```
+
+About the DeepSeek preset, since its API changes more often than the others:
+
+- The preset asks for **non-thinking mode** (`"thinking": {"type": "disabled"}`). DeepSeek thinks by default, and a translation needs no chain of thought; thinking mode also ignores `temperature` and bills the reasoning tokens.
+- The model ID is `deepseek-flash` (DeepSeek-V4.1-Flash). The older `deepseek-chat` and `deepseek-reasoner` were **retired on 2026-07-24** — if one is still configured, the run says so in a warning annotation instead of just showing a failed endpoint.
+- A base URL is accepted the way it is usually pasted: `https://api.deepseek.com`, `https://api.deepseek.com/v1/`, and a full `…/v1/chat/completions` all land on the same endpoint, and a bare DeepSeek or OpenAI host gains the `/v1` root.
+- Naming the provider explicitly (`TRANSLATE_LLM_PROVIDER=deepseek`) selects the preset together with `TRANSLATE_LLM_API_KEY`. The name is checked: a typo fails the run instead of silently dropping the provider.
+- `TRANSLATE_LLM_BASE_URL` and `TRANSLATE_LLM_MODEL` always win over the preset, so a gateway in front of DeepSeek is configured the same way as any other endpoint.
+
+Nothing here is required: an unknown host is used exactly as typed, and a key that belongs to another provider simply fails like any other dead endpoint — the notes below say which endpoint and model the run actually used.
+
 ### Checking which endpoints answer
 
-`Translation probe` ([`.github/workflows/translate-probe.yml`](.github/workflows/translate-probe.yml)) calls every provider directly, bypassing the chain, and reports the raw answer or the raw error per provider. Run it from **Actions → Translation probe → Run workflow**; it takes about a minute, prints the table below to the run page, uploads `translation-probe` as an artifact, and can post the same table as a comment on an issue or pull request (the `comment_on` input).
+`Translation probe` ([`.github/workflows/translate-probe.yml`](.github/workflows/translate-probe.yml)) calls every provider directly, bypassing the chain, and reports the raw answer or the raw error per provider. Run it from **Actions → Translation probe → Run workflow**; it takes about a minute, prints the table below to the run page, uploads `translation-probe` as an artifact, and can post the same table as a comment on an issue or pull request (the `comment_on` input). It also runs on every pull request that touches the translation chain, because whether a key works from a runner is the one thing the offline tests cannot answer. The check itself always reports the table; posting it as a pull-request comment needs a workflow token that may write, so with read-only workflow permissions the step says so in a warning and the table stays on the run page, in the step summary, and in the artifact. **Settings → Actions → General → Workflow permissions → Read and write permissions** enables the comment.
+
+The report ends with a **Configuration** section naming the variable each key came from, the endpoint it points at, and the model that will answer — the key itself is never printed. When a provider is missing from the table, that section is usually the reason.
 
 ```bash
 # The same probe locally; the report lands in build/probe/
@@ -167,7 +203,9 @@ Common arguments:
 
 **No push arrived?** Open the workflow run log: `items=0` means the window genuinely held no new articles, while `pushplus code=xxx` points at a token or quota problem. The rendered HTML is also uploaded as an artifact and kept for seven days, so you can download and inspect it.
 
-**English cards arrived without their Chinese lines?** The push is designed to go out anyway, so the run page says what happened: look for the `translation: …` notice and the warning naming the retired endpoints, or open `translation-report.md` in the uploaded artifact. Then run the `Translation probe` workflow — it shows each endpoint's raw answer from a GitHub runner in one minute. If every keyless endpoint refuses the runner (Google answers `429` most often), add `TRANSLATE_LLM_API_KEY` or `DEEPL_API_KEY`; a key is not required for the digest to run, but it is what makes the translations dependable.
+**English cards arrived without their Chinese lines?** The push is designed to go out anyway, so the run page says what happened: look for the `translation: …` notice and the warnings naming the endpoints that were retired or the configuration that is wrong, or open `translation-report.md` in the uploaded artifact — its Configuration section names the key variable, endpoint, and model the run used. Then run the `Translation probe` workflow, or open the comment it posts on a pull request that touches the translation chain: it shows each endpoint's raw answer from a GitHub runner in one minute. If every keyless endpoint refuses the runner (Google answers `429` most often), add `DEEPSEEK_API_KEY` or `DEEPL_API_KEY`; a key is not required for the digest to run, but it is what makes the translations dependable.
+
+**DeepSeek returns “model not exist”?** The account is fine — the model ID is not. `deepseek-chat` and `deepseek-reasoner` were retired on 2026-07-24; use `deepseek-flash` (or `deepseek-v4-pro`) in `TRANSLATE_LLM_MODEL`, or delete that variable and let the preset pick. The run shows the same advice as a warning annotation.
 
 **Want different delivery times?** Change the two cron expressions in the workflow (UTC = Beijing time − 8 hours) and update `window_hours` in `EDITIONS` so the windows still cover 24 hours.
 

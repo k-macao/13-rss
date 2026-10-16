@@ -62,10 +62,15 @@ jobs:
           PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
           PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
           # Translation is a chain: the keyed providers below are tried first and
-          # the keyless ones follows. Keys are optional — without them the digest
+          # the keyless ones follow. Keys are optional — without them the digest
           # still renders, and the run summary says which endpoint answered.
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
           TRANSLATE_LLM_API_KEY: ${{ secrets.TRANSLATE_LLM_API_KEY }}
+          # DeepSeek needs no other variable: the script's preset supplies the
+          # endpoint and a current model ID, so a key stored under either name
+          # (TRANSLATE_LLM_API_KEY or DEEPSEEK_API_KEY) works on its own.
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY || secrets.DEEPSEEK_KEY }}
+          TRANSLATE_LLM_PROVIDER: ${{ vars.TRANSLATE_LLM_PROVIDER }}
           TRANSLATE_LLM_BASE_URL: ${{ vars.TRANSLATE_LLM_BASE_URL }}
           TRANSLATE_LLM_MODEL: ${{ vars.TRANSLATE_LLM_MODEL }}
           TRANSLATE_PROVIDERS: ${{ vars.TRANSLATE_PROVIDERS }}
