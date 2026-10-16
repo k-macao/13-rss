@@ -1,0 +1,66 @@
+name: Translation probe
+
+# Asks every translation provider directly and reports which endpoints answer
+# from a GitHub-hosted runner. The digest chain hides that detail on purpose, so
+# this is the diagnostic to run when a push arrives without its Chinese lines.
+on:
+  workflow_dispatch:
+    inputs:
+      translators:
+        description: "Provider order to probe (comma-separated; empty = the chain default)"
+        type: string
+        default: ""
+      comment_on:
+        description: "Issue or pull request number to post the report to (0 = skip)"
+        type: string
+        default: "0"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: translate-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Probe every translation provider
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          TRANSLATE_LLM_API_KEY: ${{ secrets.TRANSLATE_LLM_API_KEY }}
+          TRANSLATE_LLM_BASE_URL: ${{ vars.TRANSLATE_LLM_BASE_URL }}
+          TRANSLATE_LLM_MODEL: ${{ vars.TRANSLATE_LLM_MODEL }}
+          MYMEMORY_EMAIL: ${{ secrets.MYMEMORY_EMAIL }}
+        run: |
+          python scripts/wechat_digest.py \
+            --probe-translators \
+            --translators "${{ inputs.translators }}" \
+            --timeout 10 \
+            --out build/probe
+
+      - name: Post the report as a comment
+        if: inputs.comment_on != '0' && inputs.comment_on != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "${{ inputs.comment_on }}" \
+            --repo "${{ github.repository }}" \
+            --body-file build/probe/translation-report.md
+
+      - name: Upload the probe report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: translation-probe
+          path: build/probe
+          if-no-files-found: ignore
+          retention-days: 14
