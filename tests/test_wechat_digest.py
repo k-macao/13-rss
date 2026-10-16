@@ -32,6 +32,7 @@ from scripts.wechat_digest import (
     clamp,
     configured_providers,
     dedupe,
+    deepl_translate,
     display_width,
     google_chrome_translate,
     google_translate,
@@ -574,6 +575,25 @@ class ProviderParsingTests(unittest.TestCase):
                 patch("scripts.wechat_digest.urlopen", side_effect=seen):
             self.assertEqual(mymemory_translate("Hello & world", timeout=8), "你好&世界")
         self.assertIn("de=me%40example.com", seen.requests[0].full_url)
+
+    def test_deepl_posts_form_fields_with_the_auth_header(self):
+        seen = self.responding({"translations": [{"detected_source_language": "EN", "text": "新模型提升了推理能力"}]})
+        with patch("scripts.wechat_digest.urlopen", side_effect=seen):
+            result = deepl_translate(
+                "A new model improves reasoning",
+                timeout=8,
+                api_key="abc:fx",
+                endpoint=DEEPL_FREE_ENDPOINT,
+            )
+
+        self.assertEqual(result, "新模型提升了推理能力")
+        request = seen.requests[0]
+        self.assertEqual(request.full_url, "https://api-free.deepl.com/v2/translate")
+        self.assertEqual(request.get_header("Authorization"), "DeepL-Auth-Key abc:fx")
+        body = parse_qs(request.data.decode("utf-8"))
+        self.assertEqual(body["target_lang"], ["ZH"])
+        self.assertEqual(body["source_lang"], ["EN"])
+        self.assertEqual(body["text"], ["A new model improves reasoning"])
 
     def test_llm_uses_an_openai_compatible_chat_endpoint(self):
         payload = {"choices": [{"message": {"content": "  “新模型提升了推理能力”\n"}}]}

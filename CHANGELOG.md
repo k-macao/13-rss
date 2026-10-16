@@ -9,7 +9,7 @@
 - Added the `Translation probe` workflow and `--probe-translators`, which call every provider directly with two fixed English strings and report each endpoint's raw answer or raw error, so one manual run answers which endpoints a GitHub runner can reach. The probe can post its table as a comment on an issue or pull request.
 - Passed the optional translation keys through the digest workflow as `DEEPL_API_KEY`, `TRANSLATE_LLM_API_KEY`, `MYMEMORY_EMAIL` secrets and `TRANSLATE_LLM_BASE_URL`, `TRANSLATE_LLM_MODEL`, `TRANSLATE_PROVIDERS` variables, and added a step that shows the translation report next to the rendered pages.
 - Documented the chain, its provider table, the probe, the report, and the new parameters in both WeChat digest guides, and noted the chain in both READMEs' digest sections.
-- Added 33 tests covering each provider's wire format, chain fall-through, stickiness, retirement, config resolution, the probe report and annotations, and the two workflows.
+- Added 34 tests covering each provider's wire format, chain fall-through, stickiness, retirement, config resolution, the probe report and annotations, and the two workflows.
 
 - Published the WeChat digest guide in English as `WECHAT-DIGEST.md`, pointed the English README's digest link at it, and cross-linked the two guides from each other; a repository test now asserts both READMEs link to the guide in their own language.
 - Added `topic_en` to all 41 entries of `sources/wechat-curated.json` and taught `tools/merge_wechat_sources.py` to write an English `description_en`, then backfilled the 18 published WeChat feeds whose English appendix descriptions still embedded a Chinese topic. Both README appendices now read in a single language each, and regeneration stays reproducible.
