@@ -2,8 +2,8 @@
 <opml version="2.0">
   <head>
     <title>Tidings Curated RSS — Company Technology</title>
-    <dateCreated>2026-09-03</dateCreated>
-    <dateModified>2026-09-03</dateModified>
+    <dateCreated>2026-10-17</dateCreated>
+    <dateModified>2026-10-17</dateModified>
     <ownerName>Tidings RSS Community</ownerName>
     <docs>http://opml.org/spec2.opml</docs>
   </head>
@@ -12,9 +12,13 @@
       <outline text="Anthropic News" title="Anthropic News" type="rss" xmlUrl="https://rsshub.bestblogs.dev/anthropic/news" htmlUrl="https://www.anthropic.com/news" />
       <outline text="Apple Machine Learning Research" title="Apple Machine Learning Research" type="rss" xmlUrl="https://machinelearning.apple.com/rss.xml" htmlUrl="https://machinelearning.apple.com" />
       <outline text="Artificial Intelligence" title="Artificial Intelligence" type="rss" xmlUrl="https://aws.amazon.com/blogs/amazon-ai/feed/" htmlUrl="https://aws.amazon.com/blogs/machine-learning/" />
+      <outline text="AWS Machine Learning Blog" title="AWS Machine Learning Blog" type="rss" xmlUrl="https://aws.amazon.com/blogs/machine-learning/feed/" htmlUrl="https://aws.amazon.com/blogs/machine-learning/" />
       <outline text="DeepSeek" title="DeepSeek" type="rss" xmlUrl="https://wechat2rss.bestblogs.dev/feed/1709da4f538d4ce4fb6d7a8ba1a5a1c297919601.xml" htmlUrl="https://wechat2rss.bestblogs.dev/feed/1709da4f538d4ce4fb6d7a8ba1a5a1c297919601.xml" />
+      <outline text="GitHub Blog · AI &amp; ML" title="GitHub Blog · AI &amp; ML" type="rss" xmlUrl="https://github.blog/ai-and-ml/feed/" htmlUrl="https://github.blog/ai-and-ml/" />
       <outline text="Google DeepMind News" title="Google DeepMind News" type="rss" xmlUrl="https://deepmind.com/blog/feed/basic/" htmlUrl="https://deepmind.google/blog/" />
       <outline text="Hugging Face - Blog" title="Hugging Face - Blog" type="rss" xmlUrl="https://huggingface.co/blog/feed.xml" htmlUrl="https://huggingface.co/blog" />
+      <outline text="Mistral AI" title="Mistral AI" type="rss" xmlUrl="https://mistral.ai/rss.xml" htmlUrl="https://mistral.ai/news" />
+      <outline text="NVIDIA Blog" title="NVIDIA Blog" type="rss" xmlUrl="https://blogs.nvidia.com/feed/" htmlUrl="https://blogs.nvidia.com/" />
       <outline text="OpenAI News" title="OpenAI News" type="rss" xmlUrl="https://openai.com/news/rss.xml" htmlUrl="https://openai.com/news" />
       <outline text="The latest research from Google" title="The latest research from Google" type="rss" xmlUrl="https://research.google/blog/rss/" htmlUrl="https://research.google/blog/" />
       <outline text="月之暗面 Kimi" title="月之暗面 Kimi" type="rss" xmlUrl="https://wechat2rss.bestblogs.dev/feed/c5c43d4bc17bae656763859ed0903bb6314ec6fe.xml" htmlUrl="https://wechat2rss.bestblogs.dev/feed/c5c43d4bc17bae656763859ed0903bb6314ec6fe.xml" />
@@ -52,6 +56,7 @@
     </outline>
     <outline text="🔬 Research &amp; Science" title="🔬 Research &amp; Science">
       <outline text="Amazon Science" title="Amazon Science" type="rss" xmlUrl="https://www.amazon.science/index.rss" htmlUrl="https://www.amazon.science/" />
+      <outline text="Microsoft Research" title="Microsoft Research" type="rss" xmlUrl="https://www.microsoft.com/en-us/research/feed/" htmlUrl="https://www.microsoft.com/en-us/research/blog/" />
       <outline text="腾讯研究院" title="腾讯研究院" type="rss" xmlUrl="https://wechat2rss.bestblogs.dev/feed/6152301e0978bffb0a8284cab339262b9764dcfb.xml" htmlUrl="https://wechat2rss.bestblogs.dev/feed/6152301e0978bffb0a8284cab339262b9764dcfb.xml" />
       <outline text="阿里研究院" title="阿里研究院" type="rss" xmlUrl="https://wechat2rss.bestblogs.dev/feed/e2f1190c120f7f3d74b630bfcfe9e58296bd535c.xml" htmlUrl="https://wechat2rss.bestblogs.dev/feed/e2f1190c120f7f3d74b630bfcfe9e58296bd535c.xml" />
     </outline>

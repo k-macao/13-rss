@@ -2,8 +2,8 @@
 <opml version="2.0">
   <head>
     <title>Tidings Curated RSS — Technology Media</title>
-    <dateCreated>2026-09-03</dateCreated>
-    <dateModified>2026-09-03</dateModified>
+    <dateCreated>2026-10-17</dateCreated>
+    <dateModified>2026-10-17</dateModified>
     <ownerName>Tidings RSS Community</ownerName>
     <docs>http://opml.org/spec2.opml</docs>
   </head>
@@ -11,10 +11,15 @@
     <outline text="📰 Technology Media" title="📰 Technology Media">
       <outline text="36氪" title="36氪" type="rss" xmlUrl="https://www.36kr.com/feed" htmlUrl="http://36kr.com" />
       <outline text="Ars Technica" title="Ars Technica" type="rss" xmlUrl="https://feeds.arstechnica.com/arstechnica/index" htmlUrl="https://arstechnica.com" />
+      <outline text="Ars Technica · AI" title="Ars Technica · AI" type="rss" xmlUrl="https://arstechnica.com/ai/feed/" htmlUrl="https://arstechnica.com/ai/" />
       <outline text="Engadget" title="Engadget" type="rss" xmlUrl="https://www.engadget.com/rss.xml" htmlUrl="https://www.engadget.com/" />
       <outline text="IT之家" title="IT之家" type="rss" xmlUrl="https://www.ithome.com/rss/" htmlUrl="https://www.ithome.com/" />
       <outline text="MIT Technology Review" title="MIT Technology Review" type="rss" xmlUrl="https://www.technologyreview.com/feed/" htmlUrl="https://www.technologyreview.com/" />
+      <outline text="MIT Technology Review · AI" title="MIT Technology Review · AI" type="rss" xmlUrl="https://www.technologyreview.com/topic/artificial-intelligence/feed" htmlUrl="https://www.technologyreview.com/topic/artificial-intelligence/" />
       <outline text="TechCrunch" title="TechCrunch" type="rss" xmlUrl="https://techcrunch.com/feed/" htmlUrl="https://techcrunch.com/" />
+      <outline text="TechCrunch · AI" title="TechCrunch · AI" type="rss" xmlUrl="https://techcrunch.com/category/artificial-intelligence/feed/" htmlUrl="https://techcrunch.com/category/artificial-intelligence/" />
+      <outline text="The Decoder" title="The Decoder" type="rss" xmlUrl="https://the-decoder.com/feed/" htmlUrl="https://the-decoder.com/" />
+      <outline text="The Verge · AI" title="The Verge · AI" type="rss" xmlUrl="https://www.theverge.com/rss/ai-artificial-intelligence/index.xml" htmlUrl="https://www.theverge.com/ai-artificial-intelligence" />
       <outline text="The Verge — News" title="The Verge — News" type="rss" xmlUrl="https://www.theverge.com/rss/index.xml" htmlUrl="https://www.theverge.com" />
       <outline text="WIRED" title="WIRED" type="rss" xmlUrl="https://www.wired.com/feed/rss" htmlUrl="https://www.wired.com" />
       <outline text="少数派" title="少数派" type="rss" xmlUrl="https://sspai.com/feed" htmlUrl="https://sspai.com" />

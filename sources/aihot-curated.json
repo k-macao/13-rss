@@ -9,7 +9,7 @@
   "requested_sources": [
     "AIHOT 示范信源 industry/sources.json（k-macao/AIHOT）"
   ],
-  "method": "Every candidate endpoint was fetched directly over HTTPS and its payload parsed as RSS, Atom, or JSON Feed. Each round records the HTTP status, the parsed root format, the number of items actually read, the newest item timestamp as published by the feed, and the channel's own title and language. Candidates had to return a parseable feed with at least one item in all three rounds. Tidings parser rounds were not available in the authoring environment, so this round records HTTP fetch plus feed-parse evidence only.",
+  "method": "Every candidate endpoint was fetched directly over HTTPS from a GitHub-hosted runner and its payload parsed as RSS, Atom, or JSON Feed. Each round records the HTTP status, the parsed root format, the number of items actually read, the newest item timestamp as published by the feed, and the channel's own title and language. Candidates had to return a parseable feed with at least one item in all three rounds. Tidings parser rounds were not available in the authoring environment, so this round records HTTP fetch plus feed-parse evidence only. Rounds ran on 2026-10-16 between 17:07 and 17:16 UTC, about seven minutes apart.",
   "checked_on": "2026-10-17",
   "timezone_note": "Review timestamps are Asia/Macau (UTC+8); feed timestamps are reproduced in UTC as published.",
   "candidates": [
@@ -23,7 +23,12 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech", "engineering"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
       "organization": "OpenAI",
       "company_direction": "AI",
       "selected": false,
@@ -41,12 +46,17 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech", "engineering"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
       "organization": "Google",
       "company_direction": "AI",
       "selected": false,
       "duplicate_of": "https://deepmind.com/blog/feed/basic/",
-      "reason": "The catalog already publishes this lab's blog as “Google DeepMind News” (Google / AI in the company-technology bundle). Adding the same publisher's blog a second time under a newer host would duplicate an existing slot, so the candidate is recorded as a rejected duplicate and the published endpoint is re-checked in the same rounds.",
+      "reason": "The catalog already publishes this lab's blog as “Google DeepMind News” (Google / AI in the company-technology bundle). Adding the same publisher's blog a second time under a newer host would duplicate an existing slot, so the candidate is recorded as a rejected duplicate; the published deepmind.com endpoint was re-checked in the same rounds and still resolves, redirecting to this address.",
       "description": "Google DeepMind 官方博客，发布模型与研究进展的一手说明。",
       "description_en": "Google DeepMind's official blog with first-party model and research announcements."
     },
@@ -60,7 +70,13 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech", "engineering", "research"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering",
+        "research"
+      ],
       "organization": "Google",
       "company_direction": "研究",
       "selected": false,
@@ -78,7 +94,12 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech", "engineering"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
       "organization": "Hugging Face",
       "company_direction": "AI",
       "selected": false,
@@ -96,7 +117,12 @@
       "category": "Research & Science",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech", "research"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "research"
+      ],
       "organization": "Microsoft",
       "company_direction": "研究",
       "selected": true,
@@ -114,7 +140,12 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech", "engineering"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
       "organization": "NVIDIA",
       "company_direction": "AI",
       "selected": true,
@@ -132,7 +163,12 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech", "engineering"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
       "organization": "Amazon Web Services",
       "company_direction": "机器学习",
       "selected": true,
@@ -150,7 +186,12 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech", "engineering"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
       "organization": "GitHub",
       "company_direction": "AI",
       "selected": true,
@@ -168,7 +209,11 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech"
+      ],
       "organization": "Mistral AI",
       "company_direction": "AI",
       "selected": true,
@@ -186,7 +231,11 @@
       "category": "Research & Science",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "research"],
+      "packs": [
+        "ai",
+        "all",
+        "research"
+      ],
       "selected": true,
       "reason": "Long-running university lab blog publishing first-party research write-ups; a different kind of source from the company research blogs already in the catalog.",
       "description": "加州大学伯克利分校 BAIR 实验室博客，由研究者本人写模型和系统方向的新工作。",
@@ -202,7 +251,12 @@
       "category": "Technology Media",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "news", "tech-media"],
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
       "selected": true,
       "reason": "Dedicated AI section of a first-party media feed, so readers can follow AI coverage without the rest of the newsroom; the catalog's main Verge feed stays as the full-newsroom option.",
       "description": "The Verge 人工智能栏目，只推 AI 相关的报道与产品评测。",
@@ -218,7 +272,12 @@
       "category": "Technology Media",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "news", "tech-media"],
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
       "selected": true,
       "reason": "Dedicated AI section of a first-party startup newsroom, focused on funding and company news in AI rather than the full TechCrunch wire.",
       "description": "TechCrunch 人工智能栏目，聚焦 AI 创业公司的融资、产品与行业动向。",
@@ -234,7 +293,12 @@
       "category": "Technology Media",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "news", "tech-media"],
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
       "selected": true,
       "reason": "Dedicated AI section with a technical editing angle, narrower than the general Ars Technica feed already published.",
       "description": "Ars Technica 人工智能栏目，偏技术解释的 AI 报道与分析。",
@@ -250,7 +314,12 @@
       "category": "Technology Media",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "news", "tech-media"],
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
       "selected": true,
       "reason": "Dedicated AI topic feed from a first-party magazine, isolating the AI desk from the general MIT Technology Review feed.",
       "description": "MIT Technology Review 人工智能主题源，只收 AI 相关的深度报道与评论。",
@@ -266,7 +335,12 @@
       "category": "Technology Media",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "news", "tech-media"],
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
       "selected": true,
       "reason": "Independent AI-only newsroom with several items per day and a clear editorial remit; no overlapping publisher in the catalog.",
       "description": "The Decoder 是专注 AI 的独立媒体，日更模型发布、研究与企业动向的简明报道。",
@@ -282,7 +356,11 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "engineering"],
+      "packs": [
+        "ai",
+        "all",
+        "engineering"
+      ],
       "selected": false,
       "reason": "Already published in the catalog under the same normalized feed URL.",
       "description": "Simon Willison 的个人博客，记录 LLM 工具与实践的第一手实验。",
@@ -298,9 +376,13 @@
       "category": "Tech Newsletters & Weeklies",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "weeklies"],
-      "selected": true,
-      "reason": "Long-running independent AI newsletter with an editorial voice, filling a weekly-review slot next to the two AI newsletters already published.",
+      "packs": [
+        "ai",
+        "all",
+        "weeklies"
+      ],
+      "selected": false,
+      "reason": "Rejected: Substack answered HTTP 403 on all three rounds from the hosted runner, so the endpoint cannot be verified as publicly subscribable and would also fail the weekly live check. Recorded as an unsubscribable candidate rather than published on trust.",
       "description": "Import AI 是 Jack Clark 主笔的 AI 周刊，按周梳理研究、产业与政策动态。",
       "description_en": "Import AI is Jack Clark's weekly AI newsletter summarizing research, industry, and policy developments."
     },
@@ -314,7 +396,11 @@
       "category": "Podcasts",
       "kind": "podcast",
       "language": "en",
-      "packs": ["ai", "all", "podcasts"],
+      "packs": [
+        "ai",
+        "all",
+        "podcasts"
+      ],
       "selected": true,
       "reason": "Practitioner-focused AI engineering podcast with an accompanying written archive; no overlapping publisher in the catalog.",
       "description": "Latent Space 是面向 AI 工程师的播客，访谈模型、工具与产品的一线实践者。",
@@ -330,10 +416,15 @@
       "category": "Artificial Intelligence",
       "kind": "article",
       "language": "en",
-      "packs": ["ai", "all", "company-tech", "engineering"],
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
       "selected": false,
       "existing_entry_check": true,
-      "reason": "Not a candidate for publication. This is the endpoint the catalog already publishes as “Google DeepMind News”; it is probed in the same rounds to record whether the published URL still resolves while the newer deepmind.google address is rejected as a duplicate.",
+      "reason": "Not a candidate for publication. This is the endpoint the catalog already publishes as “Google DeepMind News”; it answered HTTP 200 in all three rounds and redirects to deepmind.google/blog/rss.xml, so the published entry needs no correction.",
       "description": "目录中已发布的 Google DeepMind 官方博客，本轮一并复核该地址是否仍然可用。",
       "description_en": "The Google DeepMind blog endpoint this catalog already publishes, re-checked in this round to record whether it still resolves."
     }

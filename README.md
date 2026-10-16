@@ -2,7 +2,7 @@
   <img src="https://tidings.info/apple-touch-icon.png" width="96" height="96" alt="Tidings app icon">
   <h1>Tidings RSS</h1>
   <p><strong>High-quality feeds, organized into OPML bundles you can import directly.</strong></p>
-  <p>Start with the Top 200, then use topic bundles or the 725-source directory when you want more. Top 200 last checked: 2026-08-13.</p>
+  <p>Start with the Top 200, then use topic bundles or the 737-source directory when you want more. Top 200 last checked: 2026-08-13.</p>
   <p><a href="README.zh-CN.md">简体中文</a> · <a href="#downloads">Download OPML</a> · <a href="RSS-GUIDE.md">RSS guide</a> · <a href="#complete-source-directory">Browse every source</a> · <a href="CONTRIBUTING.md">Suggest a feed</a> · <a href="#wechat-user-group">WeChat group</a> · <a href="https://tidings.info/">Get Tidings</a></p>
   <p>
     <a href="https://github.com/fuxiaoai/tidings-rss/actions/workflows/validate.yml"><img alt="Catalog validation" src="https://github.com/fuxiaoai/tidings-rss/actions/workflows/validate.yml/badge.svg"></a>
@@ -11,7 +11,7 @@
   </p>
 </div>
 
-For a first import, choose the Top 200. It keeps established publishers, long-running independent writers, first-party sources, and authors with strong community recognition from the 725-source directory. All 14 categories are represented, without leaving you hundreds of subscriptions to prune.
+For a first import, choose the Top 200. It keeps established publishers, long-running independent writers, first-party sources, and authors with strong community recognition from the 737-source directory. All 14 categories are represented, without leaving you hundreds of subscriptions to prune.
 
 The Top 200 balances Chinese and English sources across AI, engineering, security, technology media, newsletters, research, news, product, business, blogs, communities, culture, video, and podcasts. Use a topic bundle when you want more depth, or the complete collection when you want an archive to organize yourself.
 
@@ -22,20 +22,20 @@ If you are unsure, choose the Top 200. Topic bundles overlap; the complete colle
 | Collection | Feeds | Download | Best for |
 | --- | ---: | --- | --- |
 | ⭐ Top 200 (recommended) | `200` | [Download `tidings-top200.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-top200.opml) | Broad, high-quality coverage with a much smaller cleanup cost |
-| 📚 Complete collection | `725` | [Download `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | Keeping the full directory or pruning it yourself |
+| 📚 Complete collection | `737` | [Download `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | Keeping the full directory or pruning it yourself |
 | ✍️ Chinese independent blogs | `349` | [Download `tidings-blogs.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-blogs.opml) | Active Chinese personal writing |
 | 👥 Technical communities | `14` | [Download `tidings-communities.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-communities.opml) | V2EX, LINUX DO, Reddit, Hacker News, and other active discussions |
 | 🔐 Security | `8` | [Download `tidings-security.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-security.opml) | Vulnerabilities, defensive guidance, security research, and news |
-| 📰 Technology media | `10` | [Download `tidings-tech-media.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-tech-media.opml) | Technology news, products, and long-form reporting |
+| 📰 Technology media | `15` | [Download `tidings-tech-media.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-tech-media.opml) | Technology news, products, and long-form reporting |
 | 📮 Technical newsletters | `9` | [Download `tidings-weeklies.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-weeklies.opml) | AI, JavaScript, Go, Rust, and Chinese technology weeklies |
 | 💬 WeChat official accounts | `30` | [Download `tidings-wechat.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-wechat.opml) | Reading selected WeChat articles outside the app |
-| 🏢 Company technology | `40` | [Download `tidings-company-tech.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-company-tech.opml) | First-party engineering, AI, security, and research writing |
-| 🤖 Artificial intelligence | `99` | [Download `tidings-ai.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-ai.opml) | Models, research, tools, and technical viewpoints |
-| 🗞️ Fresh news | `48` | [Download `tidings-news.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-news.opml) | International, technology, security, Chinese news, and trending boards |
-| 🔬 Research and science | `27` | [Download `tidings-research.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-research.opml) | Papers, journals, labs, and science reporting |
-| 🛠️ Engineering and technology | `420` | [Download `tidings-engineering.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-engineering.opml) | Software, architecture, developer tools, and engineering practice |
+| 🏢 Company technology | `45` | [Download `tidings-company-tech.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-company-tech.opml) | First-party engineering, AI, security, and research writing |
+| 🤖 Artificial intelligence | `111` | [Download `tidings-ai.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-ai.opml) | Models, research, tools, and technical viewpoints |
+| 🗞️ Fresh news | `53` | [Download `tidings-news.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-news.opml) | International, technology, security, Chinese news, and trending boards |
+| 🔬 Research and science | `29` | [Download `tidings-research.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-research.opml) | Papers, journals, labs, and science reporting |
+| 🛠️ Engineering and technology | `423` | [Download `tidings-engineering.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-engineering.opml) | Software, architecture, developer tools, and engineering practice |
 | 🎬 Video channels | `93` | [Download `tidings-videos.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-videos.opml) | AI, software, science, and business video |
-| 🎧 Podcasts | `73` | [Download `tidings-podcasts.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-podcasts.opml) | Technology, business, science, and Chinese shows |
+| 🎧 Podcasts | `74` | [Download `tidings-podcasts.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-podcasts.opml) | Technology, business, science, and Chinese shows |
 | 🀄 Chinese-language sources | `474` | [Download `tidings-chinese.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-chinese.opml) | Chinese articles, communities, video, and audio |
 
 [RSS guide](RSS-GUIDE.md) · [Browse OPML](opml/) · [SHA-256 checksums](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/SHA256SUMS.txt) · [Catalog summary](reports/catalog-summary.md) · [Machine-readable catalog](data/feeds.json)
@@ -102,10 +102,10 @@ The complete directory follows, with source names, descriptions, categories, and
 <!-- SOURCE_APPENDIX_START -->
 ## Complete source directory
 
-All 725 feeds in the complete collection are listed below with their primary category and bundles. This appendix is generated from `data/feeds.json`.
+All 737 feeds in the complete collection are listed below with their primary category and bundles. This appendix is generated from `data/feeds.json`.
 
 <details>
-<summary>🤖 Artificial Intelligence · 38</summary>
+<summary>🤖 Artificial Intelligence · 42</summary>
 
 | Source | Description | Primary category | Feed | Bundles |
 | --- | --- | --- | --- | --- |
@@ -115,16 +115,20 @@ All 725 feeds in the complete collection are listed below with their primary cat
 | [Anthropic News](https://www.anthropic.com/news) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://rsshub.bestblogs.dev/anthropic/news) | ai, all, company-tech, engineering, top200 |
 | [Apple Machine Learning Research](https://machinelearning.apple.com) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://machinelearning.apple.com/rss.xml) | ai, all, company-tech, engineering, research, top200 |
 | [Artificial Intelligence](https://aws.amazon.com/blogs/machine-learning/) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://aws.amazon.com/blogs/amazon-ai/feed/) | ai, all, company-tech, engineering, top200 |
+| [AWS Machine Learning Blog](https://aws.amazon.com/blogs/machine-learning/) | AWS's official machine-learning blog with practical guidance on training, inference, and managed services. | Artificial Intelligence | [RSS](https://aws.amazon.com/blogs/machine-learning/feed/) | ai, all, company-tech, engineering |
 | [cs.AI updates on arXiv.org](http://rss.arxiv.org/rss/cs.AI) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://rss.arxiv.org/rss/cs.AI) | ai, all, engineering, research |
 | [cs.CL updates on arXiv.org](http://rss.arxiv.org/rss/cs.CL) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://export.arxiv.org/rss/cs.CL) | ai, all, engineering, research, top200 |
 | [cs.CV updates on arXiv.org](http://rss.arxiv.org/rss/cs.CV) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://export.arxiv.org/rss/cs.CV) | ai, all, chinese, engineering, research |
 | [cs.LG updates on arXiv.org](http://rss.arxiv.org/rss/cs.LG) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://export.arxiv.org/rss/cs.LG) | ai, all, chinese, engineering, research |
 | [DeepSeek](https://wechat2rss.bestblogs.dev/feed/1709da4f538d4ce4fb6d7a8ba1a5a1c297919601.xml) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://wechat2rss.bestblogs.dev/feed/1709da4f538d4ce4fb6d7a8ba1a5a1c297919601.xml) | ai, all, chinese, company-tech, engineering, top200, wechat |
+| [GitHub Blog · AI & ML](https://github.blog/ai-and-ml/) | The AI and ML section of GitHub's official blog, isolating AI product and engineering updates. | Artificial Intelligence | [RSS](https://github.blog/ai-and-ml/feed/) | ai, all, company-tech, engineering |
 | [Google DeepMind News](https://deepmind.google/blog/) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://deepmind.com/blog/feed/basic/) | ai, all, company-tech, engineering, top200 |
 | [Hacker News - Newest: "AI"](https://news.ycombinator.com/newest) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://hnrss.org/newest?q=AI) | ai, all, engineering |
 | [Hacker News - Newest: "LLM"](https://news.ycombinator.com/newest) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://hnrss.org/newest?q=LLM) | ai, all, engineering |
 | [Hugging Face - Blog](https://huggingface.co/blog) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://huggingface.co/blog/feed.xml) | ai, all, company-tech, engineering, top200 |
+| [Mistral AI](https://mistral.ai/news) | Mistral AI's official blog announcing models, products, and partnerships. | Artificial Intelligence | [RSS](https://mistral.ai/rss.xml) | ai, all, company-tech |
 | [MIT News - Artificial intelligence](https://news.mit.edu/rss/topic/artificial-intelligence2) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://news.mit.edu/rss/topic/artificial-intelligence2) | ai, all, engineering, research, top200 |
+| [NVIDIA Blog](https://blogs.nvidia.com/) | NVIDIA's official blog covering accelerated computing, AI models, and industry deployments. | Artificial Intelligence | [RSS](https://blogs.nvidia.com/feed/) | ai, all, company-tech, engineering |
 | [OpenAI News](https://openai.com/news) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://openai.com/news/rss.xml) | ai, all, company-tech, engineering, top200 |
 | [Recent Commits to openclaw:main](https://github.com/openclaw/openclaw/commits/main) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://github.com/openclaw/openclaw/commits/main.atom) | ai, all, engineering |
 | [Release notes from claude-code](https://github.com/anthropics/claude-code/releases) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://github.com/anthropics/claude-code/releases.atom) | ai, all, engineering |
@@ -524,7 +528,7 @@ All 725 feeds in the complete collection are listed below with their primary cat
 </details>
 
 <details>
-<summary>📰 Technology Media · 10</summary>
+<summary>📰 Technology Media · 15</summary>
 
 | Source | Description | Primary category | Feed | Bundles |
 | --- | --- | --- | --- | --- |
@@ -538,6 +542,11 @@ All 725 feeds in the complete collection are listed below with their primary cat
 | [少数派](https://sspai.com) | Digital tools, productivity methods, software experiences, and personal workflows. | Technology Media | [RSS](https://sspai.com/feed) | all, chinese, news, tech-media, top200 |
 | [爱范儿](https://www.ifanr.com?utm_source=rss&utm_medium=rss&utm_campaign=) | Chinese coverage of consumer technology, smart devices, and product trends. | Technology Media | [RSS](https://www.ifanr.com/feed) | all, chinese, news, tech-media, top200 |
 | [MIT Technology Review](https://www.technologyreview.com/) | In-depth reporting on AI, computing, climate, and biotechnology. | Technology Media | [RSS](https://www.technologyreview.com/feed/) | all, news, tech-media, top200 |
+| [The Verge · AI](https://www.theverge.com/ai-artificial-intelligence) | The Verge's artificial-intelligence section, limited to AI reporting and product coverage. | Technology Media | [RSS](https://www.theverge.com/rss/ai-artificial-intelligence/index.xml) | ai, all, news, tech-media |
+| [TechCrunch · AI](https://techcrunch.com/category/artificial-intelligence/) | TechCrunch's artificial-intelligence category, focused on AI startup funding, products, and industry moves. | Technology Media | [RSS](https://techcrunch.com/category/artificial-intelligence/feed/) | ai, all, news, tech-media |
+| [Ars Technica · AI](https://arstechnica.com/ai/) | Ars Technica's AI section, with technically detailed AI reporting and analysis. | Technology Media | [RSS](https://arstechnica.com/ai/feed/) | ai, all, news, tech-media |
+| [MIT Technology Review · AI](https://www.technologyreview.com/topic/artificial-intelligence/) | MIT Technology Review's artificial-intelligence topic feed, isolating its AI reporting and commentary. | Technology Media | [RSS](https://www.technologyreview.com/topic/artificial-intelligence/feed) | ai, all, news, tech-media |
+| [The Decoder](https://the-decoder.com/) | The Decoder is an AI-only newsroom publishing frequent, concise reporting on models, research, and industry moves. | Technology Media | [RSS](https://the-decoder.com/feed/) | ai, all, news, tech-media |
 
 </details>
 
@@ -559,7 +568,7 @@ All 725 feeds in the complete collection are listed below with their primary cat
 </details>
 
 <details>
-<summary>🔬 Research & Science · 19</summary>
+<summary>🔬 Research & Science · 21</summary>
 
 | Source | Description | Primary category | Feed | Bundles |
 | --- | --- | --- | --- | --- |
@@ -567,9 +576,11 @@ All 725 feeds in the complete collection are listed below with their primary cat
 | [All Top News -- ScienceDaily](https://www.sciencedaily.com/news/top/) | Research and science feed. | Research & Science | [RSS](https://www.sciencedaily.com/rss/top/science.xml) | all, research |
 | [Amazon Science](https://www.amazon.science/) | Research and science feed. | Research & Science | [RSS](https://www.amazon.science/index.rss) | all, company-tech, research |
 | [BBC News — Science](https://www.bbc.co.uk/news/science_and_environment) | Research and science feed. | Research & Science | [RSS](https://feeds.bbci.co.uk/news/science_and_environment/rss.xml) | all, research, top200 |
+| [Berkeley AI Research](https://bair.berkeley.edu/blog/) | The BAIR lab blog at UC Berkeley, with research-written walkthroughs of new models and systems work. | Research & Science | [RSS](https://bair.berkeley.edu/blog/feed.xml) | ai, all, research |
 | [eLife: latest articles](https://elifesciences.org) | Research and science feed. | Research & Science | [RSS](https://elifesciences.org/rss/recent.xml) | all, research, top200 |
 | [FlowingData](https://flowingdata.com) | Research and science feed. | Research & Science | [RSS](https://flowingdata.com/feed) | all, research, top200 |
 | [Latest Science News -- ScienceDaily](https://www.sciencedaily.com/news/) | Research and science feed. | Research & Science | [RSS](https://www.sciencedaily.com/rss/all.xml) | all, research |
+| [Microsoft Research](https://www.microsoft.com/en-us/research/blog/) | Microsoft Research's official blog with first-party papers and project write-ups across AI, systems, and fundamental research. | Research & Science | [RSS](https://www.microsoft.com/en-us/research/feed/) | ai, all, company-tech, research |
 | [NASA](https://www.nasa.gov) | Research and science feed. | Research & Science | [RSS](https://www.nasa.gov/news-release/feed/) | all, research, top200 |
 | [Nature](http://feeds.nature.com/nature/rss/current) | Research and science feed. | Research & Science | [RSS](https://www.nature.com/nature.rss) | all, research, top200 |
 | [NYT > Science](https://www.nytimes.com/section/science) | Research and science feed. | Research & Science | [RSS](https://rss.nytimes.com/services/xml/rss/nyt/Science.xml) | all, research, top200 |
@@ -861,7 +872,7 @@ All 725 feeds in the complete collection are listed below with their primary cat
 </details>
 
 <details>
-<summary>🎧 Podcasts · 73</summary>
+<summary>🎧 Podcasts · 74</summary>
 
 | Source | Description | Primary category | Feed | Bundles |
 | --- | --- | --- | --- | --- |
@@ -876,6 +887,7 @@ All 725 feeds in the complete collection are listed below with their primary cat
 | [Hanselminutes with Scott Hanselman](https://www.hanselminutes.com) | Podcast. | Podcasts | [RSS](https://feeds.simplecast.com/gvtxUiIf) | all, podcasts, top200 |
 | [Invest Like the Best with Patrick O'Shaughnessy](https://colossus.com/) | Podcast. | Podcasts | [RSS](https://investlikethebest.libsyn.com/rss) | all, podcasts, top200 |
 | [Invisibilia](https://www.npr.org/podcasts/510307/invisibilia) | Podcast. | Podcasts | [RSS](https://feeds.npr.org/510307/podcast.xml) | all, podcasts |
+| [Latent Space](https://www.latent.space/) | Latent Space is an AI-engineering podcast interviewing practitioners building models, tools, and products. | Podcasts | [RSS](https://www.latent.space/feed) | ai, all, podcasts |
 | [Planet Money](https://www.npr.org/podcasts/510289/planet-money) | Podcast. | Podcasts | [RSS](https://feeds.npr.org/510289/podcast.xml) | all, podcasts |
 | [Reply All](http://gimletmedia.com/shows/reply-all) | Podcast. | Podcasts | [RSS](https://feeds.megaphone.fm/replyall) | all, podcasts |
 | [The Cynical Developer](https://cynical.dev/) | Podcast. | Podcasts | [RSS](https://cynicaldeveloper.com/feed/podcast) | all, podcasts |

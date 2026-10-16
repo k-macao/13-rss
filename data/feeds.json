@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "generated_at": "2026-09-03",
+  "generated_at": "2026-10-17",
   "validation": {
-    "engine": "Tidings parseFeedUrl; the 2026-09-03 hot-list and market-data additions were verified by HTTP fetch plus feed parse",
-    "criteria": "Chinese independent blogs passed three parser rounds, had at least two dated posts and updated within 180 days; retained catalog feeds passed two current parser rounds. WeChat additions passed two two-second time-to-first-byte probes, Tidings parsing, and a 180-day freshness check. Community additions passed three current Tidings parser rounds and exposed recently dated discussions. Security, technology-media, and weekly additions passed three current Tidings parser rounds and an editorial relevance review. The Top 200 is a balanced subset whose 307-candidate pool was checked three times; every published feed returned articles and real publication dates in all three Tidings parser rounds. The 2026-09-03 hot-list and market-data round was verified by direct HTTP fetch plus RSS/Atom parsing rather than Tidings; every published addition returned a parseable feed, and the SoPilot channel was valid but empty at check time because its board had no qualifying posts.",
-    "candidate_count": 2294,
-    "parser_passed": 725,
-    "retained_count": 725
+    "engine": "Tidings parseFeedUrl; the 2026-10-17 AIHOT demo-source round was verified by HTTP fetch plus feed parse",
+    "criteria": "Chinese independent blogs passed three parser rounds, had at least two dated posts and updated within 180 days; retained catalog feeds passed two current parser rounds. WeChat additions passed two two-second time-to-first-byte probes, Tidings parsing, and a 180-day freshness check. Community additions passed three current Tidings parser rounds and exposed recently dated discussions. Security, technology-media, and weekly additions passed three current Tidings parser rounds and an editorial relevance review. The Top 200 is a balanced subset whose 307-candidate pool was checked three times; every published feed returned articles and real publication dates in all three Tidings parser rounds. The 2026-09-03 hot-list and market-data round was verified by direct HTTP fetch plus RSS/Atom parsing rather than Tidings; every published addition returned a parseable feed, and the SoPilot channel was valid but empty at check time because its board had no qualifying posts. The 2026-10-17 AIHOT demo-source round was verified by direct HTTP fetch plus RSS/Atom/JSON Feed parsing rather than Tidings; every published addition returned a parseable feed with at least one item in every round, and the endpoints already published in the catalog were re-checked in the same rounds.",
+    "candidate_count": 2313,
+    "parser_passed": 737,
+    "retained_count": 737
   },
   "feeds": [
     {
@@ -149,6 +149,30 @@
       "company_direction": "AI"
     },
     {
+      "id": "458f4ae1b0fe",
+      "title": "AWS Machine Learning Blog",
+      "feed_url": "https://aws.amazon.com/blogs/machine-learning/feed/",
+      "site_url": "https://aws.amazon.com/blogs/machine-learning/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-16T15:23:10Z",
+      "description": "AWS 官方机器学习博客，讲模型训练、推理部署与平台服务的实践做法。",
+      "description_en": "AWS's official machine-learning blog with practical guidance on training, inference, and managed services.",
+      "organization": "Amazon Web Services",
+      "company_direction": "机器学习"
+    },
+    {
       "id": "4317c649bc1b",
       "title": "cs.AI updates on arXiv.org",
       "feed_url": "https://rss.arxiv.org/rss/cs.AI",
@@ -263,6 +287,30 @@
       "latest_item_at": "2026-06-25T13:35:00Z",
       "description": "Artificial Intelligence 订阅源",
       "organization": "DeepSeek",
+      "company_direction": "AI"
+    },
+    {
+      "id": "d3383a527b54",
+      "title": "GitHub Blog · AI & ML",
+      "feed_url": "https://github.blog/ai-and-ml/feed/",
+      "site_url": "https://github.blog/ai-and-ml/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-13T17:56:33Z",
+      "description": "GitHub 官方博客的人工智能与机器学习栏目，只收 AI 相关的产品与工程更新。",
+      "description_en": "The AI and ML section of GitHub's official blog, isolating AI product and engineering updates.",
+      "organization": "GitHub",
       "company_direction": "AI"
     },
     {
@@ -382,6 +430,29 @@
       "description_en": "A weekly digest of AI research, products, and policy."
     },
     {
+      "id": "7587c4fc479a",
+      "title": "Mistral AI",
+      "feed_url": "https://mistral.ai/rss.xml",
+      "site_url": "https://mistral.ai/news",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-15T12:00:00Z",
+      "description": "Mistral AI 官方博客，发布模型、产品与合作的一手公告。",
+      "description_en": "Mistral AI's official blog announcing models, products, and partnerships.",
+      "organization": "Mistral AI",
+      "company_direction": "AI"
+    },
+    {
       "id": "9539d7d50e44",
       "title": "MIT News - Artificial intelligence",
       "feed_url": "https://news.mit.edu/rss/topic/artificial-intelligence2",
@@ -402,6 +473,30 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-10T19:25:00Z",
       "description": "Artificial Intelligence 订阅源"
+    },
+    {
+      "id": "1a449b558450",
+      "title": "NVIDIA Blog",
+      "feed_url": "https://blogs.nvidia.com/feed/",
+      "site_url": "https://blogs.nvidia.com/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-15T17:00:23Z",
+      "description": "NVIDIA 官方博客，发布加速计算、AI 模型与行业应用的一手消息。",
+      "description_en": "NVIDIA's official blog covering accelerated computing, AI models, and industry deployments.",
+      "organization": "NVIDIA",
+      "company_direction": "AI"
     },
     {
       "id": "bea4293d5edd",
@@ -11343,6 +11438,27 @@
       "description": "播客节目"
     },
     {
+      "id": "a5689419c248",
+      "title": "Latent Space",
+      "feed_url": "https://www.latent.space/feed",
+      "site_url": "https://www.latent.space/",
+      "category": "Podcasts",
+      "kind": "podcast",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "podcasts"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-16T04:16:45Z",
+      "description": "Latent Space 是面向 AI 工程师的播客，访谈模型、工具与产品的一线实践者。",
+      "description_en": "Latent Space is an AI-engineering podcast interviewing practitioners building models, tools, and products."
+    },
+    {
       "id": "ef15faeacb5c",
       "title": "Planet Money",
       "feed_url": "https://feeds.npr.org/510289/podcast.xml",
@@ -12822,6 +12938,27 @@
       "description": "Research & Science 订阅源"
     },
     {
+      "id": "51f827497597",
+      "title": "Berkeley AI Research",
+      "feed_url": "https://bair.berkeley.edu/blog/feed.xml",
+      "site_url": "https://bair.berkeley.edu/blog/",
+      "category": "Research & Science",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "research"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-07-29T09:00:00Z",
+      "description": "加州大学伯克利分校 BAIR 实验室博客，由研究者本人写模型和系统方向的新工作。",
+      "description_en": "The BAIR lab blog at UC Berkeley, with research-written walkthroughs of new models and systems work."
+    },
+    {
       "id": "eda13bcfa201",
       "title": "eLife: latest articles",
       "feed_url": "https://elifesciences.org/rss/recent.xml",
@@ -12879,6 +13016,30 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-10T14:50:43Z",
       "description": "Research & Science 订阅源"
+    },
+    {
+      "id": "4b7dc91663de",
+      "title": "Microsoft Research",
+      "feed_url": "https://www.microsoft.com/en-us/research/feed/",
+      "site_url": "https://www.microsoft.com/en-us/research/blog/",
+      "category": "Research & Science",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "research"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-15T16:00:00Z",
+      "description": "Microsoft Research 官方博客，覆盖人工智能、系统与基础研究的一手论文与项目介绍。",
+      "description_en": "Microsoft Research's official blog with first-party papers and project write-ups across AI, systems, and fundamental research.",
+      "organization": "Microsoft",
+      "company_direction": "研究"
     },
     {
       "id": "e3069eef100a",
@@ -15096,6 +15257,116 @@
       ],
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-12T12:10:00.000Z"
+    },
+    {
+      "id": "30d307571142",
+      "title": "The Verge · AI",
+      "feed_url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "site_url": "https://www.theverge.com/ai-artificial-intelligence",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-16T16:26:17Z",
+      "description": "The Verge 人工智能栏目，只推 AI 相关的报道与产品评测。",
+      "description_en": "The Verge's artificial-intelligence section, limited to AI reporting and product coverage."
+    },
+    {
+      "id": "a654756600fb",
+      "title": "TechCrunch · AI",
+      "feed_url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+      "site_url": "https://techcrunch.com/category/artificial-intelligence/",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-16T16:30:00Z",
+      "description": "TechCrunch 人工智能栏目，聚焦 AI 创业公司的融资、产品与行业动向。",
+      "description_en": "TechCrunch's artificial-intelligence category, focused on AI startup funding, products, and industry moves."
+    },
+    {
+      "id": "1f367bf02912",
+      "title": "Ars Technica · AI",
+      "feed_url": "https://arstechnica.com/ai/feed/",
+      "site_url": "https://arstechnica.com/ai/",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-16T15:41:00Z",
+      "description": "Ars Technica 人工智能栏目，偏技术解释的 AI 报道与分析。",
+      "description_en": "Ars Technica's AI section, with technically detailed AI reporting and analysis."
+    },
+    {
+      "id": "14307d09071f",
+      "title": "MIT Technology Review · AI",
+      "feed_url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+      "site_url": "https://www.technologyreview.com/topic/artificial-intelligence/",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-13T10:00:00Z",
+      "description": "MIT Technology Review 人工智能主题源，只收 AI 相关的深度报道与评论。",
+      "description_en": "MIT Technology Review's artificial-intelligence topic feed, isolating its AI reporting and commentary."
+    },
+    {
+      "id": "05dcc2d9cd93",
+      "title": "The Decoder",
+      "feed_url": "https://the-decoder.com/feed/",
+      "site_url": "https://the-decoder.com/",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "sources": [
+        "aihot-demo-sources-2026-10-17"
+      ],
+      "validated_at": "2026-10-17",
+      "latest_item_at": "2026-10-16T15:03:46Z",
+      "description": "The Decoder 是专注 AI 的独立媒体，日更模型发布、研究与企业动向的简明报道。",
+      "description_en": "The Decoder is an AI-only newsroom publishing frequent, concise reporting on models, research, and industry moves."
     },
     {
       "id": "cc3c4c9556ef",

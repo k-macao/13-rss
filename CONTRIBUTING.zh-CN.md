@@ -16,7 +16,7 @@
 
 我们优先收录原创报道、一手科研内容、从业者博客、官方项目博客，以及具有明确编辑定位的视频和播客。抓取镜像、需要凭据的私有源、垃圾内容、SEO 内容农场、搬运站和以推广返利为主的来源不会被收录。
 
-中文独立博客需要在最近 180 天内有更新，至少返回两篇带可靠日期的文章，并通过多轮 Tidings 解析。`tidings-blogs.opml` 最多保留 400 个，全集最多 730 个；达到上限后，新源需要比现有源更活跃或更有阅读价值。
+中文独立博客需要在最近 180 天内有更新，至少返回两篇带可靠日期的文章，并通过多轮 Tidings 解析。`tidings-blogs.opml` 最多保留 400 个，全集最多 740 个；达到上限后，新源需要比现有源更活跃或更有阅读价值。
 
 社区源应使用官方订阅地址，或有公开说明的备用地址，近期仍有讨论，并连续通过三轮 Tidings 解析。Feed 能正常导入，不代表 Tidings 一定能抓取完整回帖；推荐时请把这两项能力分开说明。
 
@@ -51,6 +51,26 @@ python tools/merge_hotlist_sources.py --date 2026-09-03 \
   --output data/feeds.json \
   --report reports/hotlist-curation.json \
   --summary reports/validation-summary.json
+python scripts/catalog.py generate
+python tools/generate_source_appendix.py
+```
+
+复现 2026-10-17 AIHOT 示范信源这一轮。三轮校验需要能访问源站：可以本地跑，也可以手动触发 `AIHOT source validation`
+工作流，让它在 GitHub 托管 runner 上跑同样的三轮，并把结果作为构建产物提供下载。只有三轮全部通过的候选才会合并。
+
+```bash
+python tools/validate_aihot_sources.py --round 1 \
+  --input sources/aihot-curated.json \
+  --output reports/aihot-validation-round-1.json
+# 间隔几分钟后重复执行第 2、3 轮
+python tools/merge_aihot_sources.py --date 2026-10-17 \
+  --curated sources/aihot-curated.json \
+  --output data/feeds.json \
+  --report reports/aihot-curation.json \
+  --summary reports/validation-summary.json \
+  --validation reports/aihot-validation-round-1.json \
+  --validation reports/aihot-validation-round-2.json \
+  --validation reports/aihot-validation-round-3.json
 python scripts/catalog.py generate
 python tools/generate_source_appendix.py
 ```

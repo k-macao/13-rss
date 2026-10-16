@@ -1,9 +1,9 @@
 {
   "validated_at": "2026-08-13",
   "engine": "Tidings parseFeedUrl",
-  "published": 725,
+  "published": 737,
   "limits": {
-    "complete_collection_maximum": 730,
+    "complete_collection_maximum": 740,
     "chinese_independent_blogs_maximum": 400,
     "top200_exact": 200
   },
@@ -64,18 +64,18 @@
     "success_rate": 1.0
   },
   "by_pack": {
-    "ai": 99,
-    "all": 725,
+    "ai": 111,
+    "all": 737,
     "blogs": 349,
     "chinese": 474,
     "communities": 14,
-    "company-tech": 40,
-    "engineering": 420,
-    "news": 48,
-    "podcasts": 73,
-    "research": 27,
+    "company-tech": 45,
+    "engineering": 423,
+    "news": 53,
+    "podcasts": 74,
+    "research": 29,
     "security": 8,
-    "tech-media": 10,
+    "tech-media": 15,
     "top200": 200,
     "videos": 93,
     "wechat": 30,
@@ -104,5 +104,35 @@
     "published_with_empty_channel": 1,
     "tidings_parser_rounds": 0,
     "selection_evidence": "reports/hotlist-curation.json"
+  },
+  "published_total": 737,
+  "aihot_demo_sources_review": {
+    "validated_at": "2026-10-17",
+    "engine": "HTTP fetch + RSS/Atom/JSON Feed parse",
+    "source_project": "AIHOT",
+    "source_repository": "https://github.com/k-macao/AIHOT",
+    "candidates": 19,
+    "validation_rounds": 3,
+    "published_additions": 12,
+    "rejected_already_published": 0,
+    "rejected_as_duplicate_publisher": 1,
+    "rejected_after_failed_checks": 0,
+    "existing_entry_checks": 1,
+    "tidings_parser_rounds": 0,
+    "selection_evidence": "reports/aihot-curation.json",
+    "published_titles": [
+      "Microsoft Research",
+      "NVIDIA Blog",
+      "AWS Machine Learning Blog",
+      "GitHub Blog · AI & ML",
+      "Mistral AI",
+      "Berkeley AI Research",
+      "The Verge · AI",
+      "TechCrunch · AI",
+      "Ars Technica · AI",
+      "MIT Technology Review · AI",
+      "The Decoder",
+      "Latent Space"
+    ]
   }
 }

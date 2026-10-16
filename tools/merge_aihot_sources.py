@@ -220,6 +220,17 @@ def main() -> None:
     Path(args.output).write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     Path(args.report).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    # `published_total` is the catalog size after a round was merged, so every earlier
+    # report has to follow the catalog forward instead of freezing a stale number.
+    report_path = Path(args.report).resolve()
+    for path in sorted(Path("reports").glob("*.json")):
+        if path.resolve() == report_path:
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, dict) and data.get("published_total") != len(catalog["feeds"]):
+            data["published_total"] = len(catalog["feeds"])
+            path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
     if args.summary:
         summary_path = Path(args.summary)
         summary = json.loads(summary_path.read_text(encoding="utf-8"))

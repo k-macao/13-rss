@@ -16,7 +16,7 @@ Open a **Feed suggestion** issue or edit `data/feeds.json` in a pull request. In
 
 We favor original reporting, first-party research, practitioner writing, official project blogs, and channels with a clear editorial identity. Scraped mirrors, credentialed feeds, spam, SEO farms, copied content, and sources that primarily promote affiliate links are not accepted.
 
-Chinese independent blogs must have published within the last 180 days, return at least two reliably dated articles, and pass repeated Tidings parser checks. `tidings-blogs.opml` is capped at 400 feeds and the complete collection at 730; once a cap is reached, a new source must displace a weaker one.
+Chinese independent blogs must have published within the last 180 days, return at least two reliably dated articles, and pass repeated Tidings parser checks. `tidings-blogs.opml` is capped at 400 feeds and the complete collection at 740; once a cap is reached, a new source must displace a weaker one.
 
 Community feeds must use an official endpoint or a publicly documented fallback, contain recent discussions, and pass three current Tidings parser rounds. A parseable forum feed does not imply that Tidings can fetch its full reply thread; describe that capability separately when proposing a source.
 
@@ -51,6 +51,27 @@ python tools/merge_hotlist_sources.py --date 2026-09-03 \
   --output data/feeds.json \
   --report reports/hotlist-curation.json \
   --summary reports/validation-summary.json
+python scripts/catalog.py generate
+python tools/generate_source_appendix.py
+```
+
+Reproduce the 2026-10-17 AIHOT demo-source round. The three validation rounds need outbound access to feed hosts;
+run them locally, or dispatch the `AIHOT source validation` workflow, which runs the same rounds on a hosted
+runner and uploads the round files as a build artifact. Only candidates that pass every round are merged.
+
+```bash
+python tools/validate_aihot_sources.py --round 1 \
+  --input sources/aihot-curated.json \
+  --output reports/aihot-validation-round-1.json
+# repeat for rounds 2 and 3, several minutes apart
+python tools/merge_aihot_sources.py --date 2026-10-17 \
+  --curated sources/aihot-curated.json \
+  --output data/feeds.json \
+  --report reports/aihot-curation.json \
+  --summary reports/validation-summary.json \
+  --validation reports/aihot-validation-round-1.json \
+  --validation reports/aihot-validation-round-2.json \
+  --validation reports/aihot-validation-round-3.json
 python scripts/catalog.py generate
 python tools/generate_source_appendix.py
 ```
