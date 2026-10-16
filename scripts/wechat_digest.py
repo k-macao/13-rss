@@ -719,6 +719,20 @@ def provider_notes():
     return notes
 
 
+def llm_report_line() -> str:
+    """One line naming the configured llm endpoint, without the key.
+
+    The probe's table says whether an endpoint answered; this says which endpoint
+    it was asked to answer for, which is what a reader needs when the provider is
+    missing from the table altogether.
+    """
+    llm = resolve_llm_config()
+    if not llm:
+        return "config: llm=off"
+    host = urlsplit(llm["base_url"]).netloc or llm["base_url"]
+    return f"config: llm={llm['model']} @ {host} via {llm['source']}"
+
+
 def config_warnings():
     """Configuration mistakes that would otherwise look like a dead endpoint."""
     warnings = []
@@ -1455,6 +1469,9 @@ def _annotation_lines(payload: dict):
         if all("ok" not in results for results in states.values()):
             detail = "; ".join(f"{name}: {error}" for name, error in errors.items())
             lines.append(("warning", f"no translation provider answered | {detail}"[:900]))
+        # The probe is the diagnostic, so its annotation carries the same
+        # configuration line as its report.
+        lines.append(("notice", llm_report_line()))
         return lines
     if "attempted" not in payload:  # nothing to report
         return []

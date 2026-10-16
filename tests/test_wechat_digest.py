@@ -894,10 +894,14 @@ class TranslationProbeTests(unittest.TestCase):
              Provider("google", lambda text, *, timeout: (_ for _ in ()).throw(URLError("blocked")), "Google")],
             texts=("Hello world",),
         )
-        lines = annotation_lines({"generated_at": "now", "rows": rows})
+        with patch.dict("os.environ", {"DEEPSEEK_API_KEY": "sk-deepseek"}, clear=True):
+            lines = annotation_lines({"generated_at": "now", "rows": rows})
 
-        self.assertEqual([level for level, _ in lines], ["notice"])
+        self.assertEqual([level for level, _ in lines], ["notice", "notice"])
         self.assertIn("translation probe: edge=ok, google=failed", lines[0][1])
+        # The second line is the configuration the probe asked about, key-free.
+        self.assertIn("config: llm=deepseek-flash @ api.deepseek.com via DEEPSEEK_API_KEY", lines[1][1])
+        self.assertNotIn("sk-deepseek", " ".join(message for _, message in lines))
 
     def test_annotations_are_printed_only_inside_github_actions(self):
         translator = Translator([Provider("edge", lambda text, *, timeout: "译文", "Edge")], retries=1)

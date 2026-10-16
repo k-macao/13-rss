@@ -78,9 +78,17 @@ jobs:
           if [ -z "$target" ] || [ "$target" = "0" ]; then
             target="${{ github.event.pull_request.number }}"
           fi
-          gh issue comment "$target" \
-            --repo "${{ github.repository }}" \
-            --body-file build/probe/translation-report.md
+          echo "posting the probe report to #$target"
+          # A token that may not comment must not fail the probe: the table is
+          # already on the run page, in the step summary, and in the artifact.
+          # The reason goes out as a warning annotation, where it is readable.
+          if answer="$(gh issue comment "$target" \
+              --repo "${{ github.repository }}" \
+              --body-file build/probe/translation-report.md 2>&1)"; then
+            exit 0
+          fi
+          echo "::warning::could not comment on #$target: $(printf '%s' "$answer" | head -1)"
+          echo "$answer"
 
       - name: Upload the probe report
         if: always()
