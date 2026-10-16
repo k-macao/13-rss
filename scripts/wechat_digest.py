@@ -49,8 +49,9 @@ PUSHPLUS_CONTENT_LIMIT = 100_000
 PUSHPLUS_TITLE_LIMIT = 100
 # Leave room for the page wrapper that is added after content is packed.
 DEFAULT_PAGE_BUDGET = 92_000
-# Public Google Translate endpoint. It needs no API key; translation failures leave
-# the original text intact so a digest is never blocked by this convenience feature.
+# Public Google Translate endpoint. It needs no API key. An English original is
+# always kept and its Chinese translation is appended below it, so a failed or
+# unavailable translation only drops the extra line and never blocks a digest.
 TRANSLATE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
 
 CHINA = timezone(timedelta(hours=8))
@@ -183,9 +184,21 @@ def translate_to_chinese(text: str, *, timeout: int = 8, endpoint: str = TRANSLA
         return text
 
 
+# Original field -> the field that carries its appended Chinese translation.
+# The English original is never overwritten, so a card can show both.
+TRANSLATED_FIELDS = {"title": "title_zh", "summary": "summary_zh"}
+
+
 def translate_items(items, *, timeout: int, concurrency: int):
-    """Translate English titles and summaries concurrently before rendering."""
-    fields = [(item, field) for item in items for field in ("title", "summary") if is_english(item.get(field, ""))]
+    """Append a Chinese translation to English titles and summaries.
+
+    Translation runs concurrently before rendering. The source text stays in
+    ``title``/``summary`` and the translation lands in ``title_zh``/``summary_zh``
+    so the digest reads as original first, translation second. Nothing is
+    appended when the service fails or echoes the original back, which keeps a
+    card from printing the same sentence twice.
+    """
+    fields = [(item, field) for item in items for field in TRANSLATED_FIELDS if is_english(item.get(field, ""))]
     if not fields:
         return items
     with ThreadPoolExecutor(max_workers=max(1, min(concurrency, len(fields)))) as pool:
@@ -193,10 +206,12 @@ def translate_items(items, *, timeout: int, concurrency: int):
         for future in as_completed(futures):
             item, field = futures[future]
             try:
-                item[field] = future.result()
+                translated = future.result()
             except (HTTPError, URLError, TimeoutError, OSError, ValueError):
                 # Keep the original RSS value if an unexpected translation error occurs.
-                pass
+                continue
+            if translated and translated != item[field]:
+                item[TRANSLATED_FIELDS[field]] = translated
     return items
 
 
@@ -469,22 +484,60 @@ def render_section_head(category, count):
 """.strip()
 
 
+# Card copy limits, measured in display width so Chinese and Latin lines match.
+TITLE_WIDTH = 96
+SUMMARY_WIDTH = 190
+# Marker printed before an appended translation, so machine-translated Chinese
+# is never mistaken for the source's own wording.
+TRANSLATION_TAG = "译"
+
+
+def render_translation(text, *, size, weight, line_height, chip=False):
+    """Render the Chinese translation appended under an English original.
+
+    The translated title carries the neon 译 chip; the translated summary hangs
+    on a thin neon rule instead, so a card marks the translation once and keeps
+    the fluorescent accent spare.
+    """
+    marker = (
+        f'<span style="background:{NEON};color:{INK};font-family:{MONO};font-size:9px;font-weight:700;'
+        f'padding:0 4px;margin-right:6px;vertical-align:1px;">{TRANSLATION_TAG}</span>'
+        if chip
+        else ""
+    )
+    rule = "" if chip else f"border-left:2px solid {NEON};padding-left:8px;"
+    return (
+        f'<div style="margin:5px 0 0;{rule}font-family:{SANS};font-size:{size};font-weight:{weight};'
+        f'line-height:{line_height};color:{GRAPHITE};letter-spacing:.01em;">{marker}{esc(text)}</div>'
+    )
+
+
 def render_item(index, item):
     published = item["published_at"].astimezone(CHINA)
-    title = clamp(item["title"], 96)
-    summary = clamp(item["summary"], 190) if item["summary"] else ""
+    title = clamp(item["title"], TITLE_WIDTH)
+    title_zh = clamp(item.get("title_zh", ""), TITLE_WIDTH)
+    summary = clamp(item["summary"], SUMMARY_WIDTH) if item["summary"] else ""
+    summary_zh = clamp(item.get("summary_zh", ""), SUMMARY_WIDTH) if item.get("summary_zh") else ""
     link = item["link"] or item.get("site_url") or ""
     heading = (
         f'<a href="{esc(link)}" style="color:{INK};text-decoration:none;">{esc(title)}</a>'
         if link
         else esc(title)
     )
+    title_block = (
+        f'<div style="font-family:{SANS};font-size:15px;font-weight:700;line-height:1.5;color:{INK};'
+        f'letter-spacing:.01em;">{heading}</div>'
+    )
+    if title_zh:
+        title_block += render_translation(title_zh, size="14px", weight="700", line_height="1.6", chip=True)
     summary_block = (
         f'<div style="margin:7px 0 0;font-family:{SANS};font-size:12px;line-height:1.75;color:{INK};">'
         f"{esc(summary)}</div>"
         if summary
         else ""
     )
+    if summary_zh:
+        summary_block += render_translation(summary_zh, size="12px", weight="400", line_height="1.75")
     return f"""
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
   style="width:100%;border-collapse:collapse;background:{CARD};margin:0 0 10px;">
@@ -494,8 +547,7 @@ def render_item(index, item):
         {index:02d}</span>
     </td>
     <td valign="top" style="padding:14px 14px 14px 4px;border-left:1px solid {HAIRLINE};">
-      <div style="font-family:{SANS};font-size:15px;font-weight:700;line-height:1.5;color:{INK};
-        letter-spacing:.01em;">{heading}</div>
+      {title_block}
       {summary_block}
       <div style="margin:9px 0 0;font-family:{MONO};font-size:10px;color:{GRAPHITE};letter-spacing:.08em;">
         <span style="background:{NEON};color:{INK};padding:1px 5px;">{esc(clamp(item['source'], 30))}</span>
@@ -704,7 +756,7 @@ def main(argv=None):
     parser.add_argument("--concurrency", type=int, default=12)
     parser.add_argument("--timeout", type=int, default=20)
     parser.add_argument("--translate", action=argparse.BooleanOptionalAction, default=True,
-                        help="translate English titles and summaries to Chinese (default: enabled)")
+                        help="append a Chinese translation under English titles and summaries (default: enabled)")
     parser.add_argument("--page-budget", type=int, default=DEFAULT_PAGE_BUDGET)
     parser.add_argument("--title", default="", help="override the digest title")
     parser.add_argument("--topic", default=os.environ.get("PUSHPLUS_TOPIC", ""))

@@ -56,6 +56,8 @@ Feeds move and disappear, so the directory is checked regularly. If a source is 
 
 The repository ships an optional delivery workflow: twice a day, at 09:00 and 18:00 Beijing time, GitHub Actions collects new articles from the catalog, renders them as a portrait, international-magazine style briefing, and sends it to WeChat through pushplus. Long issues are paginated automatically to stay inside the 100,000-character pushplus limit.
 
+An English headline or summary keeps its original wording and gains a Simplified Chinese translation underneath it, so one card reads in both languages. Chinese articles are left as they are, and an unavailable translation service only removes the extra line.
+
 Set the single `PUSHPLUS_TOKEN` secret to enable it. See the [WeChat digest guide](WECHAT-DIGEST.zh-CN.md) for details.
 
 ## Read with Tidings
