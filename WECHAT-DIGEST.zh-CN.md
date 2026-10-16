@@ -19,11 +19,12 @@
    | --- | --- | --- |
    | `PUSHPLUS_TOKEN` | 是 | pushplus 个人 token |
    | `PUSHPLUS_TOPIC` | 否 | 群组编码，填了就一对多推送给群组成员 |
-   | `TRANSLATE_LLM_API_KEY` | 否 | 任意 OpenAI 兼容接口的 Key，最稳的翻译通道 |
+   | `DEEPSEEK_API_KEY` | 否 | DeepSeek 的 Key；只填这一个就能启用 `llm` 通道（接口和模型由预设给出） |
+   | `TRANSLATE_LLM_API_KEY` | 否 | 其他任意 OpenAI 兼容接口的 Key |
    | `DEEPL_API_KEY` | 否 | DeepL 的 Key，免费版（`…:fx`）或专业版都可以 |
    | `MYMEMORY_EMAIL` | 否 | 填写邮箱可提高 MyMemory 的匿名额度 |
 
-   `TRANSLATE_LLM_BASE_URL`、`TRANSLATE_LLM_MODEL`、`TRANSLATE_PROVIDERS` 属于仓库 **变量**（**Settings → Secrets and variables → Actions → Variables**），不是 secret。见[四、翻译通道](#四翻译通道)。
+   `TRANSLATE_LLM_PROVIDER`、`TRANSLATE_LLM_BASE_URL`、`TRANSLATE_LLM_MODEL`、`TRANSLATE_PROVIDERS` 属于仓库 **变量**（**Settings → Secrets and variables → Actions → Variables**），不是 secret。见[四、翻译通道](#四翻译通道)与[配置 llm 通道](#配置-llm-通道)。
 
 3. 在 **Actions** 页面确认工作流已启用。首次可以用 **Run workflow** 手动跑一次验证。
 
@@ -58,7 +59,7 @@
 | 通道 | Key | 接口 | 说明 |
 | --- | --- | --- | --- |
 | `deepl` | `DEEPL_API_KEY` | 免费 Key 用 `api-free.deepl.com`，专业版用 `api.deepl.com` | 机器翻译质量最好，免费额度每月 50 万字符 |
-| `llm` | `TRANSLATE_LLM_API_KEY` | `TRANSLATE_LLM_BASE_URL`（默认 `https://api.openai.com/v1`）+ `TRANSLATE_LLM_MODEL` | 任意 OpenAI 兼容接口：DeepSeek、通义千问/DashScope、Moonshot、智谱、OpenRouter 等；最推荐先配这个 |
+| `llm` | 任意厂商的 Key，或 `TRANSLATE_LLM_API_KEY` | 预设接口，或 `TRANSLATE_LLM_BASE_URL` + `TRANSLATE_LLM_MODEL` | 任意 OpenAI 兼容接口：DeepSeek、OpenAI、通义千问/DashScope、Moonshot、智谱、OpenRouter 等；最推荐先配这个 |
 | `google` | — | `translate.googleapis.com` | 旧版用的公开 gtx 接口，对机房 IP 限流较严 |
 | `google-chrome` | — | `clients5.google.com` | Google 词典客户端接口，独立服务、独立额度 |
 | `edge` | — | `edge.microsoft.com/translate/translatetext` | 微软 Edge 的免密接口，替代已下线的 `translate/auth` + `api-edge` 流程 |
@@ -72,9 +73,43 @@
 - 只有超时、限流、连接失败会重试；返回内容无法解析时不重试。
 - 一个 Key 都不配也能工作（走免密接口）；配了 Key 只是让结果更稳定。
 
+### 配置 llm 通道
+
+`llm` 就是一个 OpenAI 兼容对话接口，所以**只填一个厂商 Key 就能用**：接口地址和当前可用的模型由预设给出。
+
+| 预设 | Secret | 接口 | 模型 |
+| --- | --- | --- | --- |
+| `deepseek` | `DEEPSEEK_API_KEY` | `https://api.deepseek.com/v1` | `deepseek-flash` |
+| `openai` | `OPENAI_API_KEY` | `https://api.openai.com/v1` | `gpt-4o-mini` |
+| `dashscope` | `DASHSCOPE_API_KEY` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` |
+| `moonshot` | `MOONSHOT_API_KEY` | `https://api.moonshot.cn/v1` | `moonshot-v1-8k` |
+| `zhipu` | `ZHIPUAI_API_KEY` | `https://open.bigmodel.cn/api/paas/v4` | `glm-4-flash` |
+| `openrouter` | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1` | `openai/gpt-4o-mini` |
+
+```text
+# DeepSeek：只填一个 Secret，不用再配任何变量
+DEEPSEEK_API_KEY = sk-…
+
+# 同一个 Key 用通用名字也能命中 DeepSeek 预设（接口地址会说明身份）
+TRANSLATE_LLM_API_KEY = sk-…
+TRANSLATE_LLM_BASE_URL = https://api.deepseek.com/v1
+```
+
+DeepSeek 的接口变化比别的厂商频繁，所以预设额外做了几件事：
+
+- 预设会显式要求**非思考模式**（`"thinking": {"type": "disabled"}`）。DeepSeek 默认开启思考模式，而翻译不需要思维链；思考模式还会忽略 `temperature`，并按推理 token 计费。
+- 预设模型是 `deepseek-flash`（DeepSeek-V4.1-Flash）。旧的 `deepseek-chat`、`deepseek-reasoner` 已于 **2026-07-24 下线**；如果变量里还留着旧名字，运行时会以 warning 注解直接提示，而不是只显示一个失败的通道。
+- 接口地址按常见的写法都能识别：`https://api.deepseek.com`、`https://api.deepseek.com/v1/`、甚至完整的 `…/v1/chat/completions` 都会归一到同一处；只有主机名时，DeepSeek 和 OpenAI 会自动补上 `/v1`。
+- 也可以显式点名：`TRANSLATE_LLM_PROVIDER=deepseek` 配合 `TRANSLATE_LLM_API_KEY` 使用同一套预设。名字写错会直接报错退出，而不是悄悄少一个通道。
+- `TRANSLATE_LLM_BASE_URL` 和 `TRANSLATE_LLM_MODEL` 的优先级永远高于预设，所以「网关 + DeepSeek」和任何其他接口一样配置。
+
+这些都不是必需的：不认识的接口地址会按原样使用，Key 配错厂商只会像其他失效通道一样失败——而运行报告里的「Configuration」段落会写明实际用的是哪一个变量、哪个接口、哪个模型。
+
 ### 检查哪些接口可用
 
-`Translation probe`（[`.github/workflows/translate-probe.yml`](.github/workflows/translate-probe.yml)）会跳过链路，直接逐个调用所有通道，并原样记录每个通道的返回或报错。在 **Actions → Translation probe → Run workflow** 手动运行，约一分钟即可，结果会打印到运行页面、作为 `translation-probe` artifact 上传，也可以顺带作为评论发到某个 issue 或 PR（`comment_on` 输入项）。
+`Translation probe`（[`.github/workflows/translate-probe.yml`](.github/workflows/translate-probe.yml)）会跳过链路，直接逐个调用所有通道，并原样记录每个通道的返回或报错。在 **Actions → Translation probe → Run workflow** 手动运行，约一分钟即可，结果会打印到运行页面、作为 `translation-probe` artifact 上传，也可以顺带作为评论发到某个 issue 或 PR（`comment_on` 输入项）。只要 PR 改动了翻译链路，它还会自动跑一次并把同一张表评论到该 PR 上——因为「Key 在 GitHub 运行器上能不能用」是离线测试唯一答不了的问题。
+
+报告最后有一段 **Configuration**：注明 Key 来自哪个变量、指向哪个接口、会调用哪个模型（Key 本身从不打印）。表里少了某个通道时，多半就是这一段能给出原因。
 
 ```bash
 # 同样的探测在本地跑，报告写入 build/probe/
@@ -165,7 +200,9 @@ PUSHPLUS_TOKEN=你的token python scripts/wechat_digest.py --pack top200
 
 ## 九、常见问题
 
-**英文卡片的译文没出现？** 推送本身照发不误，所以要看运行页面：找 `translation: …` 的 notice，以及列出被弃用通道的 warning，或打开 artifact 里的 `translation-report.md`。然后手动跑一次 `Translation probe` 工作流，一分钟内就能看到每个接口在 GitHub 运行器上的原始返回。如果免密接口全部拒绝运行器（最常见的是 Google 返回 `429`），就配置 `TRANSLATE_LLM_API_KEY` 或 `DEEPL_API_KEY`：不配 Key 也能运行，但配了译文才稳定。
+**英文卡片的译文没出现？** 推送本身照发不误，所以要看运行页面：找 `translation: …` 的 notice，以及列出被弃用通道或配置错误的 warning，或打开 artifact 里的 `translation-report.md`（其中的 Configuration 段落写明本次用的变量、接口和模型）。然后手动跑一次 `Translation probe` 工作流，或者直接看它在翻译相关 PR 下自动贴出的评论，一分钟内就能看到每个接口在 GitHub 运行器上的原始返回。如果免密接口全部拒绝运行器（最常见的是 Google 返回 `429`），就配置 `DEEPSEEK_API_KEY` 或 `DEEPL_API_KEY`：不配 Key 也能运行，但配了译文才稳定。
+
+**DeepSeek 报 “model not exist”？** 账号没问题，是模型名过期了：`deepseek-chat`、`deepseek-reasoner` 已于 2026-07-24 下线，请把 `TRANSLATE_LLM_MODEL` 改成 `deepseek-flash`（或 `deepseek-v4-pro`），或者干脆删掉这个变量让预设去选。同样的提示也会以 warning 注解出现在运行页面。
 
 **没收到推送？** 打开工作流运行日志：`items=0` 说明窗口内确实没有新文章；`pushplus code=xxx` 说明 token 或额度有问题。渲染结果也会作为 artifact 上传，保留 7 天，可下载查看。
 

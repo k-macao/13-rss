@@ -22,6 +22,13 @@ providers first, then the keyless endpoints) and stopping at the first endpoint
 that answers; a provider that fails twice is retired for the rest of the run. The
 English original is never overwritten, so a failed translation only drops the
 appended line, and every run reports which provider answered.
+
+The keyed half of that chain is one `llm` entry for any OpenAI-compatible chat
+endpoint. One key alone configures it — `DEEPSEEK_API_KEY` (the preset the guide
+recommends), `OPENAI_API_KEY`, `DASHSCOPE_API_KEY`, `MOONSHOT_API_KEY`,
+`ZHIPUAI_API_KEY`, `OPENROUTER_API_KEY` — while `TRANSLATE_LLM_API_KEY` plus
+`TRANSLATE_LLM_BASE_URL`/`TRANSLATE_LLM_MODEL` (and `TRANSLATE_LLM_PROVIDER` to
+name a preset) stay available for anything else.
 """
 
 from __future__ import annotations
@@ -76,6 +83,58 @@ DEEPL_FREE_ENDPOINT = "https://api-free.deepl.com/v2/translate"
 DEEPL_PRO_ENDPOINT = "https://api.deepl.com/v2/translate"
 LLM_BASE_URL_DEFAULT = "https://api.openai.com/v1"
 LLM_MODEL_DEFAULT = "gpt-4o-mini"
+# OpenAI-compatible presets: one environment variable is enough to switch the
+# `llm` provider on with an endpoint and a model that belong to that key.
+# DeepSeek is the one the guide recommends configuring first, and its model IDs
+# move — ``deepseek-chat`` and ``deepseek-reasoner`` were retired on 2026-07-24 —
+# so a preset carries a current ID instead of leaving the caller to guess one.
+LLM_PRESETS = {
+    "deepseek": {
+        "keys": ("DEEPSEEK_API_KEY",),
+        "host": "api.deepseek.com",
+        "base_url": "https://api.deepseek.com/v1",
+        "model": "deepseek-flash",
+        # DeepSeek thinks by default, and thinking mode ignores `temperature`
+        # and bills the reasoning tokens: a translation wants neither.
+        "body": {"thinking": {"type": "disabled"}},
+    },
+    "openai": {
+        "keys": ("OPENAI_API_KEY",),
+        "host": "api.openai.com",
+        "base_url": LLM_BASE_URL_DEFAULT,
+        "model": LLM_MODEL_DEFAULT,
+    },
+    "dashscope": {
+        "keys": ("DASHSCOPE_API_KEY",),
+        "host": "dashscope.aliyuncs.com",
+        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "model": "qwen-plus",
+    },
+    "moonshot": {
+        "keys": ("MOONSHOT_API_KEY",),
+        "host": "api.moonshot.cn",
+        "base_url": "https://api.moonshot.cn/v1",
+        "model": "moonshot-v1-8k",
+    },
+    "zhipu": {
+        "keys": ("ZHIPUAI_API_KEY",),
+        "host": "open.bigmodel.cn",
+        "base_url": "https://open.bigmodel.cn/api/paas/v4",
+        "model": "glm-4-flash",
+    },
+    "openrouter": {
+        "keys": ("OPENROUTER_API_KEY",),
+        "host": "openrouter.ai",
+        "base_url": "https://openrouter.ai/api/v1",
+        "model": "openai/gpt-4o-mini",
+    },
+}
+# Model IDs that answer with an error today; naming the replacement beats letting
+# the endpoint's own "model not exist" reply go unexplained in the report.
+RETIRED_LLM_MODELS = {
+    "deepseek-chat": "deepseek-flash",
+    "deepseek-reasoner": "deepseek-flash",
+}
 TRANSLATE_SOURCE = "en"
 TRANSLATE_TARGET = "zh-CN"
 # Network-level failures are retried with a short backoff, while a malformed
@@ -337,24 +396,27 @@ LLM_SYSTEM_PROMPT = (
 )
 
 
-def llm_translate(text: str, *, timeout: int, api_key: str, base_url: str, model: str) -> str:
+def llm_translate(text: str, *, timeout: int, api_key: str, base_url: str, model: str, extra=None) -> str:
     """Any OpenAI-compatible chat endpoint, for a key the user already owns.
 
     The same call reaches DeepSeek, Qwen/DashScope, Moonshot, Zhipu, or any
     gateway, which makes it the most reliable option when the keyless endpoints
     refuse GitHub's runner addresses.
+
+    ``extra`` carries the fields a preset has to add on top of the OpenAI shape —
+    DeepSeek, for instance, thinks by default and is told to skip that here.
     """
-    body = json.dumps(
-        {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": LLM_SYSTEM_PROMPT},
-                {"role": "user", "content": text},
-            ],
-            "temperature": 0,
-            "stream": False,
-        }
-    ).encode("utf-8")
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": LLM_SYSTEM_PROMPT},
+            {"role": "user", "content": text},
+        ],
+        "temperature": 0,
+        "stream": False,
+    }
+    payload.update(extra or {})
+    body = json.dumps(payload).encode("utf-8")
     payload = _translate_json(
         _translate_request(
             f"{base_url.rstrip('/')}/chat/completions",
@@ -530,6 +592,152 @@ class Translator:
         )
 
 
+def preset_for_base_url(url: str) -> str:
+    """Name the preset an endpoint belongs to, if any.
+
+    A key plus a base URL is how most people configure this, and the host says
+    which preset's model and request fields apply.
+    """
+    host = urlsplit(url or "").netloc.lower().rsplit("@", 1)[-1].split(":", 1)[0]
+    for name, preset in LLM_PRESETS.items():
+        if host == preset["host"] or host.endswith("." + preset["host"]):
+            return name
+    return ""
+
+
+def normalize_llm_base_url(url: str) -> str:
+    """Accept the base URL the way people actually paste it.
+
+    ``https://api.deepseek.com``, ``https://api.deepseek.com/v1/`` and even a
+    full ``…/v1/chat/completions`` all have to land on the same endpoint: the
+    base URL is the easiest thing to get subtly wrong by hand, and every wrong
+    spelling used to look like one more dead provider.
+    """
+    url = (url or "").strip().rstrip("/")
+    if not url:
+        return ""
+    if url.endswith("/chat/completions"):
+        url = url[: -len("/chat/completions")].rstrip("/")
+    if urlsplit(url).path in ("", "/") and preset_for_base_url(url) in ("deepseek", "openai"):
+        url = f"{url}/v1"
+    return url
+
+
+def resolve_llm_config():
+    """Work out which OpenAI-compatible endpoint the environment asks for.
+
+    Resolution order, so that the guide's promise — one DeepSeek secret and
+    nothing else — holds, while an explicit configuration always wins:
+
+    1. ``TRANSLATE_LLM_API_KEY`` with ``TRANSLATE_LLM_BASE_URL`` and
+       ``TRANSLATE_LLM_MODEL``, the generic route documented before presets.
+    2. ``TRANSLATE_LLM_PROVIDER`` naming a preset, whose own key variable,
+       endpoint, and model are then used.
+    3. The presets in order, so a bare ``DEEPSEEK_API_KEY`` is enough.
+
+    Returns ``None`` when no key is configured; nothing here prints or logs a key.
+    """
+    explicit_key = os.environ.get("TRANSLATE_LLM_API_KEY", "").strip()
+    base_override = os.environ.get("TRANSLATE_LLM_BASE_URL", "").strip()
+    model_override = os.environ.get("TRANSLATE_LLM_MODEL", "").strip()
+    wanted = os.environ.get("TRANSLATE_LLM_PROVIDER", "").strip().lower()
+    if wanted and wanted not in LLM_PRESETS:
+        raise SystemExit(
+            f"unknown TRANSLATE_LLM_PROVIDER: {wanted} (known: {', '.join(LLM_PRESETS)})"
+        )
+
+    def config(key, source, preset_name, preset):
+        return {
+            "key": key,
+            "source": source,
+            "preset": preset_name,
+            "base_url": normalize_llm_base_url(
+                base_override or preset.get("base_url") or LLM_BASE_URL_DEFAULT
+            ),
+            "model": model_override or preset.get("model") or LLM_MODEL_DEFAULT,
+            "body": dict(preset.get("body") or {}),
+        }
+
+    if explicit_key:
+        # The preset is named by TRANSLATE_LLM_PROVIDER or recognised from the
+        # endpoint, so a key pointed at DeepSeek still gets DeepSeek's fields.
+        preset_name = wanted or preset_for_base_url(base_override)
+        return config(explicit_key, "TRANSLATE_LLM_API_KEY", preset_name, LLM_PRESETS.get(preset_name, {}))
+
+    for preset_name in ([wanted] if wanted else list(LLM_PRESETS)):
+        preset = LLM_PRESETS[preset_name]
+        for env_name in preset["keys"]:
+            key = os.environ.get(env_name, "").strip()
+            if key:
+                return config(key, env_name, preset_name, preset)
+    return None
+
+
+def llm_label(config: dict) -> str:
+    """The label the reports show for the llm provider: model plus endpoint."""
+    host = urlsplit(config["base_url"]).netloc or config["base_url"]
+    return f"LLM ({config['model']} @ {host})"
+
+
+def provider_notes():
+    """Describe the translation configuration for the run reports.
+
+    A key is never printed, but which *variable* it came from, which endpoint it
+    points at, and which model answers are exactly what a reader needs when a
+    translation goes missing.
+    """
+    notes = []
+    llm = resolve_llm_config()
+    if not llm:
+        presets = ", ".join(f"`{name}`" for name in LLM_PRESETS)
+        notes.append(
+            "`llm` is off: set a provider key such as `DEEPSEEK_API_KEY`, or "
+            f"`TRANSLATE_LLM_API_KEY` with `TRANSLATE_LLM_BASE_URL` and `TRANSLATE_LLM_MODEL` "
+            f"(presets: {presets})."
+        )
+    else:
+        preset = preset_for_base_url(llm["base_url"])
+        endpoint = f"`{llm['base_url']}`" + (f" ({preset} preset)" if preset else "")
+        notes.append(f"`llm`: key from `{llm['source']}`, endpoint {endpoint}, model `{llm['model']}`.")
+        if (llm["source"] == "TRANSLATE_LLM_API_KEY" and not llm["preset"]
+                and not os.environ.get("TRANSLATE_LLM_BASE_URL", "").strip()):
+            # The generic route with nothing but a key means OpenAI's defaults,
+            # which is worth saying when the key belongs to someone else.
+            notes.append(
+                f"`llm`: no `TRANSLATE_LLM_BASE_URL` is set, so the endpoint is `{llm['base_url']}` "
+                f"and the model is `{llm['model']}`; set it (and `TRANSLATE_LLM_MODEL`, or "
+                "`TRANSLATE_LLM_PROVIDER`) when the key belongs to another provider."
+            )
+        if "thinking" in llm["body"]:
+            notes.append(
+                "`llm`: thinking mode is disabled, because a translation needs no chain of thought."
+            )
+    if os.environ.get("DEEPL_API_KEY", "").strip():
+        notes.append("`deepl` is enabled and is tried before the llm endpoint.")
+    else:
+        notes.append("`deepl` is off: `DEEPL_API_KEY` adds the highest-quality machine translation.")
+    return notes
+
+
+def config_warnings():
+    """Configuration mistakes that would otherwise look like a dead endpoint."""
+    warnings = []
+    llm = resolve_llm_config()
+    wanted = os.environ.get("TRANSLATE_LLM_PROVIDER", "").strip()
+    if llm:
+        replacement = RETIRED_LLM_MODELS.get(llm["model"].strip().lower())
+        if replacement:
+            warnings.append(
+                f"TRANSLATE_LLM_MODEL={llm['model']} was retired on 2026-07-24; use {replacement}"
+            )
+    elif wanted:
+        keys = " or ".join(f"`{name}`" for name in LLM_PRESETS[wanted.lower()]["keys"])
+        warnings.append(
+            f"TRANSLATE_LLM_PROVIDER={wanted} is set but {keys} is empty, so the llm provider is off"
+        )
+    return warnings
+
+
 def configured_providers(names=None):
     """Build the provider chain: configured keyed endpoints first, then keyless.
 
@@ -538,9 +746,6 @@ def configured_providers(names=None):
     would otherwise look like a broken endpoint.
     """
     deepl_key = os.environ.get("DEEPL_API_KEY", "").strip()
-    llm_key = os.environ.get("TRANSLATE_LLM_API_KEY", "").strip()
-    llm_base = os.environ.get("TRANSLATE_LLM_BASE_URL", "").strip() or LLM_BASE_URL_DEFAULT
-    llm_model = os.environ.get("TRANSLATE_LLM_MODEL", "").strip() or LLM_MODEL_DEFAULT
     providers = []
     if deepl_key:
         endpoint = os.environ.get("DEEPL_API_URL", "").strip() or (
@@ -549,12 +754,19 @@ def configured_providers(names=None):
         providers.append(
             Provider("deepl", partial(deepl_translate, api_key=deepl_key, endpoint=endpoint), "DeepL", keyless=False)
         )
-    if llm_key:
+    llm = resolve_llm_config()
+    if llm:
         providers.append(
             Provider(
                 "llm",
-                partial(llm_translate, api_key=llm_key, base_url=llm_base, model=llm_model),
-                f"LLM ({llm_model})",
+                partial(
+                    llm_translate,
+                    api_key=llm["key"],
+                    base_url=llm["base_url"],
+                    model=llm["model"],
+                    extra=llm["body"],
+                ),
+                llm_label(llm),
                 keyless=False,
             )
         )
@@ -666,7 +878,7 @@ def probe_providers(providers, *, timeout: int = 10, texts=PROBE_TEXTS):
     return rows
 
 
-def probe_markdown(rows, *, generated_at: str) -> str:
+def probe_markdown(rows, *, generated_at: str, notes=()) -> str:
     """Render probe rows as the markdown posted to the workflow summary."""
     lines = [
         f"### Translation probe · {generated_at}",
@@ -683,6 +895,10 @@ def probe_markdown(rows, *, generated_at: str) -> str:
         )
     working = [row["provider"] for row in rows if row["status"] == "ok"]
     lines += ["", f"Providers that answered: {', '.join(sorted(set(working))) or '**none**'}", ""]
+    if notes:
+        # Which key the run found is part of the answer: a provider that is
+        # missing from the table is usually a secret that is missing too.
+        lines += ["### Configuration", "", *(f"- {note}" for note in notes), ""]
     return "\n".join(lines)
 
 
@@ -1215,7 +1431,7 @@ def load_feeds(catalog_path, pack, max_feeds):
     return feeds
 
 
-def annotation_lines(payload: dict):
+def _annotation_lines(payload: dict):
     """Turn a translation report into GitHub Actions notice/warning commands.
 
     A missing translation is invisible in the push itself by design, so the run
@@ -1262,6 +1478,19 @@ def annotation_lines(payload: dict):
         )
     elif retired:
         lines.append(("warning", f"retired translation endpoints | {detail_for(retired)}"[:900]))
+    return lines
+
+
+def annotation_lines(payload: dict):
+    """The report's annotations, plus anything wrong with the configuration.
+
+    A misconfiguration is worth as much noise as a dead endpoint: a retired
+    model ID or a preset whose key was never set fails exactly like a provider
+    that refuses GitHub's runner addresses, and the annotation is where a reader
+    finds out which one it is.
+    """
+    lines = _annotation_lines(payload)
+    lines += [("warning", warning) for warning in payload.get("warnings", [])]
     return lines
 
 
@@ -1334,9 +1563,15 @@ def main(argv=None):
     if args.probe_translators:
         providers = configured_providers(names=args.translators.split(","))
         rows = probe_providers(providers, timeout=min(args.timeout, 10))
-        report = probe_markdown(rows, generated_at=stamp)
+        notes = provider_notes()
+        warnings = config_warnings()
+        report = probe_markdown(rows, generated_at=stamp, notes=notes)
         print(report)
-        write_translation_report(out_dir, markdown=report, payload={"generated_at": stamp, "rows": rows})
+        write_translation_report(
+            out_dir,
+            markdown=report,
+            payload={"generated_at": stamp, "rows": rows, "notes": notes, "warnings": warnings},
+        )
         return 0
 
     translator = Translator(
@@ -1383,12 +1618,17 @@ def main(argv=None):
             print(f"wrote {target}")
     if args.translate:
         # The report is written even without --out, because the annotation is
-        # what makes a translation failure visible on the run page.
-        write_translation_report(
-            out_dir,
-            markdown=translator.report_markdown(),
-            payload=translator.summary(),
-        )
+        # what makes a translation failure visible on the run page. The notes
+        # say which key and endpoint the run used, since the answer "no provider
+        # answered" is usually a question about the configuration.
+        notes = provider_notes()
+        markdown = translator.report_markdown()
+        if notes:
+            markdown += "\n\n### Configuration\n\n" + "\n".join(f"- {note}" for note in notes)
+        payload = translator.summary()
+        payload["notes"] = notes
+        payload["warnings"] = config_warnings()
+        write_translation_report(out_dir, markdown=markdown, payload=payload)
 
     if not items and not args.allow_empty:
         print("nothing new in this window; skipping push")

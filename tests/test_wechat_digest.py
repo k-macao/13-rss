@@ -30,6 +30,7 @@ from scripts.wechat_digest import (
     Translator,
     annotation_lines,
     clamp,
+    config_warnings,
     configured_providers,
     dedupe,
     deepl_translate,
@@ -40,7 +41,9 @@ from scripts.wechat_digest import (
     llm_translate,
     main,
     mymemory_translate,
+    normalize_llm_base_url,
     page_title,
+    provider_notes,
     parse_datetime,
     parse_feed_payload,
     is_english,
@@ -604,7 +607,7 @@ class ProviderParsingTests(unittest.TestCase):
                 timeout=8,
                 api_key="sk-test",
                 base_url="https://api.deepseek.com/v1",
-                model="deepseek-chat",
+                model="deepseek-flash",
             )
 
         self.assertEqual(result, "新模型提升了推理能力")
@@ -612,8 +615,26 @@ class ProviderParsingTests(unittest.TestCase):
         self.assertEqual(request.full_url, "https://api.deepseek.com/v1/chat/completions")
         self.assertEqual(request.get_header("Authorization"), "Bearer sk-test")
         body = json.loads(request.data.decode("utf-8"))
-        self.assertEqual(body["model"], "deepseek-chat")
+        self.assertEqual(body["model"], "deepseek-flash")
         self.assertEqual(body["messages"][-1]["content"], "A new model improves reasoning")
+
+    def test_llm_sends_the_extra_fields_a_preset_asks_for(self):
+        payload = {"choices": [{"message": {"content": "新模型提升了推理能力"}}]}
+        seen = self.responding(payload)
+        with patch("scripts.wechat_digest.urlopen", side_effect=seen):
+            llm_translate(
+                "A new model improves reasoning",
+                timeout=8,
+                api_key="sk-test",
+                base_url="https://api.deepseek.com/v1",
+                model="deepseek-flash",
+                extra={"thinking": {"type": "disabled"}},
+            )
+
+        body = json.loads(seen.requests[0].data.decode("utf-8"))
+        # DeepSeek thinks by default; a translation must not pay for that.
+        self.assertEqual(body["thinking"], {"type": "disabled"})
+        self.assertEqual(body["temperature"], 0)
 
     def test_llm_without_a_choice_field_is_a_non_retryable_error(self):
         with patch("scripts.wechat_digest.urlopen", side_effect=self.responding({"error": {"message": "no key"}})):
@@ -661,6 +682,115 @@ class TranslatorConfigTests(unittest.TestCase):
             configured_providers(names=["googel"])
         self.assertIn("googel", str(caught.exception))
 
+    def test_a_bare_deepseek_key_supplies_its_own_endpoint_and_model(self):
+        with patch.dict("os.environ", {"DEEPSEEK_API_KEY": "sk-deepseek"}, clear=True):
+            providers = configured_providers()
+
+        llm = providers[0]
+        self.assertEqual(llm.name, "llm")
+        self.assertFalse(llm.keyless)
+        self.assertEqual(llm.call.keywords["api_key"], "sk-deepseek")
+        self.assertEqual(llm.call.keywords["base_url"], "https://api.deepseek.com/v1")
+        self.assertEqual(llm.call.keywords["model"], "deepseek-flash")
+        # Thinking mode is DeepSeek's default and a translation does not want it.
+        self.assertEqual(llm.call.keywords["extra"], {"thinking": {"type": "disabled"}})
+        self.assertIn("deepseek-flash", llm.label)
+        self.assertIn("api.deepseek.com", llm.label)
+
+    def test_a_model_override_wins_over_the_preset(self):
+        env = {"DEEPSEEK_API_KEY": "sk-deepseek", "TRANSLATE_LLM_MODEL": "deepseek-v4-pro"}
+        with patch.dict("os.environ", env, clear=True):
+            providers = configured_providers()
+
+        self.assertEqual(providers[0].call.keywords["model"], "deepseek-v4-pro")
+
+    def test_a_named_preset_uses_its_own_key_variable(self):
+        env = {"TRANSLATE_LLM_PROVIDER": "moonshot", "MOONSHOT_API_KEY": "sk-moon"}
+        with patch.dict("os.environ", env, clear=True):
+            providers = configured_providers()
+
+        self.assertEqual(providers[0].call.keywords["api_key"], "sk-moon")
+        self.assertEqual(providers[0].call.keywords["base_url"], "https://api.moonshot.cn/v1")
+        self.assertEqual(providers[0].call.keywords["model"], "moonshot-v1-8k")
+
+    def test_an_unknown_llm_provider_is_reported(self):
+        with patch.dict("os.environ", {"TRANSLATE_LLM_PROVIDER": "deepsek"}, clear=True):
+            with self.assertRaises(SystemExit) as caught:
+                configured_providers()
+        self.assertIn("deepsek", str(caught.exception))
+
+    def test_a_preset_without_its_key_does_not_fail_the_run(self):
+        with patch.dict("os.environ", {"TRANSLATE_LLM_PROVIDER": "deepseek"}, clear=True):
+            providers = configured_providers()
+        self.assertEqual([provider.name for provider in providers], ["google", "google-chrome", "edge", "mymemory"])
+
+    def test_an_explicit_key_pointing_at_deepseek_still_gets_the_preset_fields(self):
+        env = {"TRANSLATE_LLM_API_KEY": "sk-test", "TRANSLATE_LLM_BASE_URL": "https://api.deepseek.com"}
+        with patch.dict("os.environ", env, clear=True):
+            providers = configured_providers()
+
+        # The bare host gains the /v1 root, and the endpoint identifies the preset.
+        self.assertEqual(providers[0].call.keywords["base_url"], "https://api.deepseek.com/v1")
+        self.assertEqual(providers[0].call.keywords["model"], "deepseek-flash")
+        self.assertEqual(providers[0].call.keywords["extra"], {"thinking": {"type": "disabled"}})
+
+    def test_base_urls_are_accepted_the_way_people_paste_them(self):
+        self.assertEqual(normalize_llm_base_url("https://api.deepseek.com"), "https://api.deepseek.com/v1")
+        self.assertEqual(normalize_llm_base_url("https://api.deepseek.com/v1/"), "https://api.deepseek.com/v1")
+        self.assertEqual(
+            normalize_llm_base_url("https://api.deepseek.com/v1/chat/completions"),
+            "https://api.deepseek.com/v1",
+        )
+        self.assertEqual(normalize_llm_base_url("https://api.openai.com"), "https://api.openai.com/v1")
+        # An endpoint the presets do not know is used exactly as typed.
+        self.assertEqual(normalize_llm_base_url("https://llm.internal:4000/root/"), "https://llm.internal:4000/root")
+        self.assertEqual(normalize_llm_base_url(""), "")
+
+    def test_notes_name_the_key_the_endpoint_and_the_model(self):
+        env = {"DEEPSEEK_API_KEY": "sk-deepseek"}
+        with patch.dict("os.environ", env, clear=True):
+            notes = "\n".join(provider_notes())
+
+        self.assertIn("`DEEPSEEK_API_KEY`", notes)
+        self.assertIn("https://api.deepseek.com/v1", notes)
+        self.assertIn("deepseek-flash", notes)
+        self.assertIn("thinking mode is disabled", notes)
+        self.assertNotIn("sk-deepseek", notes)  # the key itself is never printed
+
+    def test_notes_explain_how_to_turn_the_llm_provider_on(self):
+        with patch.dict("os.environ", {}, clear=True):
+            notes = "\n".join(provider_notes())
+        self.assertIn("DEEPSEEK_API_KEY", notes)
+        self.assertIn("deepl", notes)
+
+    def test_a_retired_deepseek_model_is_warned_about(self):
+        env = {
+            "TRANSLATE_LLM_API_KEY": "sk-test",
+            "TRANSLATE_LLM_BASE_URL": "https://api.deepseek.com/v1",
+            "TRANSLATE_LLM_MODEL": "deepseek-chat",
+        }
+        with patch.dict("os.environ", env, clear=True):
+            warnings = config_warnings()
+
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("deepseek-chat", warnings[0])
+        self.assertIn("deepseek-flash", warnings[0])
+
+    def test_a_preset_with_no_key_is_warned_about_but_still_renders(self):
+        with patch.dict("os.environ", {"TRANSLATE_LLM_PROVIDER": "deepseek"}, clear=True):
+            warnings = config_warnings()
+        self.assertIn("DEEPSEEK_API_KEY", warnings[0])
+        self.assertIn("deepseek", warnings[0])
+
+    def test_a_key_without_an_endpoint_says_which_default_it_is_using(self):
+        with patch.dict("os.environ", {"TRANSLATE_LLM_API_KEY": "sk-test"}, clear=True):
+            notes = "\n".join(provider_notes())
+            warnings = config_warnings()
+
+        self.assertIn("gpt-4o-mini", notes)
+        self.assertIn("TRANSLATE_LLM_BASE_URL", notes)
+        self.assertEqual(warnings, [])
+
 
 class TranslationProbeTests(unittest.TestCase):
     def setUp(self):
@@ -685,8 +815,22 @@ class TranslationProbeTests(unittest.TestCase):
         self.assertIn("**none**", probe_markdown(rows, generated_at="now"))
         self.assertEqual(rows[0]["status"], "error")
 
+    def test_probe_report_says_which_key_and_endpoint_the_run_used(self):
+        rows = probe_providers(
+            [Provider("llm", lambda text, *, timeout: "译文", "LLM (deepseek-flash @ api.deepseek.com)")],
+            texts=("Hello world",),
+        )
+        with patch.dict("os.environ", {"DEEPSEEK_API_KEY": "sk-deepseek"}, clear=True):
+            markdown = probe_markdown(rows, generated_at="now", notes=provider_notes())
+
+        self.assertIn("### Configuration", markdown)
+        self.assertIn("`DEEPSEEK_API_KEY`", markdown)
+        self.assertIn("deepseek-flash", markdown)
+        self.assertNotIn("sk-deepseek", markdown)
+
     def test_probe_mode_writes_a_report_and_never_calls_pushplus(self):
-        with patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen), \
+        with patch.dict("os.environ", {"DEEPSEEK_API_KEY": "sk-deepseek"}, clear=True), \
+                patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen), \
                 patch("scripts.wechat_digest.time.sleep"), \
                 patch("scripts.wechat_digest.push_page") as pushed, \
                 contextlib.redirect_stdout(io.StringIO()):
@@ -699,8 +843,15 @@ class TranslationProbeTests(unittest.TestCase):
         report = json.loads((self.tmp / "translation-report.json").read_text(encoding="utf-8"))
         self.assertEqual([row["provider"] for row in report["rows"]], ["google", "google", "edge", "edge"])
         self.assertEqual({row["status"] for row in report["rows"]}, {"error"})
-        self.assertIn("Providers that answered: **none**",
-                      (self.tmp / "translation-report.md").read_text(encoding="utf-8"))
+        self.assertEqual(report["warnings"], [])
+        markdown = (self.tmp / "translation-report.md").read_text(encoding="utf-8")
+        self.assertIn("Providers that answered: **none**", markdown)
+        # The probe answers the question a missing provider raises: which key did
+        # the run actually find, and which endpoint and model does it point at?
+        self.assertIn("### Configuration", markdown)
+        self.assertIn("`DEEPSEEK_API_KEY`", markdown)
+        self.assertIn("deepseek-flash", markdown)
+        self.assertNotIn("sk-deepseek", markdown)
 
     def test_a_failed_digest_run_annotates_itself(self):
         translator = Translator([self.dead_provider("google"), self.dead_provider("edge")], retries=1)
@@ -727,6 +878,15 @@ class TranslationProbeTests(unittest.TestCase):
         translator = Translator([Provider("edge", lambda text, *, timeout: "译文", "Edge")])
         translator.translate("国产大模型开源周：三个新权重发布")
         self.assertEqual(annotation_lines(translator.summary()), [])
+
+    def test_a_broken_configuration_is_annotated_even_with_nothing_to_translate(self):
+        lines = annotation_lines({
+            "attempted": 0,
+            "warnings": ["TRANSLATE_LLM_MODEL=deepseek-chat was retired on 2026-07-24; use deepseek-flash"],
+        })
+
+        self.assertEqual([level for level, _ in lines], ["warning"])
+        self.assertIn("deepseek-chat", lines[0][1])
 
     def test_probe_annotations_name_every_provider(self):
         rows = probe_providers(
@@ -987,6 +1147,7 @@ class WorkflowTests(unittest.TestCase):
         for name in (
             "DEEPL_API_KEY",
             "TRANSLATE_LLM_API_KEY",
+            "TRANSLATE_LLM_PROVIDER",
             "TRANSLATE_LLM_BASE_URL",
             "TRANSLATE_LLM_MODEL",
             "TRANSLATE_PROVIDERS",
@@ -997,6 +1158,10 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("secrets.DEEPL_API_KEY", self.text)
         self.assertNotIn("required: true", self.text)
 
+    def test_workflow_accepts_a_bare_deepseek_secret(self):
+        self.assertIn("DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY", self.text)
+        self.assertIn("TRANSLATE_LLM_PROVIDER: ${{ vars.TRANSLATE_LLM_PROVIDER }}", self.text)
+
     def test_probe_workflow_reports_which_endpoint_answers(self):
         text = PROBE_WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("workflow_dispatch:", text)
@@ -1004,6 +1169,13 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("--out build/probe", text)
         self.assertIn("issues: write", text)
         self.assertIn("gh issue comment", text)
+
+    def test_probe_workflow_checks_the_chain_on_a_pull_request(self):
+        text = PROBE_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("pull_request:", text)
+        self.assertIn("scripts/wechat_digest.py", text)
+        # A fork's token cannot comment, so only branches in this repository do.
+        self.assertIn("github.event.pull_request.head.repo.full_name == github.repository", text)
 
 
 if __name__ == "__main__":
