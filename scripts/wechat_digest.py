@@ -1208,14 +1208,68 @@ def load_feeds(catalog_path, pack, max_feeds):
     return feeds
 
 
+def annotation_lines(payload: dict):
+    """Turn a translation report into GitHub Actions notice/warning commands.
+
+    A missing translation is invisible in the push itself by design, so the run
+    has to say it out loud: the notice names the provider that answered, and the
+    warning names what the endpoints that did not answer actually said. Annotations
+    survive on the run page and through the checks API, unlike a log line.
+    """
+    if "rows" in payload:  # probe report
+        states = defaultdict(list)
+        errors = {}
+        for row in payload["rows"]:
+            states[row["provider"]].append(row["status"])
+            if row["status"] == "error":
+                errors.setdefault(row["provider"], row["output"])
+        if not states:
+            return []
+        summary = ", ".join(
+            f"{name}={'ok' if 'ok' in results else 'failed'}" for name, results in states.items()
+        )
+        lines = [("notice", f"translation probe: {summary}")]
+        if all("ok" not in results for results in states.values()):
+            detail = "; ".join(f"{name}: {error}" for name, error in errors.items())
+            lines.append(("warning", f"no translation provider answered | {detail}"[:900]))
+        return lines
+    if "attempted" not in payload:  # nothing to report
+        return []
+    attempted = payload.get("attempted", 0)
+    if not attempted:
+        return []
+    providers = {provider["name"]: provider for provider in payload.get("providers", [])}
+    retired = payload.get("retired", [])
+    line = f"translation: translated={payload.get('translated', 0)}/{attempted} provider={payload.get('active') or 'none'}"
+    lines = [("notice", line)]
+
+    def detail_for(names):
+        return "; ".join(
+            f"{name}: {providers.get(name, {}).get('last_error') or 'failed'}" for name in names[:4]
+        )
+
+    failing = [name for name, provider in providers.items() if provider.get("errors")]
+    if not payload.get("translated"):
+        lines.append(
+            ("warning", f"every translation endpoint failed; the card keeps the original text | {detail_for(failing)}"[:900])
+        )
+    elif retired:
+        lines.append(("warning", f"retired translation endpoints | {detail_for(retired)}"[:900]))
+    return lines
+
+
 def write_translation_report(out_dir, *, markdown: str, payload: dict):
     """Leave a machine-readable and a human-readable translation report behind.
 
     The artifact is what makes a silent failure visible: the pushplus card just
     loses the extra line, and the Actions log is easy to miss, while this file
     records which endpoint answered and what the others said. When GitHub Actions
-    sets ``GITHUB_STEP_SUMMARY``, the same markdown lands on the run page.
+    sets ``GITHUB_STEP_SUMMARY``, the same markdown lands on the run page, and the
+    same summary is emitted as an annotation.
     """
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        for level, message in annotation_lines(payload):
+            print(f"::{level}::{message}")
     if out_dir:
         (out_dir / "translation-report.md").write_text(markdown + "\n", encoding="utf-8")
         (out_dir / "translation-report.json").write_text(

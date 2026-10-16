@@ -28,6 +28,7 @@ from scripts.wechat_digest import (
     Provider,
     TranslationError,
     Translator,
+    annotation_lines,
     clamp,
     configured_providers,
     dedupe,
@@ -680,6 +681,66 @@ class TranslationProbeTests(unittest.TestCase):
         self.assertEqual({row["status"] for row in report["rows"]}, {"error"})
         self.assertIn("Providers that answered: **none**",
                       (self.tmp / "translation-report.md").read_text(encoding="utf-8"))
+
+    def test_a_failed_digest_run_annotates_itself(self):
+        translator = Translator([self.dead_provider("google"), self.dead_provider("edge")], retries=1)
+        translator.translate("A new model improves reasoning")
+        lines = annotation_lines(translator.summary())
+
+        self.assertEqual([level for level, _ in lines], ["notice", "warning"])
+        self.assertIn("translated=0/1 provider=none", lines[0][1])
+        self.assertIn("every translation endpoint failed", lines[1][1])
+        self.assertIn("google: HTTPError: 451", lines[1][1])
+        self.assertIn("edge: HTTPError: 451", lines[1][1])
+
+    def test_a_working_run_reports_the_provider_and_the_retired_endpoints(self):
+        translator = Translator([self.dead_provider("google"), Provider("edge", lambda text, *, timeout: "译文", "Edge")],
+                                retries=2)
+        translator.translate("A new model improves reasoning")
+        lines = annotation_lines(translator.summary())
+
+        self.assertEqual([level for level, _ in lines], ["notice", "warning"])
+        self.assertIn("translated=1/1 provider=edge", lines[0][1])
+        self.assertIn("retired translation endpoints | google: HTTPError: 451", lines[1][1])
+
+    def test_a_chinese_only_issue_produces_no_annotation(self):
+        translator = Translator([Provider("edge", lambda text, *, timeout: "译文", "Edge")])
+        translator.translate("国产大模型开源周：三个新权重发布")
+        self.assertEqual(annotation_lines(translator.summary()), [])
+
+    def test_probe_annotations_name_every_provider(self):
+        rows = probe_providers(
+            [Provider("edge", lambda text, *, timeout: "译文", "Edge"),
+             Provider("google", lambda text, *, timeout: (_ for _ in ()).throw(URLError("blocked")), "Google")],
+            texts=("Hello world",),
+        )
+        lines = annotation_lines({"generated_at": "now", "rows": rows})
+
+        self.assertEqual([level for level, _ in lines], ["notice"])
+        self.assertIn("translation probe: edge=ok, google=failed", lines[0][1])
+
+    def test_annotations_are_printed_only_inside_github_actions(self):
+        translator = Translator([Provider("edge", lambda text, *, timeout: "译文", "Edge")], retries=1)
+        translator.translate("A new model improves reasoning")
+        payload = translator.summary()
+
+        silent = io.StringIO()
+        with patch.dict("os.environ", {}, clear=True), contextlib.redirect_stdout(silent):
+            write_translation_report(None, markdown="", payload=payload)
+        self.assertEqual(silent.getvalue(), "")
+
+        spoken = io.StringIO()
+        with patch.dict("os.environ", {"GITHUB_ACTIONS": "true"}, clear=True), \
+                contextlib.redirect_stdout(spoken):
+            write_translation_report(None, markdown="", payload=payload)
+        self.assertIn("::notice::translation: translated=1/1 provider=edge", spoken.getvalue())
+
+    @staticmethod
+    def dead_provider(name):
+        def call(text, *, timeout):
+            raise TranslationError("HTTPError: 451 Unavailable For Legal Reasons")
+
+        return Provider(name, call, name)
 
     def test_github_step_summary_receives_the_report(self):
         summary = self.tmp / "summary.md"
