@@ -98,7 +98,7 @@ EDITIONS = {
 }
 
 # Digest branding — the title no longer carries the date or pushplus branding.
-DIGEST_TITLE = "章鱼 AI · 营销热点聚合助手"
+DIGEST_TITLE = "章鱼 AI · 营销热点智能体"
 DIGEST_SUBTITLE = "每天三分钟！去噪音！留干货！"
 # Scope note rendered with the intro block on the first page.
 DIGEST_SCOPE = (
