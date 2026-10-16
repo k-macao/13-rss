@@ -58,7 +58,7 @@ The repository ships an optional delivery workflow: twice a day, at 09:00 and 18
 
 An English headline or summary keeps its original wording and gains a Simplified Chinese translation underneath it, so one card reads in both languages. Chinese articles are left as they are, and an unavailable translation service only removes the extra line.
 
-Set the single `PUSHPLUS_TOKEN` secret to enable it. See the [WeChat digest guide](WECHAT-DIGEST.zh-CN.md) for details.
+Set the single `PUSHPLUS_TOKEN` secret to enable it. See the [WeChat digest guide](WECHAT-DIGEST.md) for details.
 
 ## Read with Tidings
 
@@ -143,8 +143,8 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [Simon Willison's Weblog](http://simonwillison.net/) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://simonwillison.net/atom/everything/) | ai, all, engineering, top200 |
 | [The latest research from Google](https://research.google/blog/) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://research.google/blog/rss/) | ai, all, company-tech, engineering, research, top200 |
 | [大模型智能](https://wechat2rss.bestblogs.dev/feed/bfc6440c1a2443fab9a6bf607137d41db5cd5c93.xml) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://wechat2rss.bestblogs.dev/feed/bfc6440c1a2443fab9a6bf607137d41db5cd5c93.xml) | ai, all, chinese, engineering |
-| [我爱计算机视觉](https://wechat2rss.xlab.app/feed/b81ffcfff1107b5265cd7e39de610dc7ca72caf4.xml) | WeChat article feed covering 计算机视觉研究与应用. | Artificial Intelligence | [RSS](https://wechat2rss.xlab.app/feed/b81ffcfff1107b5265cd7e39de610dc7ca72caf4.xml) | ai, all, chinese, engineering, top200, wechat |
-| [新智元](https://wechat2rss.xlab.app/feed/ede30346413ea70dbef5d485ea5cbb95cca446e7.xml) | WeChat article feed covering 人工智能产业与研究. | Artificial Intelligence | [RSS](https://wechat2rss.xlab.app/feed/ede30346413ea70dbef5d485ea5cbb95cca446e7.xml) | ai, all, chinese, engineering, top200, wechat |
+| [我爱计算机视觉](https://wechat2rss.xlab.app/feed/b81ffcfff1107b5265cd7e39de610dc7ca72caf4.xml) | WeChat article feed covering computer vision research and applications. | Artificial Intelligence | [RSS](https://wechat2rss.xlab.app/feed/b81ffcfff1107b5265cd7e39de610dc7ca72caf4.xml) | ai, all, chinese, engineering, top200, wechat |
+| [新智元](https://wechat2rss.xlab.app/feed/ede30346413ea70dbef5d485ea5cbb95cca446e7.xml) | WeChat article feed covering the AI industry and research. | Artificial Intelligence | [RSS](https://wechat2rss.xlab.app/feed/ede30346413ea70dbef5d485ea5cbb95cca446e7.xml) | ai, all, chinese, engineering, top200, wechat |
 | [智谱](https://wechat2rss.bestblogs.dev/feed/433d2134dca54d80804daf32e8be546155be3300.xml) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://wechat2rss.bestblogs.dev/feed/433d2134dca54d80804daf32e8be546155be3300.xml) | ai, all, chinese, engineering, top200 |
 | [月之暗面 Kimi](https://wechat2rss.bestblogs.dev/feed/c5c43d4bc17bae656763859ed0903bb6314ec6fe.xml) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://wechat2rss.bestblogs.dev/feed/c5c43d4bc17bae656763859ed0903bb6314ec6fe.xml) | ai, all, chinese, company-tech, engineering, wechat |
 | [机器之心](https://wechat2rss.bestblogs.dev/feed/8d97af31b0de9e48da74558af128a4673d78c9a3.xml) | Artificial intelligence feed. | Artificial Intelligence | [RSS](https://wechat2rss.bestblogs.dev/feed/8d97af31b0de9e48da74558af128a4673d78c9a3.xml) | ai, all, chinese, engineering, top200, wechat |
@@ -196,7 +196,7 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [Data4Fun](https://data4fun.cc/) | Chinese independent blog. | Engineering & Technology | [RSS](https://data4fun.cc/index.xml) | ai, all, blogs, chinese, engineering |
 | [Databricks](https://www.databricks.com) | Engineering and technology feed. | Engineering & Technology | [RSS](https://www.databricks.com/feed) | all, engineering, top200 |
 | [Dax 的博客](https://daolanx.me/) | Chinese independent blog. | Engineering & Technology | [RSS](https://daolanx.me/zh/rss.xml) | all, blogs, chinese, engineering |
-| [dbaplus社群](https://wechat2rss.xlab.app/feed/3b9cc8887fccb80d3f083cd6eb8c344628d101b6.xml) | WeChat article feed covering 数据库与企业级技术. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/3b9cc8887fccb80d3f083cd6eb8c344628d101b6.xml) | all, chinese, engineering, wechat |
+| [dbaplus社群](https://wechat2rss.xlab.app/feed/3b9cc8887fccb80d3f083cd6eb8c344628d101b6.xml) | WeChat article feed covering databases and enterprise technology. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/3b9cc8887fccb80d3f083cd6eb8c344628d101b6.xml) | all, chinese, engineering, wechat |
 | [ddadaal.me](https://ddadaal.me) | Chinese independent blog. | Engineering & Technology | [RSS](https://ddadaal.me/rss.xml) | all, blogs, chinese, engineering |
 | [Debug客栈](https://blog.debuginn.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.debuginn.com/index.xml) | all, blogs, chinese, engineering |
 | [Deepzz's Blog](https://deepzz.com) | Chinese independent blog. | Engineering & Technology | [RSS](https://deepzz.com/feed) | all, blogs, chinese, engineering |
@@ -399,7 +399,7 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [卡瓦邦噶！](https://www.kawabangga.com) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.kawabangga.com/feed) | all, blogs, chinese, engineering, top200 |
 | [又耳笔记](https://youerning.top/) | Chinese independent blog. | Engineering & Technology | [RSS](https://youerning.top/index.xml) | all, blogs, chinese, engineering |
 | [后端技术杂谈](https://www.rowkey.cn/atom.xml) | Chinese independent blog. | Engineering & Technology | [RSS](https://rowkey.cn/atom.xml) | all, blogs, chinese, engineering, top200 |
-| [哔哩哔哩技术](https://wechat2rss.xlab.app/feed/434235d4815fdb8447ff3127fc053ceb8b3aada6.xml) | WeChat article feed covering 音视频、基础架构与工程实践. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/434235d4815fdb8447ff3127fc053ceb8b3aada6.xml) | all, chinese, company-tech, engineering, wechat |
+| [哔哩哔哩技术](https://wechat2rss.xlab.app/feed/434235d4815fdb8447ff3127fc053ceb8b3aada6.xml) | WeChat article feed covering audio and video, infrastructure, and engineering practice. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/434235d4815fdb8447ff3127fc053ceb8b3aada6.xml) | all, chinese, company-tech, engineering, wechat |
 | [唐巧的博客](https://blog.devtang.com/atom.xml) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.devtang.com/atom.xml) | all, blogs, chinese, engineering, top200 |
 | [喵二の小博客](https://www.miaoer.net) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.miaoer.net/feed) | all, blogs, chinese, engineering |
 | [喵喵小站・博客志](https://www.mmbkz.cn/) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.mmbkz.cn/feed) | all, blogs, chinese, engineering, top200 |
@@ -411,16 +411,16 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [失眠海峡](https://blog.imalan.cn/) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.imalan.cn/feed.xml) | all, blogs, chinese, engineering |
 | [如有乐享](https://51.ruyo.net) | Chinese independent blog. | Engineering & Technology | [RSS](https://51.ruyo.net/feed) | all, blogs, chinese, engineering, top200 |
 | [姓王者的博客](https://xingwangzhe.fun/) | Chinese independent blog. | Engineering & Technology | [RSS](https://xingwangzhe.fun/rss.xml) | all, blogs, chinese, engineering |
-| [字节跳动技术团队](https://wechat2rss.xlab.app/feed/4025ea55575daf8bfd8227e68b28d9638b073267.xml) | WeChat article feed covering 基础架构与工程实践. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/4025ea55575daf8bfd8227e68b28d9638b073267.xml) | all, chinese, company-tech, engineering, wechat |
+| [字节跳动技术团队](https://wechat2rss.xlab.app/feed/4025ea55575daf8bfd8227e68b28d9638b073267.xml) | WeChat article feed covering infrastructure and engineering practice. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/4025ea55575daf8bfd8227e68b28d9638b073267.xml) | all, chinese, company-tech, engineering, wechat |
 | [寒夜雨](https://www.coderlock.site/) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.coderlock.site/index.php/feed/) | ai, all, blogs, chinese, engineering, top200 |
-| [小众软件](https://wechat2rss.xlab.app/feed/3261d5a75cfef238650a2cabd4bbf99669c2f334.xml) | WeChat article feed covering 软件与效率工具. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/3261d5a75cfef238650a2cabd4bbf99669c2f334.xml) | all, chinese, engineering, wechat |
+| [小众软件](https://wechat2rss.xlab.app/feed/3261d5a75cfef238650a2cabd4bbf99669c2f334.xml) | WeChat article feed covering software and productivity tools. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/3261d5a75cfef238650a2cabd4bbf99669c2f334.xml) | all, chinese, engineering, wechat |
 | [崎径 其镜](http://www.z16388.top/atom.xml) | Chinese independent blog. | Engineering & Technology | [RSS](http://www.z16388.top/atom.xml) | all, blogs, chinese, engineering |
 | [嵌入式工程猫的博客](https://blog.vvzero.com) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.vvzero.com/atom.xml) | all, blogs, chinese, engineering |
-| [差评](https://wechat2rss.xlab.app/feed/8d839de8dd3290a1f1be7a94423cccb30c1b087d.xml) | WeChat article feed covering 消费科技与互联网观察. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/8d839de8dd3290a1f1be7a94423cccb30c1b087d.xml) | all, chinese, engineering, wechat |
+| [差评](https://wechat2rss.xlab.app/feed/8d839de8dd3290a1f1be7a94423cccb30c1b087d.xml) | WeChat article feed covering consumer technology and internet commentary. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/8d839de8dd3290a1f1be7a94423cccb30c1b087d.xml) | all, chinese, engineering, wechat |
 | [张戈博客](https://zhang.ge) | Chinese independent blog. | Engineering & Technology | [RSS](https://zhang.ge/feed) | all, blogs, chinese, engineering |
 | [张洪Heo](https://blog.zhheo.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.zhheo.com/rss.xml) | all, blogs, chinese, engineering, top200 |
 | [张鑫旭-鑫空间-鑫生活](https://www.zhangxinxu.com/wordpress) | Chinese independent blog. | Engineering & Technology | [RSS](http://www.zhangxinxu.com/wordpress/?feed=rss2) | all, blogs, chinese, engineering, top200 |
-| [得物技术](https://wechat2rss.xlab.app/feed/f3a42bd249ec6e8834ae761d8d0f85a949950944.xml) | WeChat article feed covering 业务系统与工程实践. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/f3a42bd249ec6e8834ae761d8d0f85a949950944.xml) | all, chinese, company-tech, engineering, wechat |
+| [得物技术](https://wechat2rss.xlab.app/feed/f3a42bd249ec6e8834ae761d8d0f85a949950944.xml) | WeChat article feed covering business systems and engineering practice. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/f3a42bd249ec6e8834ae761d8d0f85a949950944.xml) | all, chinese, company-tech, engineering, wechat |
 | [愆伏](https://www.tortorse.com/atom.xml) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.tortorse.com/atom.xml) | all, blogs, chinese, engineering, top200 |
 | [我不是咕咕鸽](https://blog.laoda.de) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.laoda.de/rss.xml) | all, blogs, chinese, engineering |
 | [所谓空想](https://www.alxh.page) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.alxh.page/feed.rss) | all, blogs, chinese, engineering |
@@ -452,7 +452,7 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [游魂博客](https://www.iyouhun.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.iyouhun.com/rss.php) | all, blogs, chinese, engineering |
 | [澄沨的漫游茶记](https://champhoon.xyz/) | Chinese independent blog. | Engineering & Technology | [RSS](https://champhoon.xyz/atom.xml) | all, blogs, chinese, engineering |
 | [烧饼博客](https://u.sb/) | Chinese independent blog. | Engineering & Technology | [RSS](https://u.sb/rss.xml) | all, blogs, chinese, engineering |
-| [爱奇艺技术产品团队](https://wechat2rss.xlab.app/feed/16a4ec12a83a52e1f6e941bce030a4d64ee26c47.xml) | WeChat article feed covering 音视频与工程实践. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/16a4ec12a83a52e1f6e941bce030a4d64ee26c47.xml) | all, chinese, company-tech, engineering, wechat |
+| [爱奇艺技术产品团队](https://wechat2rss.xlab.app/feed/16a4ec12a83a52e1f6e941bce030a4d64ee26c47.xml) | WeChat article feed covering audio and video, and engineering practice. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/16a4ec12a83a52e1f6e941bce030a4d64ee26c47.xml) | all, chinese, company-tech, engineering, wechat |
 | [猫涅的秘密结社](http://www.maonie.top/) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.maonie.top/atom.xml) | all, blogs, chinese, engineering |
 | [猿客随笔](https://monkeyke.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://monkeyke.com/index.xml) | all, blogs, chinese, engineering |
 | [王圆圆 - ICONPIK](https://www.iconpik.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.iconpik.com/rss/) | ai, all, blogs, chinese, engineering, top200 |
@@ -473,12 +473,12 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [繁星点点](https://blog.52013120.xyz) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.52013120.xyz/rss.xml) | all, blogs, chinese, engineering |
 | [维基萌](https://www.wikimoe.com) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.wikimoe.com/rss.php) | all, blogs, chinese, engineering, top200 |
 | [罗磊的独立博客](https://luolei.org) | Chinese independent blog. | Engineering & Technology | [RSS](http://luolei.org/feed/) | all, blogs, chinese, engineering |
-| [美团技术团队](https://wechat2rss.xlab.app/feed/eb4d04149424a874693a51c6fdda0dba8673f5e4.xml) | WeChat article feed covering 后端、算法与工程实践. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/eb4d04149424a874693a51c6fdda0dba8673f5e4.xml) | all, chinese, company-tech, engineering, wechat |
+| [美团技术团队](https://wechat2rss.xlab.app/feed/eb4d04149424a874693a51c6fdda0dba8673f5e4.xml) | WeChat article feed covering back-end development, algorithms, and engineering practice. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/eb4d04149424a874693a51c6fdda0dba8673f5e4.xml) | all, chinese, company-tech, engineering, wechat |
 | [翔宇工作流](https://xiangyugongzuoliu.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://xiangyugongzuoliu.com/latest/rss/) | ai, all, blogs, chinese, engineering |
 | [老范讲故事｜AI、大模型与商业世界的故事](https://lukefan.com) | Chinese independent blog. | Engineering & Technology | [RSS](http://lukefan.com/?feed=rss2) | all, blogs, chinese, engineering, top200 |
 | [肘子的 Swift 记事本 ｜ Fatbobman's Blog](https://fatbobman.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://fatbobman.com/zh/rss.xml) | all, blogs, chinese, engineering |
 | [胡涂说](https://hutusi.com) | Chinese independent blog. | Engineering & Technology | [RSS](https://hutusi.com/feed.xml) | all, blogs, chinese, engineering, top200 |
-| [腾讯技术工程](https://wechat2rss.xlab.app/feed/9685937b45fe9c7a526dbc32e4f24ba879a65b9a.xml) | WeChat article feed covering 工程实践. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/9685937b45fe9c7a526dbc32e4f24ba879a65b9a.xml) | all, chinese, company-tech, engineering, wechat |
+| [腾讯技术工程](https://wechat2rss.xlab.app/feed/9685937b45fe9c7a526dbc32e4f24ba879a65b9a.xml) | WeChat article feed covering engineering practice. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/9685937b45fe9c7a526dbc32e4f24ba879a65b9a.xml) | all, chinese, company-tech, engineering, wechat |
 | [草梅友仁的博客](https://blog.cmyr.ltd/atom.xml) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.cmyr.ltd/atom.xml) | all, blogs, chinese, engineering |
 | [莫尔索随笔](https://liduos.com/atom.xml) | Chinese independent blog. | Engineering & Technology | [RSS](https://liduos.com/atom.xml) | all, blogs, chinese, engineering |
 | [蒙需](https://jiangcl.com) | Chinese independent blog. | Engineering & Technology | [RSS](https://jiangcl.com/feed) | all, blogs, chinese, engineering |
@@ -486,9 +486,9 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [蚊子的前端博客](https://www.xiabingbao.com) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.xiabingbao.com/atom.xml) | all, blogs, chinese, engineering |
 | [謝懿Shine](https://www.futseyi.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://xieyi.org/rss.xml) | ai, all, blogs, chinese, engineering |
 | [豌豆花下猫](https://pythoncat.top/) | Chinese independent blog. | Engineering & Technology | [RSS](https://pythoncat.top/rss.xml) | all, blogs, chinese, engineering, top200 |
-| [路由器评测](https://wechat2rss.xlab.app/feed/2fa034e4b97f23d870d5b8e749e805d508761a41.xml) | WeChat article feed covering 网络设备与家庭网络. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/2fa034e4b97f23d870d5b8e749e805d508761a41.xml) | all, chinese, engineering, wechat |
+| [路由器评测](https://wechat2rss.xlab.app/feed/2fa034e4b97f23d870d5b8e749e805d508761a41.xml) | WeChat article feed covering networking equipment and home networks. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/2fa034e4b97f23d870d5b8e749e805d508761a41.xml) | all, chinese, engineering, wechat |
 | [轶哥博客](https://www.wyr.me) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.wyr.me/rss.xml) | all, blogs, chinese, engineering |
-| [辉哥奇谭](https://wechat2rss.xlab.app/feed/1b01bd297483509251779f1a02bb90223786a923.xml) | WeChat article feed covering 科技、商业与个人思考. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/1b01bd297483509251779f1a02bb90223786a923.xml) | all, chinese, engineering, wechat |
+| [辉哥奇谭](https://wechat2rss.xlab.app/feed/1b01bd297483509251779f1a02bb90223786a923.xml) | WeChat article feed covering technology, business, and personal essays. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/1b01bd297483509251779f1a02bb90223786a923.xml) | all, chinese, engineering, wechat |
 | [运维咖啡吧](https://blog.ops-coffee.com/atom.xml) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.ops-coffee.cn/feed.xml) | all, blogs, chinese, engineering |
 | [运维开发绿皮书](https://www.geekery.cn/) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.geekery.cn/rss.xml) | all, blogs, chinese, engineering |
 | [远飞闲记](https://heyuanfei.com/) | Chinese independent blog. | Engineering & Technology | [RSS](https://leonhe.cn/index.xml) | all, blogs, chinese, engineering |
@@ -498,8 +498,8 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [阁子](https://dfine.tech/atom.xml) | Chinese independent blog. | Engineering & Technology | [RSS](https://dfine.tech/atom.xml) | all, blogs, chinese, engineering, top200 |
 | [阿尔的代码屋 \| 全栈技术笔记](https://blog.algieba12.cn/) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.algieba12.cn/atom.xml) | ai, all, blogs, chinese, engineering |
 | [阿掖山·博客](https://blog.mountaye.com) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.mountaye.com/feed.xml) | all, blogs, chinese, engineering |
-| [阿里云开发者](https://wechat2rss.xlab.app/feed/c74ed6db00cfbf16f2a048a165b4453f982681f0.xml) | WeChat article feed covering 云计算与开发实践. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/c74ed6db00cfbf16f2a048a165b4453f982681f0.xml) | all, chinese, company-tech, engineering, wechat |
-| [集智俱乐部](https://wechat2rss.xlab.app/feed/8540570d27c0bfe0a219173cf1ace83ae79445cb.xml) | WeChat article feed covering 复杂科学与交叉研究. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/8540570d27c0bfe0a219173cf1ace83ae79445cb.xml) | all, chinese, engineering, wechat |
+| [阿里云开发者](https://wechat2rss.xlab.app/feed/c74ed6db00cfbf16f2a048a165b4453f982681f0.xml) | WeChat article feed covering cloud computing and development practice. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/c74ed6db00cfbf16f2a048a165b4453f982681f0.xml) | all, chinese, company-tech, engineering, wechat |
+| [集智俱乐部](https://wechat2rss.xlab.app/feed/8540570d27c0bfe0a219173cf1ace83ae79445cb.xml) | WeChat article feed covering complexity science and interdisciplinary research. | Engineering & Technology | [RSS](https://wechat2rss.xlab.app/feed/8540570d27c0bfe0a219173cf1ace83ae79445cb.xml) | all, chinese, engineering, wechat |
 | [雪猫社](https://www.yukicat.net) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.yukicat.net/feed/) | all, blogs, chinese, engineering |
 | [雪的数字花园 ❄️](https://blog.rnm.gv.uy/) | Chinese independent blog. | Engineering & Technology | [RSS](https://blog.rnm.gv.uy/atom.xml) | all, blogs, chinese, engineering |
 | [青石坞](https://www.qs5.org/) | Chinese independent blog. | Engineering & Technology | [RSS](https://www.qs5.org/feed/) | all, blogs, chinese, engineering |
@@ -642,7 +642,7 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [Velas电波站](https://www.velasx.com/) | Chinese independent blog. | Product & Design | [RSS](https://www.velasx.com/feed) | all, blogs, chinese, top200 |
 | [今日热榜 · Product Hunt](https://tophub.today/n/LBwdG0jePx) | Product Hunt's daily launch board as mirrored by TopHub, for tracking what ships each day. | Product & Design | [RSS](https://rsshub.bestblogs.dev/tophub/LBwdG0jePx) | all |
 | [拾月的博客](https://www.skyue.com/) | Chinese independent blog. | Product & Design | [RSS](https://www.skyue.com/feed/) | all, blogs, chinese, top200 |
-| [阿里云设计中心](https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml) | WeChat article feed covering 产品设计与用户体验. | Product & Design | [RSS](https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml) | all, chinese, company-tech, top200, wechat |
+| [阿里云设计中心](https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml) | WeChat article feed covering product design and user experience. | Product & Design | [RSS](https://wechat2rss.xlab.app/feed/31e04606d37f684059e23a8fd3e05f1db0186495.xml) | all, chinese, company-tech, top200, wechat |
 
 </details>
 
@@ -764,9 +764,9 @@ All 737 feeds in the complete collection are listed below with their primary cat
 | [ShineKid](https://shinekid.com) | Chinese independent blog. | Culture & Ideas | [RSS](https://shinekid.com/feed/) | all, blogs, chinese, top200 |
 | [Tripper Press - Take Photo, Think Seriously.](https://tripper.press) | Chinese independent blog. | Culture & Ideas | [RSS](https://tripper.press/atom.xml) | all, blogs, chinese, top200 |
 | [东评西就](https://dongjunke.cn/) | Chinese independent blog. | Culture & Ideas | [RSS](https://dongjunke.cn/atom.xml) | all, blogs, chinese, top200 |
-| [先生制造](https://wechat2rss.xlab.app/feed/313326d41db4f54b1cc09e7c986a5ac4e5f88ca0.xml) | WeChat article feed covering 人物与社会记录. | Culture & Ideas | [RSS](https://wechat2rss.xlab.app/feed/313326d41db4f54b1cc09e7c986a5ac4e5f88ca0.xml) | all, chinese, top200, wechat |
+| [先生制造](https://wechat2rss.xlab.app/feed/313326d41db4f54b1cc09e7c986a5ac4e5f88ca0.xml) | WeChat article feed covering profiles of people and social documentary. | Culture & Ideas | [RSS](https://wechat2rss.xlab.app/feed/313326d41db4f54b1cc09e7c986a5ac4e5f88ca0.xml) | all, chinese, top200, wechat |
 | [叉息的空中咖啡馆](https://www.xchere.xyz/atom.xml) | Chinese independent blog. | Culture & Ideas | [RSS](https://www.xchere.xyz/atom.xml) | all, blogs, chinese |
-| [浅黑科技](https://wechat2rss.xlab.app/feed/6111a6d5ecf28cfdd4fc9b664244c05ddacef15c.xml) | WeChat article feed covering 科技人物与产业故事. | Culture & Ideas | [RSS](https://wechat2rss.xlab.app/feed/6111a6d5ecf28cfdd4fc9b664244c05ddacef15c.xml) | all, chinese, wechat |
+| [浅黑科技](https://wechat2rss.xlab.app/feed/6111a6d5ecf28cfdd4fc9b664244c05ddacef15c.xml) | WeChat article feed covering technology people and industry stories. | Culture & Ideas | [RSS](https://wechat2rss.xlab.app/feed/6111a6d5ecf28cfdd4fc9b664244c05ddacef15c.xml) | all, chinese, wechat |
 | [赫赫文王](https://kqh.me/) | Chinese independent blog. | Culture & Ideas | [RSS](https://kqh.me/index.xml) | all, blogs, chinese, top200 |
 | [静风说](https://www.jfsay.com) | Chinese independent blog. | Culture & Ideas | [RSS](http://www.jfsay.com/feed) | all, blogs, chinese, top200 |
 

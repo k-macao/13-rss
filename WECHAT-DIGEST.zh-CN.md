@@ -1,5 +1,7 @@
 # 微信自动推送（pushplus）
 
+[English](WECHAT-DIGEST.md)
+
 每天北京时间 **09:00** 和 **18:00**，GitHub Actions 会读取目录里的订阅源，抓取时间窗内的新文章，渲染成国际杂志风格的竖屏 HTML，并通过 [pushplus](https://www.pushplus.plus/) 推送到微信。
 
 | | |

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Published the WeChat digest guide in English as `WECHAT-DIGEST.md`, pointed the English README's digest link at it, and cross-linked the two guides from each other; a repository test now asserts both READMEs link to the guide in their own language.
+- Added `topic_en` to all 41 entries of `sources/wechat-curated.json` and taught `tools/merge_wechat_sources.py` to write an English `description_en`, then backfilled the 18 published WeChat feeds whose English appendix descriptions still embedded a Chinese topic. Both README appendices now read in a single language each, and regeneration stays reproducible.
 - Made the WeChat digest bilingual instead of translation-only: an English title or summary now keeps the original text and gains its Simplified Chinese translation underneath, so a card reads as original first, translation second. `translate_items` writes `title_zh` and `summary_zh` instead of overwriting `title` and `summary`, and appends nothing when the endpoint is unreachable or echoes the original back, so a card never prints the same sentence twice.
 - Rendered the appended translation in the existing editorial palette: the headline translation sits at 14px in dark grey behind a fluorescent-green 译 chip, and the summary translation at 12px on a thin neon rule, both clamped to the card's own title and summary widths. Chinese copy is still never translated, and `--no-translate` now shows originals only.
 - Documented the bilingual card in the digest guide's content rules, visual-style, pagination, and parameter tables, and in both READMEs; added eleven tests covering appending, untranslated Chinese items, unreachable and echo-back translations, escaping, clamping, and pagination of a fully bilingual issue.
