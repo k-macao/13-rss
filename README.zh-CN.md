@@ -2,7 +2,7 @@
   <img src="https://tidings.info/apple-touch-icon.png" width="96" height="96" alt="Tidings 应用图标">
   <h1>Tidings RSS</h1>
   <p><strong>把真正值得长期订阅的内容，整理成可以直接导入阅读器的 RSS 合集。</strong></p>
-  <p>先从精选 200 开始；需要更多选择时，再按主题下载或浏览 725 个全量源。精选包最近检查：2026-08-13。</p>
+  <p>先从精选 200 开始；需要更多选择时，再按主题下载或浏览 737 个全量源。精选包最近检查：2026-08-13。</p>
   <p>
     <a href="README.md">English</a> ·
     <a href="#直接下载">下载 OPML</a> ·
@@ -19,7 +19,7 @@
   </p>
 </div>
 
-第一次导入，建议直接选“精选 200”。它从 725 个全量源里留下大机构、长期创作者、官方一手内容和社区认可度较高的作者，14 个分类都有覆盖，导入后不用再面对几百个订阅逐一删减。
+第一次导入，建议直接选“精选 200”。它从 737 个全量源里留下大机构、长期创作者、官方一手内容和社区认可度较高的作者，14 个分类都有覆盖，导入后不用再面对几百个订阅逐一删减。
 
 精选包兼顾中文和英文内容，覆盖 AI、工程、安全、科技媒体、周刊、科研、新闻、产品、商业、博客、社区、文化、视频和播客。想把某个方向看得更全，可以继续选下面的主题包；“综合全集”更适合收藏和二次整理。
 
@@ -30,20 +30,20 @@
 | 合集 | 数量 | 下载 | 适合你，如果你想看…… |
 | --- | ---: | --- | --- |
 | ⭐ 精选 200（首选） | `200` | [下载 `tidings-top200.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-top200.opml) | 一次导入，各个方向都有高质量内容，后续整理成本也更低 |
-| 📚 综合全集 | `725` | [下载 `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | 完整收藏，或导入后自行删减 |
+| 📚 综合全集 | `737` | [下载 `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | 完整收藏，或导入后自行删减 |
 | ✍️ 中文独立博客 | `349` | [下载 `tidings-blogs.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-blogs.opml) | 仍在认真写作的中文个人博客 |
 | 👥 技术社区 | `14` | [下载 `tidings-communities.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-communities.opml) | V2EX、LINUX DO、Reddit、Hacker News 等社区讨论 |
 | 🔐 安全 | `8` | [下载 `tidings-security.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-security.opml) | 漏洞、攻防研究、安全通告与行业动态 |
-| 📰 科技媒体 | `10` | [下载 `tidings-tech-media.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-tech-media.opml) | 国内外科技新闻、产品与深度报道 |
+| 📰 科技媒体 | `15` | [下载 `tidings-tech-media.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-tech-media.opml) | 国内外科技新闻、产品与深度报道 |
 | 📮 技术周刊 | `9` | [下载 `tidings-weeklies.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-weeklies.opml) | AI、JavaScript、Go、Rust 与中文技术周刊 |
 | 💬 微信公众号 | `30` | [下载 `tidings-wechat.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-wechat.opml) | 在阅读器里集中阅读公众号文章 |
-| 🏢 大厂技术号 | `40` | [下载 `tidings-company-tech.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-company-tech.opml) | 国内外技术团队的一手工程、AI、安全与研究文章 |
-| 🤖 AI / 人工智能 | `99` | [下载 `tidings-ai.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-ai.opml) | 模型进展、研究、工具和技术观点 |
-| 🗞️ 最新新闻 | `48` | [下载 `tidings-news.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-news.opml) | 国际、科技、安全、中文新闻与全网热榜 |
-| 🔬 科研与科学 | `27` | [下载 `tidings-research.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-research.opml) | 论文、期刊、实验室和科学报道 |
-| 🛠️ 工程与技术 | `420` | [下载 `tidings-engineering.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-engineering.opml) | 编程、架构、开发工具和工程实践 |
+| 🏢 大厂技术号 | `45` | [下载 `tidings-company-tech.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-company-tech.opml) | 国内外技术团队的一手工程、AI、安全与研究文章 |
+| 🤖 AI / 人工智能 | `111` | [下载 `tidings-ai.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-ai.opml) | 模型进展、研究、工具和技术观点 |
+| 🗞️ 最新新闻 | `53` | [下载 `tidings-news.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-news.opml) | 国际、科技、安全、中文新闻与全网热榜 |
+| 🔬 科研与科学 | `29` | [下载 `tidings-research.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-research.opml) | 论文、期刊、实验室和科学报道 |
+| 🛠️ 工程与技术 | `423` | [下载 `tidings-engineering.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-engineering.opml) | 编程、架构、开发工具和工程实践 |
 | 🎬 视频频道 | `93` | [下载 `tidings-videos.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-videos.opml) | AI、编程、科学和商业视频 |
-| 🎧 播客 | `73` | [下载 `tidings-podcasts.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-podcasts.opml) | 科技、商业、科学与中文节目 |
+| 🎧 播客 | `74` | [下载 `tidings-podcasts.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-podcasts.opml) | 科技、商业、科学与中文节目 |
 | 🀄 中文订阅源 | `474` | [下载 `tidings-chinese.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-chinese.opml) | 中文文章、社区、视频和音频 |
 
 [RSS 使用指南](RSS-GUIDE.zh-CN.md) · [浏览 OPML](opml/) · [SHA-256 校验文件](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/SHA256SUMS.txt) · [目录统计](reports/catalog-summary.md) · [机器可读目录](data/feeds.json)
@@ -110,10 +110,10 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 <!-- SOURCE_APPENDIX_START -->
 ## 全量源清单
 
-下面列出全集中的 725 个订阅源。每项都标明主分类与所属合集；内容由 `data/feeds.json` 生成。
+下面列出全集中的 737 个订阅源。每项都标明主分类与所属合集；内容由 `data/feeds.json` 生成。
 
 <details>
-<summary>🤖 人工智能 · 38</summary>
+<summary>🤖 人工智能 · 42</summary>
 
 | 名称 | 介绍 | 主分类 | Feed | 所属合集 |
 | --- | --- | --- | --- | --- |
@@ -123,16 +123,20 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 | [Anthropic News](https://www.anthropic.com/news) | 人工智能内容 | 人工智能 | [RSS](https://rsshub.bestblogs.dev/anthropic/news) | AI、全集、大厂技术号、工程、精选 200 |
 | [Apple Machine Learning Research](https://machinelearning.apple.com) | 人工智能内容 | 人工智能 | [RSS](https://machinelearning.apple.com/rss.xml) | AI、全集、大厂技术号、工程、科研、精选 200 |
 | [Artificial Intelligence](https://aws.amazon.com/blogs/machine-learning/) | 人工智能内容 | 人工智能 | [RSS](https://aws.amazon.com/blogs/amazon-ai/feed/) | AI、全集、大厂技术号、工程、精选 200 |
+| [AWS Machine Learning Blog](https://aws.amazon.com/blogs/machine-learning/) | AWS 官方机器学习博客，讲模型训练、推理部署与平台服务的实践做法。 | 人工智能 | [RSS](https://aws.amazon.com/blogs/machine-learning/feed/) | AI、全集、大厂技术号、工程 |
 | [cs.AI updates on arXiv.org](http://rss.arxiv.org/rss/cs.AI) | 人工智能内容 | 人工智能 | [RSS](https://rss.arxiv.org/rss/cs.AI) | AI、全集、工程、科研 |
 | [cs.CL updates on arXiv.org](http://rss.arxiv.org/rss/cs.CL) | 人工智能内容 | 人工智能 | [RSS](https://export.arxiv.org/rss/cs.CL) | AI、全集、工程、科研、精选 200 |
 | [cs.CV updates on arXiv.org](http://rss.arxiv.org/rss/cs.CV) | 人工智能内容 | 人工智能 | [RSS](https://export.arxiv.org/rss/cs.CV) | AI、全集、中文、工程、科研 |
 | [cs.LG updates on arXiv.org](http://rss.arxiv.org/rss/cs.LG) | 人工智能内容 | 人工智能 | [RSS](https://export.arxiv.org/rss/cs.LG) | AI、全集、中文、工程、科研 |
 | [DeepSeek](https://wechat2rss.bestblogs.dev/feed/1709da4f538d4ce4fb6d7a8ba1a5a1c297919601.xml) | 人工智能内容 | 人工智能 | [RSS](https://wechat2rss.bestblogs.dev/feed/1709da4f538d4ce4fb6d7a8ba1a5a1c297919601.xml) | AI、全集、中文、大厂技术号、工程、精选 200、微信公众号 |
+| [GitHub Blog · AI & ML](https://github.blog/ai-and-ml/) | GitHub 官方博客的人工智能与机器学习栏目，只收 AI 相关的产品与工程更新。 | 人工智能 | [RSS](https://github.blog/ai-and-ml/feed/) | AI、全集、大厂技术号、工程 |
 | [Google DeepMind News](https://deepmind.google/blog/) | 人工智能内容 | 人工智能 | [RSS](https://deepmind.com/blog/feed/basic/) | AI、全集、大厂技术号、工程、精选 200 |
 | [Hacker News - Newest: "AI"](https://news.ycombinator.com/newest) | 人工智能内容 | 人工智能 | [RSS](https://hnrss.org/newest?q=AI) | AI、全集、工程 |
 | [Hacker News - Newest: "LLM"](https://news.ycombinator.com/newest) | 人工智能内容 | 人工智能 | [RSS](https://hnrss.org/newest?q=LLM) | AI、全集、工程 |
 | [Hugging Face - Blog](https://huggingface.co/blog) | 人工智能内容 | 人工智能 | [RSS](https://huggingface.co/blog/feed.xml) | AI、全集、大厂技术号、工程、精选 200 |
+| [Mistral AI](https://mistral.ai/news) | Mistral AI 官方博客，发布模型、产品与合作的一手公告。 | 人工智能 | [RSS](https://mistral.ai/rss.xml) | AI、全集、大厂技术号 |
 | [MIT News - Artificial intelligence](https://news.mit.edu/rss/topic/artificial-intelligence2) | 人工智能内容 | 人工智能 | [RSS](https://news.mit.edu/rss/topic/artificial-intelligence2) | AI、全集、工程、科研、精选 200 |
+| [NVIDIA Blog](https://blogs.nvidia.com/) | NVIDIA 官方博客，发布加速计算、AI 模型与行业应用的一手消息。 | 人工智能 | [RSS](https://blogs.nvidia.com/feed/) | AI、全集、大厂技术号、工程 |
 | [OpenAI News](https://openai.com/news) | 人工智能内容 | 人工智能 | [RSS](https://openai.com/news/rss.xml) | AI、全集、大厂技术号、工程、精选 200 |
 | [Recent Commits to openclaw:main](https://github.com/openclaw/openclaw/commits/main) | 人工智能内容 | 人工智能 | [RSS](https://github.com/openclaw/openclaw/commits/main.atom) | AI、全集、工程 |
 | [Release notes from claude-code](https://github.com/anthropics/claude-code/releases) | 人工智能内容 | 人工智能 | [RSS](https://github.com/anthropics/claude-code/releases.atom) | AI、全集、工程 |
@@ -532,7 +536,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 </details>
 
 <details>
-<summary>📰 科技媒体 · 10</summary>
+<summary>📰 科技媒体 · 15</summary>
 
 | 名称 | 介绍 | 主分类 | Feed | 所属合集 |
 | --- | --- | --- | --- | --- |
@@ -546,6 +550,11 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 | [少数派](https://sspai.com) | 数字工具、效率方法、软件体验与个人工作流。 | 科技媒体 | [RSS](https://sspai.com/feed) | 全集、中文、新闻、科技媒体、精选 200 |
 | [爱范儿](https://www.ifanr.com?utm_source=rss&utm_medium=rss&utm_campaign=) | 中文消费科技、智能设备与产品趋势报道。 | 科技媒体 | [RSS](https://www.ifanr.com/feed) | 全集、中文、新闻、科技媒体、精选 200 |
 | [MIT Technology Review](https://www.technologyreview.com/) | 人工智能、计算、气候与生物技术的深度报道。 | 科技媒体 | [RSS](https://www.technologyreview.com/feed/) | 全集、新闻、科技媒体、精选 200 |
+| [The Verge · AI](https://www.theverge.com/ai-artificial-intelligence) | The Verge 人工智能栏目，只推 AI 相关的报道与产品评测。 | 科技媒体 | [RSS](https://www.theverge.com/rss/ai-artificial-intelligence/index.xml) | AI、全集、新闻、科技媒体 |
+| [TechCrunch · AI](https://techcrunch.com/category/artificial-intelligence/) | TechCrunch 人工智能栏目，聚焦 AI 创业公司的融资、产品与行业动向。 | 科技媒体 | [RSS](https://techcrunch.com/category/artificial-intelligence/feed/) | AI、全集、新闻、科技媒体 |
+| [Ars Technica · AI](https://arstechnica.com/ai/) | Ars Technica 人工智能栏目，偏技术解释的 AI 报道与分析。 | 科技媒体 | [RSS](https://arstechnica.com/ai/feed/) | AI、全集、新闻、科技媒体 |
+| [MIT Technology Review · AI](https://www.technologyreview.com/topic/artificial-intelligence/) | MIT Technology Review 人工智能主题源，只收 AI 相关的深度报道与评论。 | 科技媒体 | [RSS](https://www.technologyreview.com/topic/artificial-intelligence/feed) | AI、全集、新闻、科技媒体 |
+| [The Decoder](https://the-decoder.com/) | The Decoder 是专注 AI 的独立媒体，日更模型发布、研究与企业动向的简明报道。 | 科技媒体 | [RSS](https://the-decoder.com/feed/) | AI、全集、新闻、科技媒体 |
 
 </details>
 
@@ -567,7 +576,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 </details>
 
 <details>
-<summary>🔬 科研与科学 · 19</summary>
+<summary>🔬 科研与科学 · 21</summary>
 
 | 名称 | 介绍 | 主分类 | Feed | 所属合集 |
 | --- | --- | --- | --- | --- |
@@ -575,9 +584,11 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 | [All Top News -- ScienceDaily](https://www.sciencedaily.com/news/top/) | 科研与科学内容 | 科研与科学 | [RSS](https://www.sciencedaily.com/rss/top/science.xml) | 全集、科研 |
 | [Amazon Science](https://www.amazon.science/) | 科研与科学内容 | 科研与科学 | [RSS](https://www.amazon.science/index.rss) | 全集、大厂技术号、科研 |
 | [BBC News — Science](https://www.bbc.co.uk/news/science_and_environment) | 科研与科学内容 | 科研与科学 | [RSS](https://feeds.bbci.co.uk/news/science_and_environment/rss.xml) | 全集、科研、精选 200 |
+| [Berkeley AI Research](https://bair.berkeley.edu/blog/) | 加州大学伯克利分校 BAIR 实验室博客，由研究者本人写模型和系统方向的新工作。 | 科研与科学 | [RSS](https://bair.berkeley.edu/blog/feed.xml) | AI、全集、科研 |
 | [eLife: latest articles](https://elifesciences.org) | 科研与科学内容 | 科研与科学 | [RSS](https://elifesciences.org/rss/recent.xml) | 全集、科研、精选 200 |
 | [FlowingData](https://flowingdata.com) | 科研与科学内容 | 科研与科学 | [RSS](https://flowingdata.com/feed) | 全集、科研、精选 200 |
 | [Latest Science News -- ScienceDaily](https://www.sciencedaily.com/news/) | 科研与科学内容 | 科研与科学 | [RSS](https://www.sciencedaily.com/rss/all.xml) | 全集、科研 |
+| [Microsoft Research](https://www.microsoft.com/en-us/research/blog/) | Microsoft Research 官方博客，覆盖人工智能、系统与基础研究的一手论文与项目介绍。 | 科研与科学 | [RSS](https://www.microsoft.com/en-us/research/feed/) | AI、全集、大厂技术号、科研 |
 | [NASA](https://www.nasa.gov) | 科研与科学内容 | 科研与科学 | [RSS](https://www.nasa.gov/news-release/feed/) | 全集、科研、精选 200 |
 | [Nature](http://feeds.nature.com/nature/rss/current) | 科研与科学内容 | 科研与科学 | [RSS](https://www.nature.com/nature.rss) | 全集、科研、精选 200 |
 | [NYT > Science](https://www.nytimes.com/section/science) | 科研与科学内容 | 科研与科学 | [RSS](https://rss.nytimes.com/services/xml/rss/nyt/Science.xml) | 全集、科研、精选 200 |
@@ -869,7 +880,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 </details>
 
 <details>
-<summary>🎧 播客 · 73</summary>
+<summary>🎧 播客 · 74</summary>
 
 | 名称 | 介绍 | 主分类 | Feed | 所属合集 |
 | --- | --- | --- | --- | --- |
@@ -884,6 +895,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 | [Hanselminutes with Scott Hanselman](https://www.hanselminutes.com) | 播客节目 | 播客 | [RSS](https://feeds.simplecast.com/gvtxUiIf) | 全集、播客、精选 200 |
 | [Invest Like the Best with Patrick O'Shaughnessy](https://colossus.com/) | 播客节目 | 播客 | [RSS](https://investlikethebest.libsyn.com/rss) | 全集、播客、精选 200 |
 | [Invisibilia](https://www.npr.org/podcasts/510307/invisibilia) | 播客节目 | 播客 | [RSS](https://feeds.npr.org/510307/podcast.xml) | 全集、播客 |
+| [Latent Space](https://www.latent.space/) | Latent Space 是面向 AI 工程师的播客，访谈模型、工具与产品的一线实践者。 | 播客 | [RSS](https://www.latent.space/feed) | AI、全集、播客 |
 | [Planet Money](https://www.npr.org/podcasts/510289/planet-money) | 播客节目 | 播客 | [RSS](https://feeds.npr.org/510289/podcast.xml) | 全集、播客 |
 | [Reply All](http://gimletmedia.com/shows/reply-all) | 播客节目 | 播客 | [RSS](https://feeds.megaphone.fm/replyall) | 全集、播客 |
 | [The Cynical Developer](https://cynical.dev/) | 播客节目 | 播客 | [RSS](https://cynicaldeveloper.com/feed/podcast) | 全集、播客 |

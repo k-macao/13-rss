@@ -1,0 +1,432 @@
+{
+  "review": "aihot-demo-sources-2026-10-17",
+  "origin": {
+    "project": "AIHOT",
+    "repository": "https://github.com/k-macao/AIHOT",
+    "path": "industry/sources.json",
+    "note": "AIHOT ships 18 public demo feeds that are imported on first start. Their URLs were taken as discovery facts only; every title, description, category, and bundle below was written for this catalog, and no AIHOT content is redistributed."
+  },
+  "requested_sources": [
+    "AIHOT 示范信源 industry/sources.json（k-macao/AIHOT）"
+  ],
+  "method": "Every candidate endpoint was fetched directly over HTTPS from a GitHub-hosted runner and its payload parsed as RSS, Atom, or JSON Feed. Each round records the HTTP status, the parsed root format, the number of items actually read, the newest item timestamp as published by the feed, and the channel's own title and language. Candidates had to return a parseable feed with at least one item in all three rounds. Tidings parser rounds were not available in the authoring environment, so this round records HTTP fetch plus feed-parse evidence only. Rounds ran on 2026-10-16 between 17:07 and 17:16 UTC, about seven minutes apart.",
+  "checked_on": "2026-10-17",
+  "timezone_note": "Review timestamps are Asia/Macau (UTC+8); feed timestamps are reproduced in UTC as published.",
+  "candidates": [
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-openai-news",
+      "aihot_tier": "T1",
+      "title": "OpenAI News",
+      "feed_url": "https://openai.com/news/rss.xml",
+      "site_url": "https://openai.com/news/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "organization": "OpenAI",
+      "company_direction": "AI",
+      "selected": false,
+      "reason": "Already published in the catalog under the same normalized feed URL; kept in the round to re-verify the endpoint the AIHOT demo bundle points at.",
+      "description": "OpenAI 官方新闻源，发布模型、产品与研究成果的一手公告。",
+      "description_en": "OpenAI's official newsroom feed for first-party model, product, and research announcements."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-google-deepmind",
+      "aihot_tier": "T1",
+      "title": "Google DeepMind",
+      "feed_url": "https://deepmind.google/blog/rss.xml",
+      "site_url": "https://deepmind.google/blog/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "organization": "Google",
+      "company_direction": "AI",
+      "selected": false,
+      "duplicate_of": "https://deepmind.com/blog/feed/basic/",
+      "reason": "The catalog already publishes this lab's blog as “Google DeepMind News” (Google / AI in the company-technology bundle). Adding the same publisher's blog a second time under a newer host would duplicate an existing slot, so the candidate is recorded as a rejected duplicate; the published deepmind.com endpoint was re-checked in the same rounds and still resolves, redirecting to this address.",
+      "description": "Google DeepMind 官方博客，发布模型与研究进展的一手说明。",
+      "description_en": "Google DeepMind's official blog with first-party model and research announcements."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-google-research",
+      "aihot_tier": "T1",
+      "title": "Google Research",
+      "feed_url": "https://research.google/blog/rss/",
+      "site_url": "https://research.google/blog/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering",
+        "research"
+      ],
+      "organization": "Google",
+      "company_direction": "研究",
+      "selected": false,
+      "reason": "Already published in the catalog under the same normalized feed URL.",
+      "description": "Google Research 官方博客，覆盖模型、系统与基础研究的论文解读。",
+      "description_en": "Google Research's official blog covering models, systems, and fundamental research write-ups."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-hugging-face",
+      "aihot_tier": "T1",
+      "title": "Hugging Face Blog",
+      "feed_url": "https://huggingface.co/blog/feed.xml",
+      "site_url": "https://huggingface.co/blog",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "organization": "Hugging Face",
+      "company_direction": "AI",
+      "selected": false,
+      "reason": "Already published in the catalog under the same normalized feed URL.",
+      "description": "Hugging Face 官方博客，发布开源模型、数据集与工具的一手更新。",
+      "description_en": "Hugging Face's official blog announcing open models, datasets, and tooling."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-microsoft-research",
+      "aihot_tier": "T1",
+      "title": "Microsoft Research",
+      "feed_url": "https://www.microsoft.com/en-us/research/feed/",
+      "site_url": "https://www.microsoft.com/en-us/research/blog/",
+      "category": "Research & Science",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "research"
+      ],
+      "organization": "Microsoft",
+      "company_direction": "研究",
+      "selected": true,
+      "reason": "First-party research blog of a major lab, published continuously and independent of the Azure engineering feed already in the catalog.",
+      "description": "Microsoft Research 官方博客，覆盖人工智能、系统与基础研究的一手论文与项目介绍。",
+      "description_en": "Microsoft Research's official blog with first-party papers and project write-ups across AI, systems, and fundamental research."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-nvidia-blog",
+      "aihot_tier": "T1",
+      "title": "NVIDIA Blog",
+      "feed_url": "https://blogs.nvidia.com/feed/",
+      "site_url": "https://blogs.nvidia.com/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "organization": "NVIDIA",
+      "company_direction": "AI",
+      "selected": true,
+      "reason": "First-party company blog covering accelerated computing and AI; no other NVIDIA feed is published in the catalog.",
+      "description": "NVIDIA 官方博客，发布加速计算、AI 模型与行业应用的一手消息。",
+      "description_en": "NVIDIA's official blog covering accelerated computing, AI models, and industry deployments."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-aws-ml",
+      "aihot_tier": "T1",
+      "title": "AWS Machine Learning Blog",
+      "feed_url": "https://aws.amazon.com/blogs/machine-learning/feed/",
+      "site_url": "https://aws.amazon.com/blogs/machine-learning/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "organization": "Amazon Web Services",
+      "company_direction": "机器学习",
+      "selected": true,
+      "reason": "First-party machine-learning blog with hands-on engineering content; distinct from the Amazon AI, architecture, and cloud feeds already published.",
+      "description": "AWS 官方机器学习博客，讲模型训练、推理部署与平台服务的实践做法。",
+      "description_en": "AWS's official machine-learning blog with practical guidance on training, inference, and managed services."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-github-ai",
+      "aihot_tier": "T1",
+      "title": "GitHub Blog · AI & ML",
+      "feed_url": "https://github.blog/ai-and-ml/feed/",
+      "site_url": "https://github.blog/ai-and-ml/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "organization": "GitHub",
+      "company_direction": "AI",
+      "selected": true,
+      "reason": "Narrow AI-and-ML section of a first-party company blog, a distinct reading use next to the general GitHub engineering feed already published.",
+      "description": "GitHub 官方博客的人工智能与机器学习栏目，只收 AI 相关的产品与工程更新。",
+      "description_en": "The AI and ML section of GitHub's official blog, isolating AI product and engineering updates."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-mistral",
+      "aihot_tier": "T1",
+      "title": "Mistral AI",
+      "feed_url": "https://mistral.ai/rss.xml",
+      "site_url": "https://mistral.ai/news",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech"
+      ],
+      "organization": "Mistral AI",
+      "company_direction": "AI",
+      "selected": true,
+      "reason": "First-party blog of a frontier model lab; the catalog publishes no other Mistral endpoint.",
+      "description": "Mistral AI 官方博客，发布模型、产品与合作的一手公告。",
+      "description_en": "Mistral AI's official blog announcing models, products, and partnerships."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-bair",
+      "aihot_tier": "T1",
+      "title": "Berkeley AI Research",
+      "feed_url": "https://bair.berkeley.edu/blog/feed.xml",
+      "site_url": "https://bair.berkeley.edu/blog/",
+      "category": "Research & Science",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "research"
+      ],
+      "selected": true,
+      "reason": "Long-running university lab blog publishing first-party research write-ups; a different kind of source from the company research blogs already in the catalog.",
+      "description": "加州大学伯克利分校 BAIR 实验室博客，由研究者本人写模型和系统方向的新工作。",
+      "description_en": "The BAIR lab blog at UC Berkeley, with research-written walkthroughs of new models and systems work."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-verge-ai",
+      "aihot_tier": "T2",
+      "title": "The Verge · AI",
+      "feed_url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "site_url": "https://www.theverge.com/ai-artificial-intelligence",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "selected": true,
+      "reason": "Dedicated AI section of a first-party media feed, so readers can follow AI coverage without the rest of the newsroom; the catalog's main Verge feed stays as the full-newsroom option.",
+      "description": "The Verge 人工智能栏目，只推 AI 相关的报道与产品评测。",
+      "description_en": "The Verge's artificial-intelligence section, limited to AI reporting and product coverage."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-techcrunch-ai",
+      "aihot_tier": "T2",
+      "title": "TechCrunch · AI",
+      "feed_url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+      "site_url": "https://techcrunch.com/category/artificial-intelligence/",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "selected": true,
+      "reason": "Dedicated AI section of a first-party startup newsroom, focused on funding and company news in AI rather than the full TechCrunch wire.",
+      "description": "TechCrunch 人工智能栏目，聚焦 AI 创业公司的融资、产品与行业动向。",
+      "description_en": "TechCrunch's artificial-intelligence category, focused on AI startup funding, products, and industry moves."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-arstechnica-ai",
+      "aihot_tier": "T2",
+      "title": "Ars Technica · AI",
+      "feed_url": "https://arstechnica.com/ai/feed/",
+      "site_url": "https://arstechnica.com/ai/",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "selected": true,
+      "reason": "Dedicated AI section with a technical editing angle, narrower than the general Ars Technica feed already published.",
+      "description": "Ars Technica 人工智能栏目，偏技术解释的 AI 报道与分析。",
+      "description_en": "Ars Technica's AI section, with technically detailed AI reporting and analysis."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-mit-tr-ai",
+      "aihot_tier": "T2",
+      "title": "MIT Technology Review · AI",
+      "feed_url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+      "site_url": "https://www.technologyreview.com/topic/artificial-intelligence/",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "selected": true,
+      "reason": "Dedicated AI topic feed from a first-party magazine, isolating the AI desk from the general MIT Technology Review feed.",
+      "description": "MIT Technology Review 人工智能主题源，只收 AI 相关的深度报道与评论。",
+      "description_en": "MIT Technology Review's artificial-intelligence topic feed, isolating its AI reporting and commentary."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-the-decoder",
+      "aihot_tier": "T2",
+      "title": "The Decoder",
+      "feed_url": "https://the-decoder.com/feed/",
+      "site_url": "https://the-decoder.com/",
+      "category": "Technology Media",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "news",
+        "tech-media"
+      ],
+      "selected": true,
+      "reason": "Independent AI-only newsroom with several items per day and a clear editorial remit; no overlapping publisher in the catalog.",
+      "description": "The Decoder 是专注 AI 的独立媒体，日更模型发布、研究与企业动向的简明报道。",
+      "description_en": "The Decoder is an AI-only newsroom publishing frequent, concise reporting on models, research, and industry moves."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-simon-willison",
+      "aihot_tier": "T2",
+      "title": "Simon Willison",
+      "feed_url": "https://simonwillison.net/atom/everything/",
+      "site_url": "https://simonwillison.net/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "engineering"
+      ],
+      "selected": false,
+      "reason": "Already published in the catalog under the same normalized feed URL.",
+      "description": "Simon Willison 的个人博客，记录 LLM 工具与实践的第一手实验。",
+      "description_en": "Simon Willison's personal blog documenting hands-on experiments with LLM tooling."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-import-ai",
+      "aihot_tier": "T2",
+      "title": "Import AI",
+      "feed_url": "https://importai.substack.com/feed",
+      "site_url": "https://importai.substack.com/",
+      "category": "Tech Newsletters & Weeklies",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "weeklies"
+      ],
+      "selected": false,
+      "reason": "Rejected: Substack answered HTTP 403 on all three rounds from the hosted runner, so the endpoint cannot be verified as publicly subscribable and would also fail the weekly live check. Recorded as an unsubscribable candidate rather than published on trust.",
+      "description": "Import AI 是 Jack Clark 主笔的 AI 周刊，按周梳理研究、产业与政策动态。",
+      "description_en": "Import AI is Jack Clark's weekly AI newsletter summarizing research, industry, and policy developments."
+    },
+    {
+      "requested_source": "AIHOT 示范信源",
+      "aihot_id": "rss-latent-space",
+      "aihot_tier": "T2",
+      "title": "Latent Space",
+      "feed_url": "https://www.latent.space/feed",
+      "site_url": "https://www.latent.space/",
+      "category": "Podcasts",
+      "kind": "podcast",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "podcasts"
+      ],
+      "selected": true,
+      "reason": "Practitioner-focused AI engineering podcast with an accompanying written archive; no overlapping publisher in the catalog.",
+      "description": "Latent Space 是面向 AI 工程师的播客，访谈模型、工具与产品的一线实践者。",
+      "description_en": "Latent Space is an AI-engineering podcast interviewing practitioners building models, tools, and products."
+    },
+    {
+      "requested_source": "目录中已有条目复核",
+      "aihot_id": "existing-google-deepmind-news",
+      "aihot_tier": "T1",
+      "title": "Google DeepMind News (published entry)",
+      "feed_url": "https://deepmind.com/blog/feed/basic/",
+      "site_url": "https://deepmind.com/blog/",
+      "category": "Artificial Intelligence",
+      "kind": "article",
+      "language": "en",
+      "packs": [
+        "ai",
+        "all",
+        "company-tech",
+        "engineering"
+      ],
+      "selected": false,
+      "existing_entry_check": true,
+      "reason": "Not a candidate for publication. This is the endpoint the catalog already publishes as “Google DeepMind News”; it answered HTTP 200 in all three rounds and redirects to deepmind.google/blog/rss.xml, so the published entry needs no correction.",
+      "description": "目录中已发布的 Google DeepMind 官方博客，本轮一并复核该地址是否仍然可用。",
+      "description_en": "The Google DeepMind blog endpoint this catalog already publishes, re-checked in this round to record whether it still resolves."
+    }
+  ]
+}

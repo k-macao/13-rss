@@ -2,8 +2,8 @@
 <opml version="2.0">
   <head>
     <title>Tidings Curated RSS — Podcasts</title>
-    <dateCreated>2026-09-03</dateCreated>
-    <dateModified>2026-09-03</dateModified>
+    <dateCreated>2026-10-17</dateCreated>
+    <dateModified>2026-10-17</dateModified>
     <ownerName>Tidings RSS Community</ownerName>
     <docs>http://opml.org/spec2.opml</docs>
   </head>
@@ -20,6 +20,7 @@
       <outline text="Hanselminutes with Scott Hanselman" title="Hanselminutes with Scott Hanselman" type="rss" xmlUrl="https://feeds.simplecast.com/gvtxUiIf" htmlUrl="https://www.hanselminutes.com" />
       <outline text="Invest Like the Best with Patrick O'Shaughnessy" title="Invest Like the Best with Patrick O'Shaughnessy" type="rss" xmlUrl="https://investlikethebest.libsyn.com/rss" htmlUrl="https://colossus.com/" />
       <outline text="Invisibilia" title="Invisibilia" type="rss" xmlUrl="https://feeds.npr.org/510307/podcast.xml" htmlUrl="https://www.npr.org/podcasts/510307/invisibilia" />
+      <outline text="Latent Space" title="Latent Space" type="rss" xmlUrl="https://www.latent.space/feed" htmlUrl="https://www.latent.space/" />
       <outline text="Planet Money" title="Planet Money" type="rss" xmlUrl="https://feeds.npr.org/510289/podcast.xml" htmlUrl="https://www.npr.org/podcasts/510289/planet-money" />
       <outline text="Reply All" title="Reply All" type="rss" xmlUrl="https://feeds.megaphone.fm/replyall" htmlUrl="http://gimletmedia.com/shows/reply-all" />
       <outline text="The Cynical Developer" title="The Cynical Developer" type="rss" xmlUrl="https://cynicaldeveloper.com/feed/podcast" htmlUrl="https://cynical.dev/" />

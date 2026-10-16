@@ -2,8 +2,8 @@
 <opml version="2.0">
   <head>
     <title>Tidings Curated RSS — Research &amp; Science</title>
-    <dateCreated>2026-09-03</dateCreated>
-    <dateModified>2026-09-03</dateModified>
+    <dateCreated>2026-10-17</dateCreated>
+    <dateModified>2026-10-17</dateModified>
     <ownerName>Tidings RSS Community</ownerName>
     <docs>http://opml.org/spec2.opml</docs>
   </head>
@@ -23,9 +23,11 @@
       <outline text="All Top News -- ScienceDaily" title="All Top News -- ScienceDaily" type="rss" xmlUrl="https://www.sciencedaily.com/rss/top/science.xml" htmlUrl="https://www.sciencedaily.com/news/top/" />
       <outline text="Amazon Science" title="Amazon Science" type="rss" xmlUrl="https://www.amazon.science/index.rss" htmlUrl="https://www.amazon.science/" />
       <outline text="BBC News — Science" title="BBC News — Science" type="rss" xmlUrl="https://feeds.bbci.co.uk/news/science_and_environment/rss.xml" htmlUrl="https://www.bbc.co.uk/news/science_and_environment" />
+      <outline text="Berkeley AI Research" title="Berkeley AI Research" type="rss" xmlUrl="https://bair.berkeley.edu/blog/feed.xml" htmlUrl="https://bair.berkeley.edu/blog/" />
       <outline text="eLife: latest articles" title="eLife: latest articles" type="rss" xmlUrl="https://elifesciences.org/rss/recent.xml" htmlUrl="https://elifesciences.org" />
       <outline text="FlowingData" title="FlowingData" type="rss" xmlUrl="https://flowingdata.com/feed" htmlUrl="https://flowingdata.com" />
       <outline text="Latest Science News -- ScienceDaily" title="Latest Science News -- ScienceDaily" type="rss" xmlUrl="https://www.sciencedaily.com/rss/all.xml" htmlUrl="https://www.sciencedaily.com/news/" />
+      <outline text="Microsoft Research" title="Microsoft Research" type="rss" xmlUrl="https://www.microsoft.com/en-us/research/feed/" htmlUrl="https://www.microsoft.com/en-us/research/blog/" />
       <outline text="NASA" title="NASA" type="rss" xmlUrl="https://www.nasa.gov/news-release/feed/" htmlUrl="https://www.nasa.gov" />
       <outline text="Nature" title="Nature" type="rss" xmlUrl="https://www.nature.com/nature.rss" htmlUrl="http://feeds.nature.com/nature/rss/current" />
       <outline text="NYT &gt; Science" title="NYT &gt; Science" type="rss" xmlUrl="https://rss.nytimes.com/services/xml/rss/nyt/Science.xml" htmlUrl="https://www.nytimes.com/section/science" />

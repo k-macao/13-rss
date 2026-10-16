@@ -1,0 +1,77 @@
+name: AIHOT source validation
+
+# Runs the AIHOT demo-source candidates against the live web. The authoring sandbox
+# has no outbound access to feed hosts, so the checks can be dispatched onto a
+# GitHub-hosted runner and downloaded as an artifact, then merged with
+# tools/merge_aihot_sources.py.
+on:
+  workflow_dispatch:
+    inputs:
+      rounds:
+        description: "How many rounds to run"
+        type: string
+        default: "3"
+      interval_seconds:
+        description: "Pause between rounds"
+        type: string
+        default: "420"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aihot-source-validation
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run the validation rounds
+        env:
+          ROUNDS: ${{ inputs.rounds }}
+          INTERVAL: ${{ inputs.interval_seconds }}
+        run: |
+          set -euo pipefail
+          for round in $(seq 1 "${ROUNDS:-3}"); do
+            echo "::group::round $round"
+            python tools/validate_aihot_sources.py \
+              --round "$round" \
+              --input sources/aihot-curated.json \
+              --output "reports/aihot-validation-round-$round.json"
+            echo "::endgroup::"
+            if [ "$round" -lt "${ROUNDS:-3}" ]; then
+              echo "waiting ${INTERVAL:-420} seconds before round $((round + 1))"
+              sleep "${INTERVAL:-420}"
+            fi
+          done
+      - name: Summarize the rounds
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for path in sorted(Path("reports").glob("aihot-validation-round-*.json")):
+              data = json.loads(path.read_text(encoding="utf-8"))
+              print(f"\n== {path.name}: {data['passed']}/{data['candidate_count']} passed")
+              for item in data["results"]:
+                  status = "ok  " if item["ok"] else "FAIL"
+                  print(
+                      f"{status} {item['title'][:42]:44} {item.get('format', '-'):9}"
+                      f" items={item.get('items_captured', 0):>3}"
+                      f" latest={item.get('latest_item_at')}"
+                      f" resolved={item.get('resolved_url', item['feed_url'])}"
+                      f" {item.get('error', '')}"
+                  )
+          PY
+      - name: Upload the round reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: aihot-source-validation
+          path: reports/aihot-validation-round-*.json
+          retention-days: 30

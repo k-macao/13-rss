@@ -75,7 +75,7 @@ class RepositoryTests(unittest.TestCase):
 
     def test_catalog_size_limits_and_complete_appendix(self):
         catalog = json.loads((ROOT / "data/feeds.json").read_text(encoding="utf-8"))
-        self.assertLessEqual(len(catalog["feeds"]), 730)
+        self.assertLessEqual(len(catalog["feeds"]), 740)
         self.assertLessEqual(sum("blogs" in feed["packs"] for feed in catalog["feeds"]), 400)
         expected_urls = {feed["feed_url"] for feed in catalog["feeds"]}
         for name in ("README.md", "README.zh-CN.md"):
@@ -237,6 +237,48 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(review["published_additions"], report["selected_count"])
         self.assertEqual(review["candidates"], report["candidate_count"])
         self.assertEqual(review["selection_evidence"], "reports/hotlist-curation.json")
+        self.assertEqual(
+            summary["by_pack"],
+            {pack: sum(pack in feed["packs"] for feed in catalog["feeds"]) for pack in sorted(PACKS)},
+        )
+
+    def test_aihot_demo_source_additions_match_curation_report(self):
+        catalog = json.loads((ROOT / "data/feeds.json").read_text(encoding="utf-8"))
+        report = json.loads((ROOT / "reports/aihot-curation.json").read_text(encoding="utf-8"))
+        selected = [item for item in report["decisions"] if item["selected"]]
+        selected_urls = {item["feed_url"] for item in selected}
+        catalog_urls = {
+            feed["feed_url"]
+            for feed in catalog["feeds"]
+            if report["review"] in feed["sources"]
+        }
+        self.assertEqual(selected_urls, catalog_urls)
+        self.assertEqual(len(selected), report["selected_count"])
+        self.assertEqual(report["candidate_count"], len(report["decisions"]))
+        self.assertEqual(report["rejected_count"], len(report["decisions"]) - len(selected))
+        self.assertEqual(report["published_total"], len(catalog["feeds"]))
+        self.assertEqual(report["engine"], "HTTP fetch + RSS/Atom/JSON Feed parse")
+        self.assertEqual(report["validation_rounds"], [1, 2, 3])
+        for item in selected:
+            self.assertTrue(item["reason"], item["title"])
+            self.assertEqual(len(item["checks"]), 3, item["title"])
+            self.assertTrue(all(check["ok"] for check in item["checks"]), item["title"])
+            self.assertGreaterEqual(item["checks"][-1]["items_captured"], 1, item["title"])
+        rejected = [item for item in report["decisions"] if not item["selected"]]
+        self.assertTrue(all(item["reason"] for item in rejected))
+        rounds = {
+            json.loads((ROOT / f"reports/aihot-validation-round-{index}.json").read_text(encoding="utf-8"))["round"]
+            for index in (1, 2, 3)
+        }
+        self.assertEqual(rounds, {1, 2, 3})
+
+        summary = json.loads((ROOT / "reports/validation-summary.json").read_text(encoding="utf-8"))
+        review = summary["aihot_demo_sources_review"]
+        self.assertEqual(summary["published"], len(catalog["feeds"]))
+        self.assertEqual(summary["limits"]["complete_collection_maximum"], MAX_ALL_FEEDS)
+        self.assertEqual(review["published_additions"], report["selected_count"])
+        self.assertEqual(review["candidates"], report["candidate_count"])
+        self.assertEqual(review["selection_evidence"], "reports/aihot-curation.json")
         self.assertEqual(
             summary["by_pack"],
             {pack: sum(pack in feed["packs"] for feed in catalog["feeds"]) for pack in sorted(PACKS)},

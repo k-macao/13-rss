@@ -2,8 +2,8 @@
 <opml version="2.0">
   <head>
     <title>Tidings Curated RSS — Engineering &amp; Technology</title>
-    <dateCreated>2026-09-03</dateCreated>
-    <dateModified>2026-09-03</dateModified>
+    <dateCreated>2026-10-17</dateCreated>
+    <dateModified>2026-10-17</dateModified>
     <ownerName>Tidings RSS Community</ownerName>
     <docs>http://opml.org/spec2.opml</docs>
   </head>
@@ -15,16 +15,19 @@
       <outline text="Anthropic News" title="Anthropic News" type="rss" xmlUrl="https://rsshub.bestblogs.dev/anthropic/news" htmlUrl="https://www.anthropic.com/news" />
       <outline text="Apple Machine Learning Research" title="Apple Machine Learning Research" type="rss" xmlUrl="https://machinelearning.apple.com/rss.xml" htmlUrl="https://machinelearning.apple.com" />
       <outline text="Artificial Intelligence" title="Artificial Intelligence" type="rss" xmlUrl="https://aws.amazon.com/blogs/amazon-ai/feed/" htmlUrl="https://aws.amazon.com/blogs/machine-learning/" />
+      <outline text="AWS Machine Learning Blog" title="AWS Machine Learning Blog" type="rss" xmlUrl="https://aws.amazon.com/blogs/machine-learning/feed/" htmlUrl="https://aws.amazon.com/blogs/machine-learning/" />
       <outline text="cs.AI updates on arXiv.org" title="cs.AI updates on arXiv.org" type="rss" xmlUrl="https://rss.arxiv.org/rss/cs.AI" htmlUrl="http://rss.arxiv.org/rss/cs.AI" />
       <outline text="cs.CL updates on arXiv.org" title="cs.CL updates on arXiv.org" type="rss" xmlUrl="https://export.arxiv.org/rss/cs.CL" htmlUrl="http://rss.arxiv.org/rss/cs.CL" />
       <outline text="cs.CV updates on arXiv.org" title="cs.CV updates on arXiv.org" type="rss" xmlUrl="https://export.arxiv.org/rss/cs.CV" htmlUrl="http://rss.arxiv.org/rss/cs.CV" />
       <outline text="cs.LG updates on arXiv.org" title="cs.LG updates on arXiv.org" type="rss" xmlUrl="https://export.arxiv.org/rss/cs.LG" htmlUrl="http://rss.arxiv.org/rss/cs.LG" />
       <outline text="DeepSeek" title="DeepSeek" type="rss" xmlUrl="https://wechat2rss.bestblogs.dev/feed/1709da4f538d4ce4fb6d7a8ba1a5a1c297919601.xml" htmlUrl="https://wechat2rss.bestblogs.dev/feed/1709da4f538d4ce4fb6d7a8ba1a5a1c297919601.xml" />
+      <outline text="GitHub Blog · AI &amp; ML" title="GitHub Blog · AI &amp; ML" type="rss" xmlUrl="https://github.blog/ai-and-ml/feed/" htmlUrl="https://github.blog/ai-and-ml/" />
       <outline text="Google DeepMind News" title="Google DeepMind News" type="rss" xmlUrl="https://deepmind.com/blog/feed/basic/" htmlUrl="https://deepmind.google/blog/" />
       <outline text="Hacker News - Newest: &quot;AI&quot;" title="Hacker News - Newest: &quot;AI&quot;" type="rss" xmlUrl="https://hnrss.org/newest?q=AI" htmlUrl="https://news.ycombinator.com/newest" />
       <outline text="Hacker News - Newest: &quot;LLM&quot;" title="Hacker News - Newest: &quot;LLM&quot;" type="rss" xmlUrl="https://hnrss.org/newest?q=LLM" htmlUrl="https://news.ycombinator.com/newest" />
       <outline text="Hugging Face - Blog" title="Hugging Face - Blog" type="rss" xmlUrl="https://huggingface.co/blog/feed.xml" htmlUrl="https://huggingface.co/blog" />
       <outline text="MIT News - Artificial intelligence" title="MIT News - Artificial intelligence" type="rss" xmlUrl="https://news.mit.edu/rss/topic/artificial-intelligence2" htmlUrl="https://news.mit.edu/rss/topic/artificial-intelligence2" />
+      <outline text="NVIDIA Blog" title="NVIDIA Blog" type="rss" xmlUrl="https://blogs.nvidia.com/feed/" htmlUrl="https://blogs.nvidia.com/" />
       <outline text="OpenAI News" title="OpenAI News" type="rss" xmlUrl="https://openai.com/news/rss.xml" htmlUrl="https://openai.com/news" />
       <outline text="Recent Commits to openclaw:main" title="Recent Commits to openclaw:main" type="rss" xmlUrl="https://github.com/openclaw/openclaw/commits/main.atom" htmlUrl="https://github.com/openclaw/openclaw/commits/main" />
       <outline text="Release notes from claude-code" title="Release notes from claude-code" type="rss" xmlUrl="https://github.com/anthropics/claude-code/releases.atom" htmlUrl="https://github.com/anthropics/claude-code/releases" />
