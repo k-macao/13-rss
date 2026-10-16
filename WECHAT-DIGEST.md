@@ -51,7 +51,7 @@ The push title, subtitle, and scope note are defined at the top of `scripts/wech
 
 | Element | Copy |
 | --- | --- |
-| Title | 章鱼 AI · 营销热点智能体 |
+| Title | 章鱼 AI · 营销热点助手 |
 | Subtitle | 每天三分钟！去噪音！留干货！ |
 | Scope note | 全网兼顾中文和英文内容，覆盖 AI、工程、安全、科技媒体、周刊、科研、新闻、产品、商业、博客、社区、文化、视频和播客。 |
 | Signature | 作者：章鱼 ai · 仅供参考，分析研究 |
