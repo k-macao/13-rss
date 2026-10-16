@@ -15,7 +15,7 @@ on:
       interval_seconds:
         description: "Pause between rounds"
         type: string
-        default: "420"
+        default: "240"
   pull_request:
     paths:
       - .github/workflows/aihot-validation.yml
@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: aihot-source-validation
@@ -41,7 +42,7 @@ jobs:
       - name: Run the validation rounds
         env:
           ROUNDS: ${{ inputs.rounds || '3' }}
-          INTERVAL: ${{ inputs.interval_seconds || '420' }}
+          INTERVAL: ${{ inputs.interval_seconds || '240' }}
         run: |
           set -euo pipefail
           for round in $(seq 1 "$ROUNDS"); do
@@ -76,18 +77,82 @@ jobs:
                   )
           PY
       - name: Commit the round reports
+        id: commit
+        continue-on-error: true
         env:
           ROUNDS: ${{ inputs.rounds || '3' }}
         run: |
-          set -euo pipefail
+          set -eo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for round in $(seq 1 "$ROUNDS"); do
-            git add "reports/aihot-validation-round-$round.json"
+            git add -f "reports/aihot-validation-round-$round.json"
           done
           if git diff --cached --quiet; then
             echo "no report change to commit"
+            echo "push_exit=0" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "Record AIHOT source validation rounds 1-$ROUNDS"
-          git push origin "HEAD:${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}" 2>&1 | tee push.log
+          echo "push_exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+      - name: Publish the rounds as a pull request comment
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ROUNDS: ${{ inputs.rounds || '3' }}
+          PUSH_EXIT: ${{ steps.commit.outputs.push_exit }}
+        run: |
+          set -eo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          rounds = int(os.environ.get("ROUNDS", "3"))
+          push_exit = os.environ.get("PUSH_EXIT", "unknown")
+          lines = [
+              "<!-- aihot-validation-rounds -->",
+              "### AIHOT source validation rounds",
+              "",
+              f"Rounds: `{rounds}` · push back to the branch exit code: `{push_exit}`",
+              "",
+          ]
+          for round in range(1, rounds + 1):
+              path = Path(f"reports/aihot-validation-round-{round}.json")
+              if not path.exists():
+                  continue
+              data = json.loads(path.read_text(encoding="utf-8"))
+              compact = []
+              for item in data["results"]:
+                  compact.append({
+                      "round": data["round"],
+                      "checked_at": item.get("checked_at"),
+                      "ok": item.get("ok"),
+                      "title": item.get("title"),
+                      "feed_url": item.get("feed_url"),
+                      "http_status": item.get("http_status"),
+                      "format": item.get("format"),
+                      "items_captured": item.get("items_captured"),
+                      "channel_title": item.get("channel_title"),
+                      "channel_language": item.get("channel_language"),
+                      "latest_item_at": item.get("latest_item_at"),
+                      "resolved_url": item.get("resolved_url"),
+                      "error": item.get("error"),
+                  })
+              body = json.dumps(compact, ensure_ascii=False, indent=1)
+              lines.extend([
+                  f"<details><summary>round {round} — {data['passed']}/{data['candidate_count']} passed</summary>",
+                  "",
+                  "```json",
+                  body,
+                  "```",
+                  "",
+                  "</details>",
+                  "",
+              ])
+          Path("aihot-rounds.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print(f"comment size: {len(chr(10).join(lines))} characters")
+          PY
+          gh pr comment "$PR_NUMBER" --body-file aihot-rounds.md
