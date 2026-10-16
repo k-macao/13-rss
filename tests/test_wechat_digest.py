@@ -265,9 +265,9 @@ class RenderTests(unittest.TestCase):
     def test_digest_title_has_no_date_or_pushplus_branding(self):
         self.assertNotIn("pushplus", DIGEST_TITLE.casefold())
         self.assertNotRegex(DIGEST_TITLE, r"\d")
-        self.assertEqual(DIGEST_TITLE, "章鱼 AI · 营销热点聚合助手")
+        self.assertEqual(DIGEST_TITLE, "章鱼 AI · 营销热点智能体")
         self.assertEqual(DIGEST_SUBTITLE, "每天三分钟！去噪音！留干货！")
-        self.assertEqual(page_title(DIGEST_TITLE, 2, 3), "章鱼 AI · 营销热点聚合助手 2/3")
+        self.assertEqual(page_title(DIGEST_TITLE, 2, 3), "章鱼 AI · 营销热点智能体 2/3")
 
     def test_timestamps_are_rendered_in_beijing_time(self):
         item = make_items(1)[0]
