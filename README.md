@@ -62,6 +62,8 @@ Set the single `PUSHPLUS_TOKEN` secret to enable it. See the [WeChat digest guid
 
 Translation walks a chain of providers — a DeepL or OpenAI-compatible key when one is configured, then the keyless Google, Microsoft Edge, and MyMemory endpoints — and stops at the first that answers, so one reachable endpoint keeps the whole issue bilingual. One key is all the OpenAI-compatible route needs: a `DEEPSEEK_API_KEY` secret switches it on with the current DeepSeek endpoint and model already attached, and the provider is otherwise named in a single variable. Each run reports which provider answered and which endpoint and model it used, and `Translation probe` shows what every endpoint returns from a GitHub runner.
 
+That same key also writes an AI line under each card: a Chinese take on what the article says, at most 100 characters, in a human register rather than a machine one. The line is dropped, not padded, when an article carries too little text, when the model declines it, or when the answer still reads like a model wrote it, and the run reports how many lines it wrote and why the rest were skipped.
+
 ## Read with Tidings
 
 **Website: [tidings.info](https://tidings.info/)**

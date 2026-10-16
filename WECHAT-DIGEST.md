@@ -24,7 +24,7 @@ Every day at **09:00** and **18:00** Beijing time, GitHub Actions reads the cata
    | `DEEPL_API_KEY` | No | DeepL key, free (`…:fx`) or pro |
    | `MYMEMORY_EMAIL` | No | E-mail address that raises MyMemory's anonymous quota |
 
-   `TRANSLATE_LLM_PROVIDER`, `TRANSLATE_LLM_BASE_URL`, `TRANSLATE_LLM_MODEL`, and `TRANSLATE_PROVIDERS` are repository *variables* (**Settings → Secrets and variables → Actions → Variables**), not secrets. See [Translation providers](#translation-providers) and [Configuring the llm provider](#configuring-the-llm-provider).
+   `TRANSLATE_LLM_PROVIDER`, `TRANSLATE_LLM_BASE_URL`, `TRANSLATE_LLM_MODEL`, `SUMMARY_LLM_MODEL`, and `TRANSLATE_PROVIDERS` are repository *variables* (**Settings → Secrets and variables → Actions → Variables**), not secrets. See [Translation providers](#translation-providers), [Configuring the llm provider](#configuring-the-llm-provider), and [AI summary](#ai-summary).
 
 3. Confirm the workflow is enabled on the **Actions** page. Use **Run workflow** once to verify it end to end.
 
@@ -49,6 +49,7 @@ The two windows meet end to end, so they cover exactly 24 hours with almost no o
 - **Ordering.** Articles are grouped by catalog category, newest first inside each section.
 - **Bilingual cards.** An English title or summary keeps its original wording and gains a Simplified Chinese translation underneath, so one card reads in both languages. The headline translation carries a fluorescent-green 译 chip and the summary translation sits below a fluorescent-green rule, so both are clearly separated from the original. Chinese articles are never translated into English.
 - **Translation.** Translations come from a chain of providers, not one endpoint: the configured keyed providers first, then every keyless endpoint. If a provider fails, times out, or returns the original text unchanged, the next one is asked, and when none answers the card shows the original only — the push still goes out. Use `--no-translate` to turn the feature off entirely. Whether a string needs translating is decided by the ratio of Chinese to Latin characters, so an English headline that quotes one Chinese product name still gets a translation, while a Chinese sentence quoting an English brand does not. Bare URLs, plain numbers, and version strings are never sent for translation.
+- **AI summary.** A card can carry one more line: a Chinese take on what the article actually says, written by the same OpenAI-compatible endpoint, at most 100 characters long, in a human register. It is dropped rather than printed when the source carries too little text, when the model decides the article cannot be summarised honestly, or when the answer still reads like a machine wrote it. The line carries a fluorescent-green `AI` chip so it is never mistaken for something the author wrote. See [AI summary](#ai-summary).
 - **Translation reporting.** The run states which provider answered: a `translation: translated=17/24 provider=edge retired=google` line in the log, a notice (and a warning when endpoints were retired or nothing answered) on the workflow run page, `translation-report.md` and `translation-report.json` next to the rendered pages, and the same table on the run's step summary.
 - **Failure isolation.** A feed that fails to fetch is skipped without affecting the rest of the issue. When a window has nothing new, nothing is sent, so you are not disturbed; `--allow-empty` changes that.
 
@@ -125,6 +126,37 @@ python scripts/wechat_digest.py --probe-translators --translators edge --timeout
 | `google` | keyless | OpenAI ships a smaller model… | error | 0.31 | HTTPError: 429 Too Many Requests |
 | `edge` | keyless | OpenAI ships a smaller model… | ok | 0.42 | OpenAI 推出可在设备端运行的更小模型 |
 
+## AI summary
+
+Every card can carry one extra line: what the article actually says, in Chinese, in at most 100 characters. It is written by the same OpenAI-compatible endpoint the translation chain uses, so one key (`DEEPSEEK_API_KEY`, for instance) turns on both. `SUMMARY_LLM_MODEL` picks a different model for this job alone; the summary otherwise reuses the translation model, endpoint, and preset fields.
+
+The line is written to sound like a person, not a press release. The prompt asks for the voice of an editor leaving a note for a colleague — short sentences, an actual judgement, numbers and product names kept as they are — and bans the phrasing models fall back on: “本文/文章介绍了”, “深入探讨”, “值得注意的是”, “综上所述”, “首先…其次…最后”, “不仅…而且”, “赋能”, “助力”, “深度解析”, “引发广泛关注”, “不容错过”, “一文读懂”, “干货满满”, “前景广阔”, and the rest of that vocabulary. A line that still trips one of those patterns after cleaning is dropped, because a padded line costs the reader more than a missing one.
+
+Nothing is written when there is nothing to say:
+
+| Case | What the card shows |
+| --- | --- |
+| The source text is shorter than 40 characters | Nothing — the endpoint is never called |
+| The “body” is just the headline repeated, or a click teaser (“阅读全文请扫码…”, “read more”) | Nothing |
+| The model answers `SKIP` | Nothing |
+| The answer is still stock AI phrasing | Nothing |
+| The endpoint is unreachable | Nothing, and the issue is not delayed |
+
+A dead endpoint costs three timeouts for the whole issue instead of one per card. Everything is counted, so the run can say what happened: a `ai-summary: written=42/60 thin=12 declined=3 flavored=2 failed=0 model=deepseek-flash` line in the log, a notice on the run page (plus a warning when an issue wrote no line at all), and an **AI summary** section in `translation-report.md` beside the rendered pages.
+
+```bash
+# Render with AI lines into build/digest and preview it in a browser
+python scripts/wechat_digest.py --dry-run --out build/digest --window-hours 48
+
+# Originals, translations, and no AI line
+python scripts/wechat_digest.py --dry-run --no-summarize --out build/digest
+
+# Cap the line at 60 characters instead of 100
+python scripts/wechat_digest.py --dry-run --summary-max-chars 60 --out build/digest
+```
+
+Turn the feature off entirely with `--no-summarize`, or from the workflow's **Run workflow** form, where `summarize` is a checkbox. Without a key there is no AI line and no failure: the report says the feature is off and names the secret that turns it on.
+
 ## Branding and copy
 
 The push title, subtitle, and scope note are defined at the top of `scripts/wechat_digest.py`:
@@ -148,9 +180,10 @@ The layout follows the electronic-magazine typography used by 归藏's skills an
 | Background | Light grey `#EFEFEA`, cards `#F7F7F4` |
 | Body copy | Black `#0B0B0B`, 12px |
 | Secondary text | Dark grey `#3A3A38`, monospace, 10px |
-| Accent | Fluorescent green `#CCFF00` (masthead, section blocks, source labels, the 译 chip, the translation rule, and the footer bar) |
+| Accent | Fluorescent green `#CCFF00` (masthead, section blocks, source labels, the 译 chip, the translation rule, the `AI` chip, and the footer bar) |
 | Structure | Masthead, hairline section rules, two-digit item numbers, and a continuation hint in the footer |
 | Translation | English original in black above, Chinese translation in dark grey below: headlines at 14px with the 译 chip, summaries at 12px behind a fluorescent-green rule |
+| AI summary | 12px black copy behind a fluorescent-green rule, under a fluorescent-green `AI` chip, below the source summary and its translation |
 
 ## The 100,000-character limit and pagination
 
@@ -193,6 +226,8 @@ Common arguments:
 | `--translate` | on | Appends a Simplified Chinese translation under English text; `--no-translate` shows originals only |
 | `--translators` | env var | Provider order, e.g. `llm,google,edge`; empty uses keyed providers first, then every keyless one |
 | `--probe-translators` | off | Call every provider directly, report which endpoints answer, and exit |
+| `--summarize` | on | Writes the AI line under each article that carries enough text; `--no-summarize` leaves it out |
+| `--summary-max-chars` | `100` | Hard character limit for an AI line |
 | `--page-budget` | `92000` | Character budget per page |
 | `--topic` | env var | pushplus group code |
 | `--channel` | `wechat` | Also supports `mail`, `webhook`, and other pushplus channels |
@@ -204,6 +239,8 @@ Common arguments:
 **No push arrived?** Open the workflow run log: `items=0` means the window genuinely held no new articles, while `pushplus code=xxx` points at a token or quota problem. The rendered HTML is also uploaded as an artifact and kept for seven days, so you can download and inspect it.
 
 **English cards arrived without their Chinese lines?** The push is designed to go out anyway, so the run page says what happened: look for the `translation: …` notice and the warnings naming the endpoints that were retired or the configuration that is wrong, or open `translation-report.md` in the uploaded artifact — its Configuration section names the key variable, endpoint, and model the run used. Then run the `Translation probe` workflow, or open the comment it posts on a pull request that touches the translation chain: it shows each endpoint's raw answer from a GitHub runner in one minute. If every keyless endpoint refuses the runner (Google answers `429` most often), add `DEEPSEEK_API_KEY` or `DEEPL_API_KEY`; a key is not required for the digest to run, but it is what makes the translations dependable.
+
+**No AI line under the articles?** The card is designed to look the same either way, so read the report: the `ai-summary: …` notice names how many lines were written and how many were skipped as too thin, declined, dropped for stock AI phrasing, or failed, and `translation-report.md` carries the same table. `written=0` with `configured=False` means no key: the AI line reuses the translation chain's `llm` endpoint, so `DEEPSEEK_API_KEY` (or any other preset key) turns it on. A healthy issue still writes nothing for short items — a one-line teaser cannot be summarised honestly, and the digest would rather leave the space empty.
 
 **DeepSeek returns “model not exist”?** The account is fine — the model ID is not. `deepseek-chat` and `deepseek-reasoner` were retired on 2026-07-24; use `deepseek-flash` (or `deepseek-v4-pro`) in `TRANSLATE_LLM_MODEL`, or delete that variable and let the preset pick. The run shows the same advice as a warning annotation.
 

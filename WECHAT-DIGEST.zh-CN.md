@@ -24,7 +24,7 @@
    | `DEEPL_API_KEY` | 否 | DeepL 的 Key，免费版（`…:fx`）或专业版都可以 |
    | `MYMEMORY_EMAIL` | 否 | 填写邮箱可提高 MyMemory 的匿名额度 |
 
-   `TRANSLATE_LLM_PROVIDER`、`TRANSLATE_LLM_BASE_URL`、`TRANSLATE_LLM_MODEL`、`TRANSLATE_PROVIDERS` 属于仓库 **变量**（**Settings → Secrets and variables → Actions → Variables**），不是 secret。见[四、翻译通道](#四翻译通道)与[配置 llm 通道](#配置-llm-通道)。
+   `TRANSLATE_LLM_PROVIDER`、`TRANSLATE_LLM_BASE_URL`、`TRANSLATE_LLM_MODEL`、`SUMMARY_LLM_MODEL`、`TRANSLATE_PROVIDERS` 属于仓库 **变量**（**Settings → Secrets and variables → Actions → Variables**），不是 secret。见[四、翻译通道](#四翻译通道)、[配置 llm 通道](#配置-llm-通道)与[五、AI 深度总结](#五ai-深度总结)。
 
 3. 在 **Actions** 页面确认工作流已启用。首次可以用 **Run workflow** 手动跑一次验证。
 
@@ -49,6 +49,7 @@
 - **排序**：按目录分类分栏，栏内按发布时间从新到旧。
 - **双语**：原文是英文的标题与摘要会保留原文，并在下方附加简体中文译文，一张卡片中英对照。标题译文前带萤光绿「译」标记，摘要译文用一条萤光绿竖线引出，和原文明显区分；中文原文保持原样，不会被翻译成英文。
 - **翻译**：译文来自一组翻译通道，而不再只依赖单个接口：先试配置了 Key 的通道，再依次试免密的公开接口。某个通道失败、超时或返回内容和原文相同就换下一个；全部不可用时卡片只显示原文，推送不会因此中断。可用 `--no-translate` 关闭，关闭后全部只显示原文。是否需要翻译按文本里中英文字符的比例判断，所以“英文标题里夹了一个中文产品名”仍会附加译文，而“中文句子里带英文品牌名”保持原样；纯网址、纯数字和版本号不送翻译。
+- **AI 深度总结**：卡片下面还可以再挂一行 AI 写的中文要点，一百字以内，说清「到底发生了什么、值不值得点开」。原文太少、只是引流广告、模型判断不适合概括，或者写完仍有明显 AI 腔，这一行就整条丢弃，卡片不会为了有而硬凑。这一行带萤光绿 `AI` 标记，排在原文与译文之后，不会被误当成作者写的。可用 `--no-summarize` 关闭。详见[五、AI 深度总结](#五ai-深度总结)。
 - **翻译结果上报**：每次运行都会说明是哪个通道给出的译文——日志里的 `translation: translated=17/24 provider=edge retired=google`、运行页面上的 notice（有通道被弃用或全部失败时附带 warning）、渲染页面同目录的 `translation-report.md` 与 `translation-report.json`，以及运行摘要里的同款表格。
 - **容错**：抓取失败的源直接跳过，不影响本期推送；本时段无更新时不发送（避免打扰），可用 `--allow-empty` 改变该行为。
 
@@ -124,7 +125,38 @@ python scripts/wechat_digest.py --probe-translators --translators edge --timeout
 | `google` | 免密 | OpenAI ships a smaller model… | error | 0.31 | HTTPError: 429 Too Many Requests |
 | `edge` | 免密 | OpenAI ships a smaller model… | ok | 0.42 | OpenAI 推出可在设备端运行的更小模型 |
 
-## 五、品牌与文案
+## 五、AI 深度总结（去 AI 味）
+
+每张卡片可以多一行：这篇文章到底讲了什么，用中文一句话说完，一百字以内。这一行由翻译链路同一个 OpenAI 兼容接口来写，所以配一把 Key（例如 `DEEPSEEK_API_KEY`）就把译文和要点一起打开了；`SUMMARY_LLM_MODEL` 可以单独给它指定一个更深的模型，不填就沿用翻译用的模型、接口和预设字段。
+
+要点要写得像人。提示词要求它扮演一个给同事留口信的老编辑：短句、口语、敢下判断，数字和产品名保留原文；同时明确禁用模型最爱复述的那套词——「本文/文章介绍了」「深入探讨」「值得注意的是」「综上所述」「首先…其次…最后」「不仅…而且」「赋能」「助力」「彰显」「深度解析」「引发广泛关注」「不容错过」「一文读懂」「干货满满」「前景广阔」「意义重大」「带你了解」，以及破折号罗列和以提问收尾。清洗之后仍命中其中任意一条就整条丢弃：多印一段机器腔，比少印一行更伤读者。
+
+没有可写的东西时就不写：
+
+| 情况 | 卡片上 |
+| --- | --- |
+| 原文不足 40 字 | 不写，也不调用接口 |
+| 正文只是标题的重复，或者是「阅读全文请扫码」「read more」这类引流文本 | 不写 |
+| 模型回答 `SKIP` | 不写 |
+| 回答里仍有明显的 AI 套话 | 不写 |
+| 接口不通 | 不写，也不拖慢这一期 |
+
+接口连续失败三次就整期停止请求，不会每条文章各等一次超时。每种结果都会计数，所以运行过程说得清发生了什么：日志里的 `ai-summary: written=42/60 thin=12 declined=3 flavored=2 failed=0 model=deepseek-flash`、运行页面上的 notice（整期一行都没写出来时会附带 warning）、以及渲染页面同目录 `translation-report.md` 里的 **AI summary** 段落。
+
+```bash
+# 带 AI 要点渲染到 build/digest，用浏览器打开即可预览
+python scripts/wechat_digest.py --dry-run --out build/digest --window-hours 48
+
+# 只要原文和译文，不要 AI 要点
+python scripts/wechat_digest.py --dry-run --no-summarize --out build/digest
+
+# 把这一行压到 60 字以内
+python scripts/wechat_digest.py --dry-run --summary-max-chars 60 --out build/digest
+```
+
+`--no-summarize` 可以整期关掉；手动运行时也可以直接用工作流表单里的 `summarize` 勾选框。没配 Key 时这一行不会出现，也不会报错：报告里会写明功能处于关闭状态，并说明配哪一个 Secret 能打开它。
+
+## 六、品牌与文案
 
 推送标题、副标题和说明都定义在 `scripts/wechat_digest.py` 顶部：
 
@@ -137,7 +169,7 @@ python scripts/wechat_digest.py --probe-translators --translators edge --timeout
 
 标题不带日期，也不带 pushplus 字样；多页时自动追加 `2/3` 这样的页码后缀。副标题印在刊头，说明随刊首导读出现在第一页，续页不重复。
 
-## 六、视觉风格
+## 七、视觉风格
 
 参考归藏 skills 的电子杂志排版，全部使用内联样式，保证微信 webview 正常渲染：
 
@@ -147,11 +179,12 @@ python scripts/wechat_digest.py --probe-translators --translators edge --timeout
 | 底色 | 浅灰 `#EFEFEA`，卡片 `#F7F7F4` |
 | 正文 | 黑色 `#0B0B0B`，小字 12px |
 | 次要信息 | 深灰 `#3A3A38`，等宽字体 10px |
-| 强调色 | 萤光绿 `#CCFF00`（刊头、栏目色块、来源标签、译文标记与译文竖线、页脚色条） |
+| 强调色 | 萤光绿 `#CCFF00`（刊头、栏目色块、来源标签、译文标记与译文竖线、`AI` 标记与要点竖线、页脚色条） |
 | 结构 | 刊头 + 发丝线分栏 + 两位数序号 + 页脚续页提示 |
 | 译文 | 英文原文黑色在上，中文译文深灰在下：标题 14px 带「译」标记，摘要 12px 带萤光绿竖线 |
+| AI 要点 | 12px 黑色正文，一条萤光绿竖线引出，线首带萤光绿 `AI` 标记，排在原文摘要与译文之后 |
 
-## 七、10 万字限制与分页
+## 八、10 万字限制与分页
 
 pushplus 微信渠道单条内容上限为 10 万字（会员），标题 100 字。脚本按 **每页 92,000 字符** 的预算打包（预留刊头、页脚与包裹层空间），超出即自动分页：
 
@@ -161,7 +194,7 @@ pushplus 微信渠道单条内容上限为 10 万字（会员），标题 100 �
 - 每页之间间隔 2 秒发送，避免触发频率限制。
 - 双语卡片（原文 + 译文）比单语卡片更长，英文内容多的一期会分成更多页，字符预算与上限不变。
 
-## 八、本地调试
+## 九、本地调试
 
 ```bash
 # 只渲染不推送，把 HTML 写到 build/digest 目录，用浏览器打开即可预览
@@ -172,6 +205,9 @@ python scripts/wechat_digest.py --dry-run --pack ai --edition morning --out buil
 
 # 只看原文，不附加中文译文
 python scripts/wechat_digest.py --dry-run --no-translate --out build/digest
+
+# 不要 AI 要点，只保留原文与译文
+python scripts/wechat_digest.py --dry-run --no-summarize --out build/digest
 
 # 逐个探测翻译通道可用性，只出报告不推送
 python scripts/wechat_digest.py --probe-translators --out build/probe
@@ -192,15 +228,19 @@ PUSHPLUS_TOKEN=你的token python scripts/wechat_digest.py --pack top200
 | `--translate` | 开 | 英文原文下方附加简体中文译文，`--no-translate` 只显示原文 |
 | `--translators` | 环境变量 | 指定通道顺序，例如 `llm,google,edge`；留空表示先 Key 后免密 |
 | `--probe-translators` | 关 | 直接逐个调用翻译通道，报告哪些可用后退出 |
+| `--summarize` | 开 | 为内容足够的一文补一行 AI 要点，`--no-summarize` 不写这一行 |
+| `--summary-max-chars` | `100` | AI 要点的字数上限 |
 | `--page-budget` | `92000` | 单页字符预算 |
 | `--topic` | 环境变量 | pushplus 群组编码 |
 | `--channel` | `wechat` | 也支持 `mail`、`webhook` 等 pushplus 渠道 |
 | `--dry-run` | 关 | 只渲染不推送 |
 | `--allow-empty` | 关 | 没有新文章时也推送 |
 
-## 九、常见问题
+## 十、常见问题
 
 **英文卡片的译文没出现？** 推送本身照发不误，所以要看运行页面：找 `translation: …` 的 notice，以及列出被弃用通道或配置错误的 warning，或打开 artifact 里的 `translation-report.md`（其中的 Configuration 段落写明本次用的变量、接口和模型）。然后手动跑一次 `Translation probe` 工作流，或者直接看它在翻译相关 PR 下自动贴出的评论，一分钟内就能看到每个接口在 GitHub 运行器上的原始返回。如果免密接口全部拒绝运行器（最常见的是 Google 返回 `429`），就配置 `DEEPSEEK_API_KEY` 或 `DEEPL_API_KEY`：不配 Key 也能运行，但配了译文才稳定。
+
+**卡片下面没有 AI 要点那一行？** 有和没有，卡片长得一样，所以要看报告：`ai-summary: …` 这行 notice 写明了本期写出多少行、多少条因为原文太少被跳过、多少条被模型拒绝、多少条因为 AI 腔被丢弃、多少条失败，`translation-report.md` 里是同一张表。`written=0` 且 `configured=False` 说明没有 Key：要点复用翻译链路的 `llm` 接口，配 `DEEPSEEK_API_KEY`（或其他预设的 Key）就能打开。健康的一期也会有很多条不写——一句话的引流文本没法老实概括，简报宁可把那块地方空着。
 
 **DeepSeek 报 “model not exist”？** 账号没问题，是模型名过期了：`deepseek-chat`、`deepseek-reasoner` 已于 2026-07-24 下线，请把 `TRANSLATE_LLM_MODEL` 改成 `deepseek-flash`（或 `deepseek-v4-pro`），或者干脆删掉这个变量让预设去选。同样的提示也会以 warning 注解出现在运行页面。
 

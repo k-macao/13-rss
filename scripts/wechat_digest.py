@@ -17,6 +17,12 @@ size, dark grey metadata, and a fluorescent green accent used sparingly for
 kickers, indices and rules. All styling is inline so pushplus/WeChat webviews
 render it without a stylesheet.
 
+Every card can also carry an AI line: a Chinese take on what the article says,
+written by the same OpenAI-compatible endpoint, at most 100 characters long, and
+in a human register rather than a machine one. The line is dropped — not printed
+— when the source carries too little text, when the model declines, or when the
+answer still reads like a model wrote it.
+
 English titles and summaries are translated by walking a provider chain (keyed
 providers first, then the keyless endpoints) and stopping at the first endpoint
 that answers; a provider that fails twice is retired for the rest of the run. The
@@ -396,6 +402,39 @@ LLM_SYSTEM_PROMPT = (
 )
 
 
+def _llm_chat(messages, *, timeout: int, api_key: str, base_url: str, model: str,
+              extra=None, temperature: int = 0) -> str:
+    """One OpenAI-compatible chat completion, or a ``TranslationError`` saying why not.
+
+    Both the translation chain and the AI summary talk to the same kind of
+    endpoint, so the wire format lives here once: a network fault stays retryable
+    while a payload that will never parse does not.
+    """
+    payload = {
+        "model": model,
+        "messages": list(messages),
+        "temperature": temperature,
+        "stream": False,
+    }
+    payload.update(extra or {})
+    body = json.dumps(payload).encode("utf-8")
+    answer = _translate_json(
+        _translate_request(
+            f"{base_url.rstrip('/')}/chat/completions",
+            data=body,
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
+            timeout=timeout,
+        )
+    )
+    try:
+        content = answer["choices"][0]["message"]["content"]
+    except (TypeError, IndexError, KeyError) as error:
+        raise TranslationError(f"unexpected payload: {answer!r}"[:200], retryable=False) from error
+    if not isinstance(content, str) or not content.strip():
+        raise TranslationError("empty completion", retryable=False)
+    return content.strip().strip("`").strip()
+
+
 def llm_translate(text: str, *, timeout: int, api_key: str, base_url: str, model: str, extra=None) -> str:
     """Any OpenAI-compatible chat endpoint, for a key the user already owns.
 
@@ -406,32 +445,18 @@ def llm_translate(text: str, *, timeout: int, api_key: str, base_url: str, model
     ``extra`` carries the fields a preset has to add on top of the OpenAI shape —
     DeepSeek, for instance, thinks by default and is told to skip that here.
     """
-    payload = {
-        "model": model,
-        "messages": [
+    answer = _llm_chat(
+        [
             {"role": "system", "content": LLM_SYSTEM_PROMPT},
             {"role": "user", "content": text},
         ],
-        "temperature": 0,
-        "stream": False,
-    }
-    payload.update(extra or {})
-    body = json.dumps(payload).encode("utf-8")
-    payload = _translate_json(
-        _translate_request(
-            f"{base_url.rstrip('/')}/chat/completions",
-            data=body,
-            headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
-            timeout=timeout,
-        )
+        timeout=timeout,
+        api_key=api_key,
+        base_url=base_url,
+        model=model,
+        extra=extra,
+        temperature=0,
     )
-    try:
-        answer = payload["choices"][0]["message"]["content"]
-    except (TypeError, IndexError, KeyError) as error:
-        raise TranslationError(f"unexpected payload: {payload!r}"[:200], retryable=False) from error
-    if not isinstance(answer, str) or not answer.strip():
-        raise TranslationError("empty completion", retryable=False)
-    answer = answer.strip().strip("`").strip()
     answer = re.sub(r"^(翻译|译文|translation)\s*[:：]\s*", "", answer, flags=re.IGNORECASE)
     return answer.strip().strip('"').strip("“”").strip()
 
@@ -916,6 +941,362 @@ def probe_markdown(rows, *, generated_at: str, notes=()) -> str:
     return "\n".join(lines)
 
 
+# ---------------------------------------------------------------------------
+# AI 深度总结 — one short, human-sounding line per article
+# ---------------------------------------------------------------------------
+# A card carries what the source wrote; the AI line says what it means. It runs
+# on the same OpenAI-compatible endpoint the translation chain uses, writes at
+# most ``SUMMARY_MAX_CHARS`` characters of Chinese, and is dropped rather than
+# printed when the source is too thin, when the model declines, or when the
+# answer still reads like a machine wrote it. A missing line costs the reader
+# nothing — a padded one costs them the habit of reading the digest.
+SUMMARY_MAX_CHARS = 100          # 一百字以内
+SUMMARY_MIN_CHARS = 8            # shorter than this is a label, not a take
+SUMMARY_MIN_SOURCE_CHARS = 40    # 内容太稀少就不送模型
+SUMMARY_SOURCE_CHAR_LIMIT = 1500  # only the opening of the body is worth sending
+SUMMARY_MAX_WORKERS = 4
+SUMMARY_MAX_FAILURES = 3         # stop asking after this many failures in a row
+SUMMARY_TIMEOUT = 25
+SUMMARY_TEMPERATURE = 0.4        # a take may vary; a translation may not
+SUMMARY_RETRIES = 2
+SUMMARY_BACKOFF_SECONDS = (1.0,)
+SUMMARY_SKIP_TOKEN = "SKIP"
+
+# 去 AI 味：模型最爱复述的套话。命中就整条丢弃，宁可留空也不印一段机器腔。
+AI_FLAVOR_PATTERNS = (
+    "本文", "本文章", "这篇文章", "该文章", "文章介绍", "文章讲述",
+    "深入探讨", "深度解析", "深度剖析", "深入剖析", "全面解析",
+    "值得注意的是", "需要注意的是", "值得一提",
+    "综上所述", "总而言之", "总的来说", "总结来说", "总结一下",
+    "首先", "其次", "最后，", "此外，", "不仅如此", "不仅", "而且",
+    "赋能", "助力", "彰显", "保驾护航",
+    "引发广泛", "广泛关注", "引发热议", "备受关注", "不容错过", "不容忽视",
+    "一文读懂", "带你了解", "干货满满", "前景广阔", "意义重大",
+    "进一步", "显著提升", "大幅提升", "极大地",
+    "小结", "总结如下", "以下是", "内容如下", "让我们一起",
+)
+
+# 引流、广告、占位文本：这类原文本身就没有可总结的内容。
+TEASER_PATTERNS = (
+    "read more", "continue reading", "subscribe", "sign up", "click here",
+    "查看全文", "阅读全文", "阅读原文", "点击阅读", "扫码", "加入社群",
+    "广告", "赞助", "sponsored",
+)
+
+# Lead-ins a model adds even when told not to; they are stripped, not fatal.
+SUMMARY_LEAD_INS = ("要点", "总结", "摘要", "核心要点", "一句话总结", "结论", "AI 总结", "AI总结")
+
+SUMMARY_SYSTEM_PROMPT = (
+    "你是干了十年的一线行业编辑，在给同事写一句「这篇到底讲了什么、值不值得点开」。\n"
+    f"硬性要求：简体中文，不超过 {SUMMARY_MAX_CHARS} 个字，一段话，"
+    "只输出这句话本身，不要前缀、编号、引号、列表符号或换行。\n"
+    "内容：说清主体、动作、关键数字和结论，让人不点开也知道发生了什么、为什么值得看。\n"
+    "语气：像人写给同事的口信，短句、口语、敢下判断，专有名词和产品名保留原文。\n"
+    "禁止 AI 腔：不要出现「本文/文章介绍了」「深入探讨」「值得注意的是」「综上所述」「总之」"
+    "「首先…其次…最后」「不仅…而且」「赋能」「助力」「彰显」「深度解析」「引发广泛关注」"
+    "「不容错过」「一文读懂」「干货满满」「前景广阔」「意义重大」「带你了解」这类套话；"
+    "不要用破折号或分号罗列，不要以提问收尾，不要复述标题，不要写「点击查看」。\n"
+    "不许编造原文没有的信息。\n"
+    f"原文信息太少、只是引流或广告、或话题不适合概括时，只回复 {SUMMARY_SKIP_TOKEN}。"
+)
+
+SUMMARY_USER_TEMPLATE = (
+    "来源：{source}\n标题：{title}\n正文：\n{body}\n\n"
+    "用不超过 {limit} 个汉字写一句要点；不适合总结就只回复 {skip}。"
+)
+
+
+def summary_source_text(item, *, limit: int = SUMMARY_SOURCE_CHAR_LIMIT) -> str:
+    """The text a summary is written from: the article body, trimmed."""
+    body = strip_html((item or {}).get("summary") or "")
+    return re.sub(r"\s+", " ", body).strip()[:limit]
+
+
+def is_summarizable(item, *, min_chars: int = SUMMARY_MIN_SOURCE_CHARS) -> bool:
+    """Whether an article carries enough text to be worth one line.
+
+    A title standing in for a body, an echo of the headline, and a teaser that
+    only asks for a click are all content the model cannot honestly summarise,
+    so they never reach the endpoint.
+    """
+    body = summary_source_text(item)
+    title = re.sub(r"\s+", " ", strip_html((item or {}).get("title") or "")).strip()
+    if len(body) < min_chars:
+        return False
+    if not re.search(r"[0-9A-Za-z\u4e00-\u9fff]", body):
+        return False
+    if title and re.sub(r"\W+", "", body.casefold()) == re.sub(r"\W+", "", title.casefold()):
+        return False
+    lowered = body.casefold()
+    if any(pattern in lowered for pattern in TEASER_PATTERNS) and len(body) < min_chars * 3:
+        return False
+    return True
+
+
+def shorten_text(text: str, limit: int) -> str:
+    """Cut to ``limit`` characters, preferring the last sentence boundary.
+
+    The hard cut spends one character on the ellipsis, so the result is never
+    longer than the limit the prompt was given.
+    """
+    if len(text) <= limit:
+        return text
+    window = text[:limit]
+    for stop in ("。", "！", "？", "；", "，"):
+        index = window.rfind(stop)
+        if index >= limit * 0.6:
+            return window[: index + 1]
+    return text[: limit - 1].rstrip() + "…"
+
+
+def clean_summary(text: str, *, max_chars: int = SUMMARY_MAX_CHARS):
+    """Trim a model answer into one credible line.
+
+    Returns ``(line, outcome)`` where the line is "" whenever the card should
+    print nothing, and the outcome says why: ``written``, ``empty``,
+    ``declined`` (the model answered SKIP), or ``flavored`` (the answer is still
+    stock AI phrasing, which is worse than no line at all).
+    """
+    text = re.sub(r"\s+", " ", (text or "").replace("\r", " ").replace("\n", " ")).strip()
+    text = re.sub(r"^\s*(#{1,6}\s*|\*{1,2}|-+\s*)", "", text)
+    # Curly quotes are asymmetric, so the pair has to be matched, not the character.
+    for opener, closer in (("“", "”"), ("「", "」"), ("《", "》"), ("\"", "\""), ("'", "'"), ("‘", "’")):
+        if len(text) > 2 and text.startswith(opener) and text.endswith(closer):
+            text = text[len(opener): -len(closer)].strip()
+    for lead in SUMMARY_LEAD_INS:
+        text = re.sub(rf"^(AI\s*)?{re.escape(lead)}\s*[:：\-—]\s*", "", text)
+    text = text.strip().strip("*").strip()
+    if not text:
+        return "", "empty"
+    if re.fullmatch(r"(?i)skip\b[.!。]?", text):
+        return "", "declined"
+    if len(text) < SUMMARY_MIN_CHARS:
+        return "", "empty"
+    if any(pattern in text for pattern in AI_FLAVOR_PATTERNS):
+        return "", "flavored"
+    return shorten_text(text, max_chars), "written"
+
+
+def resolve_summary_config():
+    """The endpoint that writes the AI lines.
+
+    The translation chain already resolves an OpenAI-compatible endpoint from
+    one key, and the same key is what a reader already owns, so the summary
+    reuses it. ``SUMMARY_LLM_MODEL`` picks a different model when a deeper one
+    is wanted for this job. Returns ``None`` when no key is configured.
+    """
+    config = resolve_llm_config()
+    if not config:
+        return None
+    override = os.environ.get("SUMMARY_LLM_MODEL", "").strip()
+    if override:
+        config = dict(config, model=override)
+    return config
+
+
+def summary_messages(item, *, max_chars: int = SUMMARY_MAX_CHARS):
+    """The two messages one article is summarised from."""
+    body = summary_source_text(item)
+    return [
+        {"role": "system", "content": SUMMARY_SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": SUMMARY_USER_TEMPLATE.format(
+                source=(item.get("source") or "").strip(),
+                title=(item.get("title") or "").strip(),
+                body=body,
+                limit=max_chars,
+                skip=SUMMARY_SKIP_TOKEN,
+            ),
+        },
+    ]
+
+
+def summarize_item(item, config, *, timeout: int = SUMMARY_TIMEOUT, max_chars: int = SUMMARY_MAX_CHARS,
+                   retries: int = SUMMARY_RETRIES, backoff: tuple = SUMMARY_BACKOFF_SECONDS):
+    """Ask the endpoint for one line about ``item``.
+
+    Returns ``(line, outcome)``; a transient fault is retried once, and a
+    payload that will never parse fails immediately. See ``clean_summary`` for
+    the outcomes.
+    """
+    messages = summary_messages(item, max_chars=max_chars)
+    last_error = None
+    for attempt in range(max(1, retries)):
+        try:
+            answer = _llm_chat(
+                messages,
+                timeout=timeout,
+                api_key=config["key"],
+                base_url=config["base_url"],
+                model=config["model"],
+                extra=config.get("body"),
+                temperature=SUMMARY_TEMPERATURE,
+            )
+        except TranslationError as error:
+            last_error = error
+            if not error.retryable or attempt + 1 >= retries:
+                raise
+            time.sleep(backoff[min(attempt, len(backoff) - 1)])
+            continue
+        return clean_summary(answer, max_chars=max_chars)
+    raise last_error  # pragma: no cover - the loop either returns or raises
+
+
+def summarize_items(items, *, timeout: int = SUMMARY_TIMEOUT, concurrency: int = SUMMARY_MAX_WORKERS,
+                    config=None, max_chars: int = SUMMARY_MAX_CHARS,
+                    min_chars: int = SUMMARY_MIN_SOURCE_CHARS):
+    """Write ``item["ai_summary"]`` for every article that earns one.
+
+    Thin articles never reach the endpoint, a run of failures retires the
+    endpoint for the rest of the issue instead of paying a timeout per card,
+    and every outcome is counted so the run report can say what happened.
+    """
+    if config is None:
+        config = resolve_summary_config()
+    stats = {
+        "configured": bool(config),
+        "model": config["model"] if config else "",
+        "endpoint": urlsplit(config["base_url"]).netloc if config else "",
+        "max_chars": max_chars,
+        "candidates": 0,
+        "written": 0,
+        "thin": len(items),
+        "declined": 0,
+        "flavored": 0,
+        "empty": 0,
+        "failed": 0,
+        "last_error": "",
+    }
+    if not config:
+        return stats
+
+    candidates = [item for item in items if is_summarizable(item, min_chars=min_chars)]
+    stats["candidates"] = len(candidates)
+    stats["thin"] = len(items) - len(candidates)
+    if not candidates:
+        return stats
+
+    lock = threading.Lock()
+    failures = 0
+    with ThreadPoolExecutor(max_workers=max(1, min(concurrency, SUMMARY_MAX_WORKERS, len(candidates)))) as pool:
+        futures = {
+            pool.submit(summarize_item, item, config, timeout=timeout, max_chars=max_chars): item
+            for item in candidates
+        }
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                line, outcome = future.result()
+            except Exception as error:  # one bad answer must not lose the issue
+                with lock:
+                    stats["failed"] += 1
+                    stats["last_error"] = f"{type(error).__name__}: {error}"[:160]
+                    failures += 1
+                if failures >= SUMMARY_MAX_FAILURES:
+                    # A dead endpoint costs three timeouts, not one per card.
+                    pool.shutdown(wait=False, cancel_futures=True)
+                    break
+                continue
+            failures = 0
+            with lock:
+                stats[outcome] += 1
+            if line:
+                item["ai_summary"] = line
+    return stats
+
+
+def summary_report_line(stats: dict) -> str:
+    """One log line naming what the AI summary did for this issue."""
+    if not stats.get("configured"):
+        return "ai-summary: off (no llm endpoint configured)"
+    if not stats.get("candidates"):
+        return "ai-summary: no article in this window carries enough text"
+    return (
+        f"ai-summary: written={stats['written']}/{stats['candidates']} "
+        f"thin={stats['thin']} declined={stats['declined']} flavored={stats['flavored']} "
+        f"failed={stats['failed']} model={stats['model']}"
+    )
+
+
+def summary_report_markdown(stats: dict) -> str:
+    """The AI-summary section of the run report."""
+    if not stats.get("configured"):
+        return "\n".join(
+            [
+                "### AI summary",
+                "",
+                "Off: no OpenAI-compatible key is configured. The AI line reuses the translation "
+                "chain's `llm` endpoint, so one key such as `DEEPSEEK_API_KEY` turns both on.",
+                "",
+            ]
+        )
+    rows = [
+        "| Metric | Count |",
+        "| --- | ---: |",
+        f"| Articles carrying enough text | {stats['candidates']} |",
+        f"| Lines written | **{stats['written']}** |",
+        f"| Skipped: too little source text | {stats['thin']} |",
+        f"| Skipped: the model declined | {stats['declined']} |",
+        f"| Dropped: stock AI phrasing | {stats['flavored']} |",
+        f"| Dropped: empty answer | {stats['empty']} |",
+        f"| Failed | {stats['failed']} |",
+    ]
+    lines = [
+        "### AI summary",
+        "",
+        f"Wrote **{stats['written']}** of **{stats['candidates']}** candidate lines with "
+        f"`{stats['model']}`"
+        + (f" @ `{stats['endpoint']}`" if stats.get("endpoint") else "")
+        + f", at most {stats['max_chars']} characters each.",
+        "",
+        *rows,
+        "",
+    ]
+    if stats.get("last_error"):
+        lines += [f"Last error: `{stats['last_error']}`", ""]
+    return "\n".join(lines)
+
+
+def summary_notes(stats: dict):
+    """Configuration lines for the report, in the same shape as the translation notes."""
+    if not stats.get("configured"):
+        return [
+            "`ai-summary` is off: it reuses the translation chain's `llm` endpoint, so a key such as "
+            "`DEEPSEEK_API_KEY` turns it on; `SUMMARY_LLM_MODEL` then picks a different model for it."
+        ]
+    return [
+        f"`ai-summary`: `{stats['model']}` @ `{stats['endpoint']}`, at most {stats['max_chars']} "
+        f"characters per line. A line is dropped when the model answers {SUMMARY_SKIP_TOKEN}, when it "
+        "writes stock AI phrasing, or when the article carries too little text to summarise."
+    ]
+
+
+def summary_warnings(stats: dict):
+    """A run that wrote nothing is worth as much noise as a dead endpoint."""
+    if not stats.get("configured") or not stats.get("candidates"):
+        return []
+    if stats.get("written"):
+        return []
+    return [
+        f"ai-summary: wrote no line for any of the {stats['candidates']} candidates | "
+        f"declined={stats['declined']} ai-flavored={stats['flavored']} empty={stats['empty']} "
+        f"failed={stats['failed']} {stats.get('last_error', '')}"[:900]
+    ]
+
+
+def _summary_annotation_lines(stats: dict):
+    if not stats:
+        return []
+    if not stats.get("configured"):
+        return [("notice", "ai-summary: off (no llm endpoint configured)")]
+    if not stats.get("candidates"):
+        return [("notice", "ai-summary: no article in this window carries enough text to summarise")]
+    lines = [("notice", summary_report_line(stats))]
+    lines += [("warning", warning) for warning in summary_warnings(stats)]
+    return lines
+
+
 def display_width(text: str) -> int:
     return sum(2 if unicodedata.east_asian_width(char) in "WF" else 1 for char in text)
 
@@ -1188,9 +1569,13 @@ def render_section_head(category, count):
 # Card copy limits, measured in display width so Chinese and Latin lines match.
 TITLE_WIDTH = 96
 SUMMARY_WIDTH = 190
+# A 100-character AI line can be 200 columns wide when it is all Chinese.
+AI_SUMMARY_WIDTH = 208
 # Marker printed before an appended translation, so machine-translated Chinese
 # is never mistaken for the source's own wording.
 TRANSLATION_TAG = "译"
+# Marker printed before an AI-written line, so a reader always knows who wrote it.
+AI_SUMMARY_TAG = "AI"
 
 
 def render_translation(text, *, size, weight, line_height, chip=False):
@@ -1210,6 +1595,24 @@ def render_translation(text, *, size, weight, line_height, chip=False):
     return (
         f'<div style="margin:5px 0 0;{rule}font-family:{SANS};font-size:{size};font-weight:{weight};'
         f'line-height:{line_height};color:{GRAPHITE};letter-spacing:.01em;">{marker}{esc(text)}</div>'
+    )
+
+
+def render_ai_summary(text):
+    """Render the AI line: a neon chip over black copy on the neon rule.
+
+    It sits below the source's own summary and its translation, so a card reads
+    as source first, translation second, and the AI's take last — and the chip
+    keeps that last line from being mistaken for something the author wrote.
+    """
+    marker = (
+        f'<span style="background:{NEON};color:{INK};font-family:{MONO};font-size:9px;font-weight:700;'
+        f'padding:0 4px;margin-right:6px;vertical-align:1px;">{AI_SUMMARY_TAG}</span>'
+    )
+    return (
+        f'<div style="margin:8px 0 0;border-left:2px solid {NEON};padding-left:8px;'
+        f'font-family:{SANS};font-size:12px;line-height:1.8;color:{INK};letter-spacing:.01em;">'
+        f"{marker}{esc(text)}</div>"
     )
 
 
@@ -1239,6 +1642,11 @@ def render_item(index, item):
     )
     if summary_zh:
         summary_block += render_translation(summary_zh, size="12px", weight="400", line_height="1.75")
+    ai_block = (
+        render_ai_summary(clamp(item["ai_summary"], AI_SUMMARY_WIDTH))
+        if item.get("ai_summary")
+        else ""
+    )
     return f"""
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
   style="width:100%;border-collapse:collapse;background:{CARD};margin:0 0 10px;">
@@ -1250,6 +1658,7 @@ def render_item(index, item):
     <td valign="top" style="padding:14px 14px 14px 4px;border-left:1px solid {HAIRLINE};">
       {title_block}
       {summary_block}
+      {ai_block}
       <div style="margin:9px 0 0;font-family:{MONO};font-size:10px;color:{GRAPHITE};letter-spacing:.08em;">
         <span style="background:{NEON};color:{INK};padding:1px 5px;">{esc(clamp(item['source'], 30))}</span>
         <span style="padding-left:8px;">{published.strftime('%m-%d %H:%M')}</span>
@@ -1504,9 +1913,11 @@ def annotation_lines(payload: dict):
     A misconfiguration is worth as much noise as a dead endpoint: a retired
     model ID or a preset whose key was never set fails exactly like a provider
     that refuses GitHub's runner addresses, and the annotation is where a reader
-    finds out which one it is.
+    finds out which one it is. The AI summary reports the same way, because a
+    card that loses its AI line looks exactly like a card that never had one.
     """
     lines = _annotation_lines(payload)
+    lines += _summary_annotation_lines(payload.get("ai_summary") or {})
     lines += [("warning", warning) for warning in payload.get("warnings", [])]
     return lines
 
@@ -1556,6 +1967,10 @@ def main(argv=None):
                              "(default: keyed providers first, then every keyless one)")
     parser.add_argument("--probe-translators", action="store_true",
                         help="call every provider directly, report which endpoints answer, and exit")
+    parser.add_argument("--summarize", action=argparse.BooleanOptionalAction, default=True,
+                        help="write an AI line under each article that carries enough text (default: enabled)")
+    parser.add_argument("--summary-max-chars", type=int, default=SUMMARY_MAX_CHARS,
+                        help=f"hard character limit for an AI line (default: {SUMMARY_MAX_CHARS})")
     parser.add_argument("--page-budget", type=int, default=DEFAULT_PAGE_BUDGET)
     parser.add_argument("--title", default="", help="override the digest title")
     parser.add_argument("--topic", default=os.environ.get("PUSHPLUS_TOPIC", ""))
@@ -1608,6 +2023,19 @@ def main(argv=None):
     if args.translate:
         translate_items(items, timeout=min(args.timeout, 8), concurrency=args.concurrency, translator=translator)
 
+    summary_stats = {"configured": False}
+    if args.summarize:
+        summary_stats = summarize_items(
+            items,
+            timeout=min(args.timeout, SUMMARY_TIMEOUT),
+            concurrency=args.concurrency,
+            max_chars=args.summary_max_chars,
+        )
+        # Same reasoning as the translation line: the card just loses the extra
+        # line, so the run has to say how many lines it wrote and why the rest
+        # were skipped.
+        print(summary_report_line(summary_stats))
+
     base_title = args.title or DIGEST_TITLE
     pages = render_pages(
         items,
@@ -1633,18 +2061,23 @@ def main(argv=None):
             target = out_dir / f"digest-{edition}-{index:02d}.html"
             target.write_text(page, encoding="utf-8")
             print(f"wrote {target}")
-    if args.translate:
+    if args.translate or args.summarize:
         # The report is written even without --out, because the annotation is
         # what makes a translation failure visible on the run page. The notes
         # say which key and endpoint the run used, since the answer "no provider
         # answered" is usually a question about the configuration.
         notes = provider_notes()
-        markdown = translator.report_markdown()
+        blocks = [translator.report_markdown()] if args.translate else []
+        payload = translator.summary() if args.translate else {}
+        if args.summarize:
+            blocks.append(summary_report_markdown(summary_stats))
+            notes += summary_notes(summary_stats)
+            payload["ai_summary"] = summary_stats
+        markdown = "\n\n".join(blocks)
         if notes:
             markdown += "\n\n### Configuration\n\n" + "\n".join(f"- {note}" for note in notes)
-        payload = translator.summary()
         payload["notes"] = notes
-        payload["warnings"] = config_warnings()
+        payload["warnings"] = config_warnings() + (summary_warnings(summary_stats) if args.summarize else [])
         write_translation_report(out_dir, markdown=markdown, payload=payload)
 
     if not items and not args.allow_empty:
