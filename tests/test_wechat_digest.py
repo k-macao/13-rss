@@ -4,6 +4,8 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
+from urllib.error import URLError
+from urllib.parse import parse_qs, urlsplit
 
 from scripts.wechat_digest import (
     AUTHOR_LINE,
@@ -16,13 +18,16 @@ from scripts.wechat_digest import (
     NEON,
     PUSHPLUS_CONTENT_LIMIT,
     PUSHPLUS_TITLE_LIMIT,
+    TRANSLATION_TAG,
     clamp,
     dedupe,
+    display_width,
     page_title,
     parse_datetime,
     parse_feed_payload,
     is_english,
     render_pages,
+    translate_items,
     translate_to_chinese,
     resolve_edition,
     strip_html,
@@ -36,6 +41,57 @@ NOW = datetime(2026, 8, 19, 10, 0, tzinfo=timezone.utc)
 def section_head(label):
     """Match a rendered category header, not the same word inside intro copy."""
     return f">{label}</span>"
+
+
+def translate_response(mapping):
+    """Stand in for the Google Translate endpoint, answering from `mapping`.
+
+    A source string missing from the mapping is echoed back, which is what the
+    real endpoint effectively does for text it cannot translate.
+    """
+
+    def _urlopen(request, **kwargs):
+        source = parse_qs(urlsplit(request.full_url).query)["q"][0]
+        target = mapping.get(source, source)
+
+        class Response:
+            def read(self):
+                return json.dumps([[[target, source, None, None, 1]], None, "en"]).encode("utf-8")
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        return Response()
+
+    return _urlopen
+
+
+def offline_urlopen(request, **kwargs):
+    raise URLError("translation endpoint unreachable")
+
+
+ENGLISH_PAIRS = {
+    "OpenAI ships a smaller model that runs on device": "OpenAI 推出可在设备端运行的更小模型",
+    "The new model keeps most of the reasoning quality at a tenth of the cost.":
+        "新模型以十分之一的成本保留了大部分推理能力。",
+    "A new model improves reasoning": "新模型提升了推理能力",
+}
+
+
+def make_english_item(index=0, *, category="Artificial Intelligence"):
+    return {
+        "title": "OpenAI ships a smaller model that runs on device",
+        "link": f"https://example.com/en/{index}",
+        "summary": "The new model keeps most of the reasoning quality at a tenth of the cost.",
+        "published_at": NOW - timedelta(minutes=index),
+        "source": "Example Weekly",
+        "site_url": "https://example.com",
+        "category": category,
+        "language": "en",
+    }
 
 
 def make_items(count, *, category="News", summary="摘要内容，用于测试排版和截断。"):
@@ -158,6 +214,72 @@ class ParsingTests(unittest.TestCase):
         self.assertLessEqual(len(clamped), 11)
 
 
+class TranslationTests(unittest.TestCase):
+    """English originals stay; the Chinese translation is appended beside them."""
+
+    def test_english_item_keeps_the_original_and_gains_a_chinese_copy(self):
+        item = make_english_item()
+        with patch("scripts.wechat_digest.urlopen", side_effect=translate_response(ENGLISH_PAIRS)):
+            translate_items([item], timeout=8, concurrency=4)
+
+        self.assertEqual(item["title"], "OpenAI ships a smaller model that runs on device")
+        self.assertEqual(item["summary"],
+                         "The new model keeps most of the reasoning quality at a tenth of the cost.")
+        self.assertEqual(item["title_zh"], "OpenAI 推出可在设备端运行的更小模型")
+        self.assertEqual(item["summary_zh"], "新模型以十分之一的成本保留了大部分推理能力。")
+
+    def test_chinese_item_is_left_alone(self):
+        item = make_items(1)[0]
+        item["title"] = "国产大模型开源周：三个新权重发布"
+        item["summary"] = "本周国内团队连续开源三个模型，覆盖长上下文与推理。"
+        with patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen) as mocked:
+            translate_items([item], timeout=8, concurrency=4)
+
+        self.assertNotIn("title_zh", item)
+        self.assertNotIn("summary_zh", item)
+        self.assertEqual(item["title"], "国产大模型开源周：三个新权重发布")
+        mocked.assert_not_called()  # Chinese copy is never sent to the endpoint
+
+    def test_mixed_headline_dominated_by_latin_letters_is_still_translated(self):
+        item = make_english_item()
+        item["title"] = "NVIDIA 发布 RTX Spark: 128GB unified memory"
+        item["summary"] = ""
+        mapping = {item["title"]: "NVIDIA 发布 RTX Spark：128GB 统一内存"}
+        with patch("scripts.wechat_digest.urlopen", side_effect=translate_response(mapping)):
+            translate_items([item], timeout=8, concurrency=4)
+
+        self.assertEqual(item["title"], "NVIDIA 发布 RTX Spark: 128GB unified memory")
+        self.assertEqual(item["title_zh"], "NVIDIA 发布 RTX Spark：128GB 统一内存")
+
+    def test_unreachable_translation_endpoint_appends_nothing(self):
+        item = make_english_item()
+        with patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen):
+            translate_items([item], timeout=8, concurrency=4)
+
+        self.assertNotIn("title_zh", item)
+        self.assertNotIn("summary_zh", item)
+        self.assertEqual(item["title"], "OpenAI ships a smaller model that runs on device")
+
+    def test_translation_that_echoes_the_original_is_not_appended(self):
+        # A proper noun or an untranslated string must not be printed twice.
+        item = make_english_item()
+        item["title"] = "NVIDIA"
+        item["summary"] = ""
+        with patch("scripts.wechat_digest.urlopen", side_effect=translate_response({})):
+            translate_items([item], timeout=8, concurrency=4)
+
+        self.assertNotIn("title_zh", item)
+
+    def test_only_english_fields_of_an_item_are_translated(self):
+        item = make_english_item()
+        item["summary"] = "本周国内团队连续开源三个模型。"
+        with patch("scripts.wechat_digest.urlopen", side_effect=translate_response(ENGLISH_PAIRS)):
+            translate_items([item], timeout=8, concurrency=4)
+
+        self.assertIn("title_zh", item)
+        self.assertNotIn("summary_zh", item)
+
+
 class EditionTests(unittest.TestCase):
     def test_editions_cover_the_two_scheduled_pushes(self):
         self.assertEqual(set(EDITIONS), {"morning", "evening"})
@@ -242,6 +364,69 @@ class RenderTests(unittest.TestCase):
         page = render([item])[0]
         self.assertNotIn("<script>", page)
         self.assertIn("&amp;", page)
+
+    def test_english_card_prints_the_original_then_the_appended_translation(self):
+        item = make_english_item()
+        item["title_zh"] = "OpenAI 推出可在设备端运行的更小模型"
+        item["summary_zh"] = "新模型以十分之一的成本保留了大部分推理能力。"
+        page = render([item])[0]
+
+        # Both languages are present, original first, translation appended below.
+        self.assertIn("OpenAI ships a smaller model that runs on device", page)
+        self.assertIn(item["title_zh"], page)
+        self.assertIn("The new model keeps most of the reasoning quality", page)
+        self.assertIn(item["summary_zh"], page)
+        self.assertLess(page.index("OpenAI ships a smaller model"), page.index(item["title_zh"]))
+        self.assertLess(page.index("The new model keeps most of the reasoning"), page.index(item["summary_zh"]))
+        # The appended copy is marked as a translation and hung on the neon accent.
+        self.assertIn(TRANSLATION_TAG, page)
+        self.assertIn(f"border-left:2px solid {NEON}", page)
+        # The original title keeps the link; the appended translation is plain text.
+        self.assertEqual(page.count('href="https://example.com/en/0"'), 1)
+
+    def test_chinese_card_carries_no_translation_marker(self):
+        page = render(make_items(3))[0]
+        self.assertNotIn(TRANSLATION_TAG, page)
+        self.assertNotIn(f"border-left:2px solid {NEON}", page)
+
+    def test_translation_and_rendering_work_together(self):
+        items = [make_english_item(index) for index in range(4)] + make_items(4)
+        with patch("scripts.wechat_digest.urlopen", side_effect=translate_response(ENGLISH_PAIRS)):
+            translate_items(items, timeout=8, concurrency=4)
+        page = render(items)[0]
+
+        self.assertIn("OpenAI ships a smaller model that runs on device", page)   # original kept
+        self.assertIn("OpenAI 推出可在设备端运行的更小模型", page)                   # translation appended
+        self.assertIn(TRANSLATION_TAG, page)
+        self.assertNotIn("title_zh", page)
+
+    def test_appended_translation_is_escaped_and_clamped(self):
+        item = make_english_item()
+        item["title_zh"] = '模型 <script>alert("x")</script> & 更多'
+        item["summary_zh"] = "很长的中文摘要" * 40
+        page = render([item])[0]
+
+        self.assertNotIn("<script>", page)
+        self.assertIn("&lt;script&gt;", page)
+        self.assertIn("&amp;", page)
+        rendered_summary = re.search(r"border-left:2px solid [^>]+>([^<]+)</div>", page).group(1)
+        self.assertTrue(rendered_summary.endswith("…"))
+        self.assertLessEqual(display_width(rendered_summary), 190)
+
+    def test_bilingual_digest_still_paginates_inside_the_pushplus_limit(self):
+        items = make_items(400, summary="A summary that needs translating " * 6)
+        for item in items:
+            item["title_zh"] = "需要翻译的中文标题，用于测试分页与字符预算。"
+            item["summary_zh"] = "需要翻译的中文摘要，用于测试分页与字符预算。" * 4
+        pages = render(items)
+
+        self.assertGreater(len(pages), 1)
+        for page in pages:
+            self.assertLessEqual(len(page), PUSHPLUS_CONTENT_LIMIT)
+        combined = "".join(pages)
+        for item in items:
+            self.assertEqual(combined.count(f'href="{item["link"]}"'), 1, item["link"])
+            self.assertIn(item["title_zh"], combined)
 
     def test_empty_digest_still_renders_one_page(self):
         pages = render([])
