@@ -798,7 +798,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-08-11T14:53:00.000Z"
+      "latest_item_at": "2026-08-11T14:53:00.000Z",
+      "description_en": "WeChat article feed covering computer vision research and applications."
     },
     {
       "id": "66242ceed483",
@@ -821,7 +822,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-08-12T04:26:00.000Z"
+      "latest_item_at": "2026-08-12T04:26:00.000Z",
+      "description_en": "WeChat article feed covering the AI industry and research."
     },
     {
       "id": "590f6db1e612",
@@ -1456,7 +1458,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-08-11T02:47:00.000Z"
+      "latest_item_at": "2026-08-11T02:47:00.000Z",
+      "description_en": "WeChat article feed covering profiles of people and social documentary."
     },
     {
       "id": "2681d5fc2524",
@@ -1496,7 +1499,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-06-01T02:04:00.000Z"
+      "latest_item_at": "2026-06-01T02:04:00.000Z",
+      "description_en": "WeChat article feed covering technology people and industry stories."
     },
     {
       "id": "5f3b7bca48a6",
@@ -2316,7 +2320,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-08-11T23:15:00.000Z"
+      "latest_item_at": "2026-08-11T23:15:00.000Z",
+      "description_en": "WeChat article feed covering databases and enterprise technology."
     },
     {
       "id": "64864672e2d8",
@@ -6696,7 +6701,8 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-04T08:40:00.000Z",
       "organization": "哔哩哔哩",
-      "company_direction": "工程"
+      "company_direction": "工程",
+      "description_en": "WeChat article feed covering audio and video, infrastructure, and engineering practice."
     },
     {
       "id": "20f51c01876e",
@@ -6955,7 +6961,8 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-11T10:00:00.000Z",
       "organization": "字节跳动",
-      "company_direction": "工程"
+      "company_direction": "工程",
+      "description_en": "WeChat article feed covering infrastructure and engineering practice."
     },
     {
       "id": "097105c72702",
@@ -6999,7 +7006,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-08-12T09:57:00.000Z"
+      "latest_item_at": "2026-08-12T09:57:00.000Z",
+      "description_en": "WeChat article feed covering software and productivity tools."
     },
     {
       "id": "45002d82ae97",
@@ -7062,7 +7070,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-08-11T16:00:00.000Z"
+      "latest_item_at": "2026-08-11T16:00:00.000Z",
+      "description_en": "WeChat article feed covering consumer technology and internet commentary."
     },
     {
       "id": "7dca85d46404",
@@ -7151,7 +7160,8 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-05T10:30:00.000Z",
       "organization": "得物",
-      "company_direction": "工程"
+      "company_direction": "工程",
+      "description_en": "WeChat article feed covering business systems and engineering practice."
     },
     {
       "id": "3a50c127a492",
@@ -7829,7 +7839,8 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-06T04:00:00.000Z",
       "organization": "爱奇艺",
-      "company_direction": "工程"
+      "company_direction": "工程",
+      "description_en": "WeChat article feed covering audio and video, and engineering practice."
     },
     {
       "id": "975b7b131234",
@@ -8280,7 +8291,8 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-06T02:24:00.000Z",
       "organization": "美团",
-      "company_direction": "工程"
+      "company_direction": "工程",
+      "description_en": "WeChat article feed covering back-end development, algorithms, and engineering practice."
     },
     {
       "id": "50adf0a2ef3a",
@@ -8391,7 +8403,8 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-12T10:24:00.000Z",
       "organization": "腾讯",
-      "company_direction": "工程"
+      "company_direction": "工程",
+      "description_en": "WeChat article feed covering engineering practice."
     },
     {
       "id": "595a8395ef92",
@@ -8589,7 +8602,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-08-07T15:54:00.000Z"
+      "latest_item_at": "2026-08-07T15:54:00.000Z",
+      "description_en": "WeChat article feed covering networking equipment and home networks."
     },
     {
       "id": "bfec11696518",
@@ -8631,7 +8645,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-08-09T15:07:00.000Z"
+      "latest_item_at": "2026-08-09T15:07:00.000Z",
+      "description_en": "WeChat article feed covering technology, business, and personal essays."
     },
     {
       "id": "fa90e95e2850",
@@ -8846,7 +8861,8 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-06T05:12:00.000Z",
       "organization": "阿里巴巴",
-      "company_direction": "云计算"
+      "company_direction": "云计算",
+      "description_en": "WeChat article feed covering cloud computing and development practice."
     },
     {
       "id": "aafbb66f21ee",
@@ -8867,7 +8883,8 @@
         "wechat2rss"
       ],
       "validated_at": "2026-08-12",
-      "latest_item_at": "2026-08-12T06:30:00.000Z"
+      "latest_item_at": "2026-08-12T06:30:00.000Z",
+      "description_en": "WeChat article feed covering complexity science and interdisciplinary research."
     },
     {
       "id": "6670aa0a33b3",
@@ -12854,7 +12871,8 @@
       "validated_at": "2026-08-12",
       "latest_item_at": "2026-08-03T10:41:00.000Z",
       "organization": "阿里巴巴",
-      "company_direction": "设计"
+      "company_direction": "设计",
+      "description_en": "WeChat article feed covering product design and user experience."
     },
     {
       "id": "b7b2cec82d5e",

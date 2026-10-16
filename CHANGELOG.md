@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Published the WeChat digest guide in English as `WECHAT-DIGEST.md`, pointed the English README's digest link at it, and cross-linked the two guides from each other; a repository test now asserts both READMEs link to the guide in their own language.
+- Added `topic_en` to all 41 entries of `sources/wechat-curated.json` and taught `tools/merge_wechat_sources.py` to write an English `description_en`, then backfilled the 18 published WeChat feeds whose English appendix descriptions still embedded a Chinese topic. Both README appendices now read in a single language each, and regeneration stays reproducible.
 - Made the WeChat digest bilingual instead of translation-only: an English title or summary now keeps the original text and gains its Simplified Chinese translation underneath, so a card reads as original first, translation second. `translate_items` writes `title_zh` and `summary_zh` instead of overwriting `title` and `summary`, and appends nothing when the endpoint is unreachable or echoes the original back, so a card never prints the same sentence twice.
 - Rendered the appended translation in the existing editorial palette: the headline translation sits at 14px in dark grey behind a fluorescent-green 译 chip, and the summary translation at 12px on a thin neon rule, both clamped to the card's own title and summary widths. Chinese copy is still never translated, and `--no-translate` now shows originals only.
 - Documented the bilingual card in the digest guide's content rules, visual-style, pagination, and parameter tables, and in both READMEs; added eleven tests covering appending, untranslated Chinese items, unreachable and echo-back translations, escaping, clamping, and pagination of a fully bilingual issue.
@@ -11,7 +13,7 @@
 - Published `sources/aihot-curated.json`, `tools/validate_aihot_sources.py`, and `tools/merge_aihot_sources.py` so the round is reproducible; the round files live in `reports/aihot-validation-round-{1,2,3}.json` and the decisions in `reports/aihot-curation.json`.
 - Raised the complete-collection limit from 730 to 740 feeds so the twelve verified additions do not displace existing curated sources, updated both contributing guides, and refreshed the `published_total` field of earlier curation reports so every evidence file tracks the current catalog size.
 - Recorded that this round was verified by direct HTTP fetch plus RSS/Atom/JSON Feed parsing on a GitHub-hosted runner, because the authoring environment has no outbound access to feed hosts.
-- Renamed the digest to “章鱼 AI · 营销热点智能体”, replaced the subtitle with “每天三分钟！去噪音！留干货！”, and added the explicit scope note “全网兼顾中文和英文内容，覆盖 AI、工程、安全、科技媒体、周刊、科研、新闻、产品、商业、博客、社区、文化、视频和播客。” under the first-page intro.
+- Renamed the digest to “章鱼 AI · 营销热点助手”, replaced the subtitle with “每天三分钟！去噪音！留干货！”, and added the explicit scope note “全网兼顾中文和英文内容，覆盖 AI、工程、安全、科技媒体、周刊、科研、新闻、产品、商业、博客、社区、文化、视频和播客。” under the first-page intro.
 - Kept the scope note on the first page only, alongside the intro, so continuation pages stay lean; extended the branding tests to assert all fourteen topics and both languages appear.
 - Added a 品牌与文案 section to the WeChat digest guide documenting the title, subtitle, scope note, and signature, and shifted the later section numbers.
 - Added a twice-daily WeChat digest workflow that pushes new catalog articles through pushplus at 09:00 and 18:00 Beijing time.

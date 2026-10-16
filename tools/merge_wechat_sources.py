@@ -96,6 +96,8 @@ def main() -> None:
             feed["language"] = "zh"
             feed["packs"] = sorted(set(feed["packs"]) | {"wechat", "chinese"})
             feed["sources"] = sorted(set(feed["sources"]) | {"wechat2rss"})
+            if item.get("topic_en") and not feed.get("description_en"):
+                feed["description_en"] = f"WeChat article feed covering {item['topic_en']}."
         if item["organization"]:
             feed["packs"] = sorted(set(feed["packs"]) | {"company-tech"})
             feed["organization"] = item["organization"]

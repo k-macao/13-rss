@@ -16,6 +16,8 @@ MARKDOWN_FILES = [
     ROOT / "SOURCES.md",
     ROOT / "RSS-GUIDE.md",
     ROOT / "RSS-GUIDE.zh-CN.md",
+    ROOT / "WECHAT-DIGEST.md",
+    ROOT / "WECHAT-DIGEST.zh-CN.md",
 ]
 
 
@@ -34,6 +36,21 @@ class RepositoryTests(unittest.TestCase):
                 if not resolved.exists():
                     missing.append(f"{markdown.name}: {target}")
         self.assertEqual(missing, [])
+
+    def test_wechat_digest_guide_is_published_in_both_languages(self):
+        pairs = (
+            ("README.md", "WECHAT-DIGEST.md", "简体中文"),
+            ("README.zh-CN.md", "WECHAT-DIGEST.zh-CN.md", "English"),
+        )
+        for readme_name, guide_name, sibling_label in pairs:
+            readme = (ROOT / readme_name).read_text(encoding="utf-8")
+            self.assertIn(f"]({guide_name})", readme)
+            guide = ROOT / guide_name
+            self.assertTrue(guide.is_file())
+            text = guide.read_text(encoding="utf-8")
+            sibling = "WECHAT-DIGEST.zh-CN.md" if guide_name == "WECHAT-DIGEST.md" else "WECHAT-DIGEST.md"
+            self.assertIn(f"]({sibling})", text)
+            self.assertIn(sibling_label, text)
 
     def test_readmes_have_no_unresolved_count_tokens(self):
         for name in ("README.md", "README.zh-CN.md"):
