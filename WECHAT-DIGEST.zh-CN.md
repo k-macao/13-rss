@@ -107,7 +107,7 @@ DeepSeek 的接口变化比别的厂商频繁，所以预设额外做了几件�
 
 ### 检查哪些接口可用
 
-`Translation probe`（[`.github/workflows/translate-probe.yml`](.github/workflows/translate-probe.yml)）会跳过链路，直接逐个调用所有通道，并原样记录每个通道的返回或报错。在 **Actions → Translation probe → Run workflow** 手动运行，约一分钟即可，结果会打印到运行页面、作为 `translation-probe` artifact 上传，也可以顺带作为评论发到某个 issue 或 PR（`comment_on` 输入项）。只要 PR 改动了翻译链路，它还会自动跑一次并把同一张表评论到该 PR 上——因为「Key 在 GitHub 运行器上能不能用」是离线测试唯一答不了的问题。
+`Translation probe`（[`.github/workflows/translate-probe.yml`](.github/workflows/translate-probe.yml)）会跳过链路，直接逐个调用所有通道，并原样记录每个通道的返回或报错。在 **Actions → Translation probe → Run workflow** 手动运行，约一分钟即可，结果会打印到运行页面、作为 `translation-probe` artifact 上传，也可以顺带作为评论发到某个 issue 或 PR（`comment_on` 输入项）。只要 PR 改动了翻译链路，它还会自动跑一次——因为「Key 在 GitHub 运行器上能不能用」是离线测试唯一答不了的问题。检查结果始终会给出那张表；把表贴成 PR 评论需要工作流 token 有写权限，所以在只读权限下这一步会以 warning 说明原因，表格仍在运行页面、step summary 和 artifact 里。把 **Settings → Actions → General → Workflow permissions** 改为 **Read and write permissions** 即可开启评论。
 
 报告最后有一段 **Configuration**：注明 Key 来自哪个变量、指向哪个接口、会调用哪个模型（Key 本身从不打印）。表里少了某个通道时，多半就是这一段能给出原因。
 
