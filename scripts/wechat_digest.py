@@ -129,14 +129,43 @@ def strip_html(value: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+CJK_RANGES = (
+    (0x3000, 0x303F),  # CJK punctuation such as 。、「」《》
+    (0x3040, 0x30FF),  # kana
+    (0x3400, 0x4DBF),  # CJK Extension A
+    (0x4E00, 0x9FFF),  # CJK Unified Ideographs
+    (0xF900, 0xFAFF),  # CJK compatibility ideographs
+    (0xFF00, 0xFFEF),  # full-width forms, including ，
+)
+LATIN_LETTER = re.compile(r"[A-Za-z]")
+MIN_LATIN_LETTERS = 3
+CJK_SHARE_LIMIT = 0.3
+
+
+def is_cjk(char: str) -> bool:
+    code = ord(char)
+    return any(low <= code <= high for low, high in CJK_RANGES)
+
+
 def is_english(text: str) -> bool:
-    """Return whether text is predominantly English and needs translation."""
-    if not text or re.search(r"[\u3400-\u9fff]", text) or re.fullmatch(r"https?://\S+", text.strip()):
+    """Return whether text reads as English and therefore needs translation.
+
+    One Chinese character is not enough to call a title Chinese: a headline that
+    quotes a Chinese product name is still English, while a Chinese sentence that
+    quotes an English brand stays Chinese. The share of CJK characters among the
+    characters that carry language decides, so mixed text follows the side that
+    dominates it.
+    """
+    if not text or re.fullmatch(r"https?://\S+", text.strip()):
         return False
-    letters = re.findall(r"[A-Za-z]", text)
+    cjk = sum(1 for char in text if is_cjk(char))
+    letters = len(LATIN_LETTER.findall(text))
     # Avoid sending version numbers, URLs, source names, and punctuation alone.
-    words = re.findall(r"[A-Za-z]+", text)
-    return len(letters) >= 3 and len(words) >= 1
+    if letters < MIN_LATIN_LETTERS:
+        return False
+    if cjk == 0:
+        return True
+    return cjk / (cjk + letters) < CJK_SHARE_LIMIT
 
 
 def translate_to_chinese(text: str, *, timeout: int = 8, endpoint: str = TRANSLATE_ENDPOINT) -> str:

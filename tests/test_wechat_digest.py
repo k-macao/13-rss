@@ -88,6 +88,21 @@ class ParsingTests(unittest.TestCase):
         with patch("scripts.wechat_digest.urlopen", return_value=Response()):
             self.assertEqual(translate_to_chinese("A new model"), "一个新的模型")
 
+    def test_english_detection_follows_the_dominant_script_in_mixed_text(self):
+        # A Chinese product name inside an English headline must not mask the English.
+        self.assertTrue(is_english("Baidu's 文心一言 gets an upgrade"))
+        self.assertTrue(is_english("NVIDIA 发布 RTX Spark: 128GB unified memory"))
+        self.assertTrue(is_english("A new model improves reasoning"))
+        # A Chinese sentence that quotes an English brand stays Chinese.
+        self.assertFalse(is_english("OpenAI 发布 GPT-6，性能翻倍"))
+        self.assertFalse(is_english("Anthropic 关于 Claude Opus 5.5 的官方说明：fast mode 结束预览"))
+        self.assertFalse(is_english("Kimi K3 上线，支持 1M 上下文"))
+        # Chinese punctuation, kana, and full-width forms count towards the Chinese share.
+        self.assertFalse(is_english("「新しいモデル」で日本語のテキスト"))
+        # Version numbers and bare dates carry no language.
+        self.assertFalse(is_english("v1.2.3"))
+        self.assertFalse(is_english("2026 年第 3 季度"))
+
     def test_parse_datetime_accepts_rfc822_and_iso8601(self):
         rfc = parse_datetime("Tue, 19 Aug 2026 09:30:00 +0800")
         iso = parse_datetime("2026-08-19T01:30:00Z")
