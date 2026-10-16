@@ -7,6 +7,7 @@ Usage examples
 --------------
     python scripts/wechat_digest.py --dry-run --out build/digest
     PUSHPLUS_TOKEN=xxx python scripts/wechat_digest.py --pack top200
+    python scripts/wechat_digest.py --probe-translators --out build/probe
 
 Design notes
 ------------
@@ -15,6 +16,12 @@ portrait, single-column canvas on light grey paper, black body copy at a small
 size, dark grey metadata, and a fluorescent green accent used sparingly for
 kickers, indices and rules. All styling is inline so pushplus/WeChat webviews
 render it without a stylesheet.
+
+English titles and summaries are translated by walking a provider chain (keyed
+providers first, then the keyless endpoints) and stopping at the first endpoint
+that answers; a provider that fails twice is retired for the rest of the run. The
+English original is never overwritten, so a failed translation only drops the
+appended line, and every run reports which provider answered.
 """
 
 from __future__ import annotations

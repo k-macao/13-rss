@@ -60,6 +60,8 @@ An English headline or summary keeps its original wording and gains a Simplified
 
 Set the single `PUSHPLUS_TOKEN` secret to enable it. See the [WeChat digest guide](WECHAT-DIGEST.md) for details.
 
+Translation walks a chain of providers — a DeepL or OpenAI-compatible key when one is configured, then the keyless Google, Microsoft Edge, and MyMemory endpoints — and stops at the first that answers, so one reachable endpoint keeps the whole issue bilingual. Each run reports which provider answered, and `Translation probe` shows what every endpoint returns from a GitHub runner.
+
 ## Read with Tidings
 
 **Website: [tidings.info](https://tidings.info/)**

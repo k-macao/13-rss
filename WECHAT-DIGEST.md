@@ -19,6 +19,11 @@ Every day at **09:00** and **18:00** Beijing time, GitHub Actions reads the cata
    | --- | --- | --- |
    | `PUSHPLUS_TOKEN` | Yes | Your personal pushplus token |
    | `PUSHPLUS_TOPIC` | No | Group code; when set, one push reaches every member of the group |
+   | `TRANSLATE_LLM_API_KEY` | No | Key for any OpenAI-compatible chat endpoint; the most reliable translation route |
+   | `DEEPL_API_KEY` | No | DeepL key, free (`…:fx`) or pro |
+   | `MYMEMORY_EMAIL` | No | E-mail address that raises MyMemory's anonymous quota |
+
+   `TRANSLATE_LLM_BASE_URL`, `TRANSLATE_LLM_MODEL`, and `TRANSLATE_PROVIDERS` are repository *variables* (**Settings → Secrets and variables → Actions → Variables**), not secrets. See [Translation providers](#translation-providers).
 
 3. Confirm the workflow is enabled on the **Actions** page. Use **Run workflow** once to verify it end to end.
 
@@ -42,8 +47,47 @@ The two windows meet end to end, so they cover exactly 24 hours with almost no o
 - **Deduplication.** Links (ignoring trailing slashes and anchors) and titles are both deduplicated.
 - **Ordering.** Articles are grouped by catalog category, newest first inside each section.
 - **Bilingual cards.** An English title or summary keeps its original wording and gains a Simplified Chinese translation underneath, so one card reads in both languages. The headline translation carries a fluorescent-green 译 chip and the summary translation sits below a fluorescent-green rule, so both are clearly separated from the original. Chinese articles are never translated into English.
-- **Translation.** Translations come from a public translation endpoint. If it fails, times out, or returns the original text unchanged, no translation is appended and the card shows the original only — the push still goes out. Use `--no-translate` to turn the feature off entirely. Whether a string needs translating is decided by the ratio of Chinese to Latin characters, so an English headline that quotes one Chinese product name still gets a translation, while a Chinese sentence quoting an English brand does not. Bare URLs, plain numbers, and version strings are never sent for translation.
+- **Translation.** Translations come from a chain of providers, not one endpoint: the configured keyed providers first, then every keyless endpoint. If a provider fails, times out, or returns the original text unchanged, the next one is asked, and when none answers the card shows the original only — the push still goes out. Use `--no-translate` to turn the feature off entirely. Whether a string needs translating is decided by the ratio of Chinese to Latin characters, so an English headline that quotes one Chinese product name still gets a translation, while a Chinese sentence quoting an English brand does not. Bare URLs, plain numbers, and version strings are never sent for translation.
+- **Translation reporting.** The run states which provider answered: a `translation: translated=17/24 provider=edge retired=google` line in the log, a notice (and a warning when endpoints were retired or nothing answered) on the workflow run page, `translation-report.md` and `translation-report.json` next to the rendered pages, and the same table on the run's step summary.
 - **Failure isolation.** A feed that fails to fetch is skipped without affecting the rest of the issue. When a window has nothing new, nothing is sent, so you are not disturbed; `--allow-empty` changes that.
+
+## Translation providers
+
+English titles and summaries are translated by walking a chain and stopping at the first endpoint that answers. Keyed providers come first because they do not depend on a public endpoint's goodwill towards GitHub's runner addresses — which is where the old single-endpoint build lost every translation.
+
+| Provider | Key | Endpoint | Notes |
+| --- | --- | --- | --- |
+| `deepl` | `DEEPL_API_KEY` | `api-free.deepl.com` (keys ending in `:fx`) or `api.deepl.com` | Highest-quality machine translation; the free tier covers 500,000 characters a month |
+| `llm` | `TRANSLATE_LLM_API_KEY` | `TRANSLATE_LLM_BASE_URL` (default `https://api.openai.com/v1`) + `TRANSLATE_LLM_MODEL` | Any OpenAI-compatible chat endpoint: DeepSeek, Qwen/DashScope, Moonshot, Zhipu, OpenRouter, …; context-aware, and the one worth setting up first |
+| `google` | — | `translate.googleapis.com` | The public gtx endpoint used before; rate-limits datacenter addresses |
+| `google-chrome` | — | `clients5.google.com` | Google's dictionary client, a separate service with its own quota |
+| `edge` | — | `edge.microsoft.com/translate/translatetext` | Microsoft Edge's keyless translator, the successor of the removed `translate/auth` + `api-edge` flow |
+| `mymemory` | `MYMEMORY_EMAIL` (optional) | `api.mymemory.translated.net` | Free translation memory with a small daily quota |
+
+How the chain behaves in a run:
+
+- A provider that fails twice in a row is **retired** for the rest of the run, so a blocked endpoint costs a couple of timeouts instead of one per article.
+- The provider that answered is tried **first** from then on; the others are skipped while it keeps working, and one is picked up again if it starts failing.
+- Providers are asked in the order above. Set `TRANSLATE_PROVIDERS` (repository variable) or `--translators` to choose and order them, for example `llm,google,edge`.
+- A malformed answer is not retried, only a timeout, a rate limit, or a connection error is.
+- With no key set the digest still translates through the keyless endpoints; a key simply makes the outcome dependable.
+
+### Checking which endpoints answer
+
+`Translation probe` ([`.github/workflows/translate-probe.yml`](.github/workflows/translate-probe.yml)) calls every provider directly, bypassing the chain, and reports the raw answer or the raw error per provider. Run it from **Actions → Translation probe → Run workflow**; it takes about a minute, prints the table below to the run page, uploads `translation-probe` as an artifact, and can post the same table as a comment on an issue or pull request (the `comment_on` input).
+
+```bash
+# The same probe locally; the report lands in build/probe/
+python scripts/wechat_digest.py --probe-translators --out build/probe
+
+# Probe one provider only
+python scripts/wechat_digest.py --probe-translators --translators edge --timeout 10
+```
+
+| Provider | Kind | Source | Status | Seconds | Output |
+| --- | --- | --- | --- | ---: | --- |
+| `google` | keyless | OpenAI ships a smaller model… | error | 0.31 | HTTPError: 429 Too Many Requests |
+| `edge` | keyless | OpenAI ships a smaller model… | ok | 0.42 | OpenAI 推出可在设备端运行的更小模型 |
 
 ## Branding and copy
 
@@ -94,6 +138,9 @@ python scripts/wechat_digest.py --dry-run --pack ai --edition morning --out buil
 # Originals only, without the Chinese translations
 python scripts/wechat_digest.py --dry-run --no-translate --out build/digest
 
+# Ask every translation provider which ones answer, then exit
+python scripts/wechat_digest.py --probe-translators --out build/probe
+
 # Push for real (locally)
 PUSHPLUS_TOKEN=your-token python scripts/wechat_digest.py --pack top200
 ```
@@ -108,6 +155,8 @@ Common arguments:
 | `--max-per-feed` | `3` | Maximum items taken from one feed |
 | `--max-items` | `120` | Maximum articles per issue |
 | `--translate` | on | Appends a Simplified Chinese translation under English text; `--no-translate` shows originals only |
+| `--translators` | env var | Provider order, e.g. `llm,google,edge`; empty uses keyed providers first, then every keyless one |
+| `--probe-translators` | off | Call every provider directly, report which endpoints answer, and exit |
 | `--page-budget` | `92000` | Character budget per page |
 | `--topic` | env var | pushplus group code |
 | `--channel` | `wechat` | Also supports `mail`, `webhook`, and other pushplus channels |
@@ -117,6 +166,8 @@ Common arguments:
 ## Troubleshooting
 
 **No push arrived?** Open the workflow run log: `items=0` means the window genuinely held no new articles, while `pushplus code=xxx` points at a token or quota problem. The rendered HTML is also uploaded as an artifact and kept for seven days, so you can download and inspect it.
+
+**English cards arrived without their Chinese lines?** The push is designed to go out anyway, so the run page says what happened: look for the `translation: …` notice and the warning naming the retired endpoints, or open `translation-report.md` in the uploaded artifact. Then run the `Translation probe` workflow — it shows each endpoint's raw answer from a GitHub runner in one minute. If every keyless endpoint refuses the runner (Google answers `429` most often), add `TRANSLATE_LLM_API_KEY` or `DEEPL_API_KEY`; a key is not required for the digest to run, but it is what makes the translations dependable.
 
 **Want different delivery times?** Change the two cron expressions in the workflow (UTC = Beijing time − 8 hours) and update `window_hours` in `EDITIONS` so the windows still cover 24 hours.
 
