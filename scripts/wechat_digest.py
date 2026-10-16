@@ -1381,12 +1381,14 @@ def main(argv=None):
             target = out_dir / f"digest-{edition}-{index:02d}.html"
             target.write_text(page, encoding="utf-8")
             print(f"wrote {target}")
-        if args.translate:
-            write_translation_report(
-                out_dir,
-                markdown=translator.report_markdown(),
-                payload=translator.summary(),
-            )
+    if args.translate:
+        # The report is written even without --out, because the annotation is
+        # what makes a translation failure visible on the run page.
+        write_translation_report(
+            out_dir,
+            markdown=translator.report_markdown(),
+            payload=translator.summary(),
+        )
 
     if not items and not args.allow_empty:
         print("nothing new in this window; skipping push")
