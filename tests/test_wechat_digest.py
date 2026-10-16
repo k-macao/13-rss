@@ -4,6 +4,7 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
+from urllib.error import HTTPError
 from urllib.error import URLError
 from urllib.parse import parse_qs, urlsplit
 
@@ -253,12 +254,57 @@ class TranslationTests(unittest.TestCase):
 
     def test_unreachable_translation_endpoint_appends_nothing(self):
         item = make_english_item()
-        with patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen):
+        with patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen), \
+                patch("scripts.wechat_digest.time.sleep"):
             translate_items([item], timeout=8, concurrency=4)
 
         self.assertNotIn("title_zh", item)
         self.assertNotIn("summary_zh", item)
         self.assertEqual(item["title"], "OpenAI ships a smaller model that runs on device")
+
+    def test_transient_failure_is_retried_then_succeeds(self):
+        ok = translate_response({"A new model improves reasoning": "新模型提升了推理能力"})
+        calls = []
+
+        def flaky(request, **kwargs):
+            calls.append(request)
+            if len(calls) == 1:
+                raise HTTPError(request.full_url, 429, "Too Many Requests", {}, None)
+            return ok(request, **kwargs)
+
+        with patch("scripts.wechat_digest.urlopen", side_effect=flaky), \
+                patch("scripts.wechat_digest.time.sleep") as sleep:
+            result = translate_to_chinese("A new model improves reasoning")
+
+        self.assertEqual(result, "新模型提升了推理能力")
+        self.assertEqual(len(calls), 2)
+        sleep.assert_called_once_with(1.0)
+
+    def test_persistent_failure_gives_up_after_retries_and_keeps_original(self):
+        with patch("scripts.wechat_digest.urlopen", side_effect=offline_urlopen) as mocked, \
+                patch("scripts.wechat_digest.time.sleep"):
+            result = translate_to_chinese("A new model improves reasoning", retries=3)
+
+        self.assertEqual(result, "A new model improves reasoning")
+        self.assertEqual(mocked.call_count, 3)
+
+    def test_malformed_response_is_not_retried(self):
+        class Response:
+            def read(self):
+                return b"<html>blocked</html>"
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        with patch("scripts.wechat_digest.urlopen", return_value=Response()) as mocked, \
+                patch("scripts.wechat_digest.time.sleep"):
+            result = translate_to_chinese("A new model improves reasoning")
+
+        self.assertEqual(result, "A new model improves reasoning")
+        self.assertEqual(mocked.call_count, 1)
 
     def test_translation_that_echoes_the_original_is_not_appended(self):
         # A proper noun or an untranslated string must not be printed twice.
