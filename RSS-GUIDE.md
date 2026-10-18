@@ -6,7 +6,7 @@ RSS brings updates from different websites into one reader, in chronological ord
 
 ## Start in three steps
 
-1. **Choose a bundle.** Use the Top 200 for a first import: every primary category is represented without requiring you to prune hundreds of feeds. Pick a topic bundle when you already know your focus, or the complete collection when you want an archive to organize yourself.
+1. **Choose a bundle.** For the full directory, start with the Complete collection (737 sources). If you prefer a smaller, curated start, choose the Top 200; choose a topic bundle if you already know what you want to read.
 2. **Download the OPML file.** Click a file in the [download table](README.md#downloads). The downloaded file should end in `.opml`. If the browser displays XML text, save the page as a file instead of subscribing to the page URL.
 3. **Import it into your reader.** If you do not have one yet, choose from the [readers and tutorials](#readers-and-official-tutorials) below. Otherwise, look for “Import OPML,” select the downloaded file, and wait for the first refresh. The OPML groups become folders in readers that preserve them.
 
@@ -14,13 +14,14 @@ RSS brings updates from different websites into one reader, in chronological ord
 
 Open Tidings and choose **Import OPML** from Add Subscription or Feed Management. Tidings preserves the bundle groups, skips duplicate feed URLs, and reports how many subscriptions were added, skipped, or failed.
 
-The Top 200 is the default everyday bundle. The 737-feed complete collection creates a larger unread queue and many more network requests, so it is better suited to readers who plan to curate it themselves.
+The Complete collection imports all 737 sources and creates a larger unread queue with more network requests. If that is more than you want to follow, choose the curated Top 200 or a focused topic bundle instead.
 
 ## Which bundle should I choose?
 
 | You want to read | Recommended bundle |
 | --- | --- |
-| A balanced first library across every category | ⭐ Top 200 |
+| Every source in the catalog, in one import | 📚 Complete collection (737) |
+| A smaller curated start across all categories | ⭐ Top 200 |
 | Chinese personal writing | ✍️ Chinese independent blogs |
 | V2EX, LINUX DO, Reddit, Hacker News, and other discussions | 👥 Technical communities |
 | Vulnerabilities, security research, and advisories | 🔐 Security |
@@ -29,7 +30,6 @@ The Top 200 is the default everyday bundle. The 737-feed complete collection cre
 | First-party writing from company engineering teams | 🏢 Company technology |
 | Models, AI research, and tools | 🤖 Artificial intelligence |
 | Every Chinese-language source | 🀄 Chinese-language sources |
-| The entire directory to prune yourself | 📚 Complete collection |
 
 Topic bundles may overlap. Most readers identify existing subscriptions by feed URL, but exporting your current OPML before a large import is a sensible backup.
 

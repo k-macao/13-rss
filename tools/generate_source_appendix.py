@@ -106,7 +106,7 @@ def appendix(catalog, chinese):
         grouped.setdefault(feed["category"], []).append(feed)
     title = "## 全量源清单" if chinese else "## Complete source directory"
     intro = (
-        f"下面列出全集中的 {len(catalog['feeds'])} 个订阅源。每项都标明主分类与所属合集；内容由 `data/feeds.json` 生成。"
+        f"下面列出全集中的 {len(catalog['feeds'])} 个全量源。每项都标明主分类与所属合集；内容由 `data/feeds.json` 生成。"
         if chinese
         else f"All {len(catalog['feeds'])} feeds in the complete collection are listed below with their primary category and bundles. This appendix is generated from `data/feeds.json`."
     )

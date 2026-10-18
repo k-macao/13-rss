@@ -6,7 +6,7 @@ Dependency-free: standard library only, matching the rest of this repository.
 Usage examples
 --------------
     python scripts/wechat_digest.py --dry-run --out build/digest
-    PUSHPLUS_TOKEN=xxx python scripts/wechat_digest.py --pack top200
+    PUSHPLUS_TOKEN=xxx python scripts/wechat_digest.py --pack all
     python scripts/wechat_digest.py --probe-translators --out build/probe
 
 Design notes
@@ -1952,7 +1952,7 @@ def write_translation_report(out_dir, *, markdown: str, payload: dict):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Push an RSS digest to WeChat via pushplus.")
     parser.add_argument("--catalog", default=str(ROOT / "data/feeds.json"))
-    parser.add_argument("--pack", default="top200", help="OPML pack to read, e.g. top200, ai, news")
+    parser.add_argument("--pack", default="all", help="OPML pack to read (default: all), e.g. top200, ai, news")
     parser.add_argument("--edition", choices=["auto", "morning", "evening"], default="auto")
     parser.add_argument("--window-hours", type=float, default=0, help="0 uses the edition default")
     parser.add_argument("--max-feeds", type=int, default=0, help="0 uses every feed in the pack")

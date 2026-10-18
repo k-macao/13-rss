@@ -43,7 +43,7 @@
 
 ## 三、内容规则
 
-- **来源**：默认读取 `data/feeds.json` 里的 `top200` 集合，可换成 `ai`、`news`、`security` 等任意 OPML 集合。
+- **来源**：默认读取 `data/feeds.json` 里的 `all` 集合，即 737 个全量源；也可换成 `top200`、`ai`、`news`、`security` 等任意 OPML 集合。
 - **筛选**：只保留时间窗内、带有真实发布时间的文章；每个源最多 3 条，单期最多 120 条。
 - **去重**：按链接（忽略末尾斜杠与锚点）和标题双重去重。
 - **排序**：按目录分类分栏，栏内按发布时间从新到旧。
@@ -213,14 +213,14 @@ python scripts/wechat_digest.py --dry-run --no-summarize --out build/digest
 python scripts/wechat_digest.py --probe-translators --out build/probe
 
 # 真实推送（本地）
-PUSHPLUS_TOKEN=你的token python scripts/wechat_digest.py --pack top200
+PUSHPLUS_TOKEN=你的token python scripts/wechat_digest.py --pack all
 ```
 
 常用参数：
 
 | 参数 | 默认值 | 说明 |
 | --- | --- | --- |
-| `--pack` | `top200` | 要读取的 OPML 集合 |
+| `--pack` | `all` | 要读取的 OPML 集合，默认读取 737 个全量源 |
 | `--edition` | `auto` | `auto` 按北京时间判断上午/下午 |
 | `--window-hours` | `0` | 0 表示使用该期号的默认窗口 |
 | `--max-per-feed` | `3` | 每个源最多取几条 |

@@ -2,7 +2,7 @@
   <img src="https://tidings.info/apple-touch-icon.png" width="96" height="96" alt="Tidings 应用图标">
   <h1>Tidings RSS</h1>
   <p><strong>把真正值得长期订阅的内容，整理成可以直接导入阅读器的 RSS 合集。</strong></p>
-  <p>先从精选 200 开始；需要更多选择时，再按主题下载或浏览 737 个全量源。精选包最近检查：2026-08-13。</p>
+  <p>直接导入 737 个全量源，完整浏览全部分类；想缩小阅读范围时，再选主题合集或精选 200。精选 200 最近检查：2026-08-13。</p>
   <p>
     <a href="README.md">English</a> ·
     <a href="#直接下载">下载 OPML</a> ·
@@ -19,18 +19,18 @@
   </p>
 </div>
 
-第一次导入，建议直接选“精选 200”。它从 737 个全量源里留下大机构、长期创作者、官方一手内容和社区认可度较高的作者，14 个分类都有覆盖，导入后不用再面对几百个订阅逐一删减。
+想一次导入完整目录，选择“综合全集”，其中包含 737 个全量源，覆盖全部 14 个分类。若更想轻量开始，可以选择“精选 200”：它优先保留大机构、长期创作者、官方一手内容和社区认可度较高的作者。
 
-精选包兼顾中文和英文内容，覆盖 AI、工程、安全、科技媒体、周刊、科研、新闻、产品、商业、博客、社区、文化、视频和播客。想把某个方向看得更全，可以继续选下面的主题包；“综合全集”更适合收藏和二次整理。
+精选 200 兼顾中文和英文内容，覆盖 AI、工程、安全、科技媒体、周刊、科研、新闻、产品、商业、博客、社区、文化、视频和播客，是全量目录的轻量子集。想聚焦某个方向，可以选择主题包；想完整浏览或自行整理全部来源，就选“综合全集”。
 
 ## 直接下载
 
-拿不准就选“精选 200”。主题包之间会有重叠，全集里的 Feed 地址不会重复。
+想完整收录就选“综合全集”；希望从较轻量、经过精选的范围开始，就选“精选 200”。主题包之间会有重叠，全集里的 Feed 地址不会重复。
 
 | 合集 | 数量 | 下载 | 适合你，如果你想看…… |
 | --- | ---: | --- | --- |
-| ⭐ 精选 200（首选） | `200` | [下载 `tidings-top200.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-top200.opml) | 一次导入，各个方向都有高质量内容，后续整理成本也更低 |
-| 📚 综合全集 | `737` | [下载 `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | 完整收藏，或导入后自行删减 |
+| 📚 综合全集（737 个全量源，首选） | `737` | [下载 `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | 一次导入目录中的全部来源，适合完整浏览或自行整理 |
+| ⭐ 精选 200（轻量精选） | `200` | [下载 `tidings-top200.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-top200.opml) | 14 个分类都有覆盖，源数量更少，适合轻量开始 |
 | ✍️ 中文独立博客 | `349` | [下载 `tidings-blogs.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-blogs.opml) | 仍在认真写作的中文个人博客 |
 | 👥 技术社区 | `14` | [下载 `tidings-communities.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-communities.opml) | V2EX、LINUX DO、Reddit、Hacker News 等社区讨论 |
 | 🔐 安全 | `8` | [下载 `tidings-security.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-security.opml) | 漏洞、攻防研究、安全通告与行业动态 |
@@ -62,7 +62,7 @@ RSS 地址可能随时迁移或失效，所以目录会持续复查。发现漏�
 
 ## 每日推送到微信
 
-仓库自带一个可选的推送流程：每天北京时间 09:00 和 18:00，GitHub Actions 抓取目录里的新文章，渲染成国际杂志风格的竖屏简报，通过 pushplus 发到微信。内容超出 pushplus 的 10 万字上限时会自动分页发送。
+仓库自带一个可选的推送流程：每天北京时间 09:00 和 18:00，GitHub Actions 默认读取综合全集中的 737 个全量源，抓取新文章后渲染成国际杂志风格的竖屏简报，通过 pushplus 发到微信。内容超出 pushplus 的 10 万字上限时会自动分页发送。
 
 原文是英文的标题和摘要会保留原文，并在下方附加简体中文译文，同一张卡片中英对照阅读；中文原文保持原样，翻译服务不可用时只显示原文。
 
@@ -116,7 +116,7 @@ AI 能力由你选择的独立 Provider 提供，可能需要自己的账号、A
 <!-- SOURCE_APPENDIX_START -->
 ## 全量源清单
 
-下面列出全集中的 737 个订阅源。每项都标明主分类与所属合集；内容由 `data/feeds.json` 生成。
+下面列出全集中的 737 个全量源。每项都标明主分类与所属合集；内容由 `data/feeds.json` 生成。
 
 <details>
 <summary>🤖 人工智能 · 42</summary>

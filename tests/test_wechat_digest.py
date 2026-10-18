@@ -1497,6 +1497,38 @@ class WorkflowTests(unittest.TestCase):
     def setUp(self):
         self.text = WORKFLOW.read_text(encoding="utf-8")
 
+    def test_cli_defaults_to_the_complete_catalog(self):
+        with tempfile.TemporaryDirectory() as temp:
+            catalog_path = Path(temp) / "catalog.json"
+            catalog_path.write_text(
+                json.dumps(
+                    {
+                        "feeds": [
+                            {"id": "all-source", "title": "All source", "category": "News", "packs": ["all"]},
+                            {"id": "top200-source", "title": "Top source", "category": "News", "packs": ["top200"]},
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            selected_ids = []
+
+            def collect(feeds, **kwargs):
+                selected_ids.extend(feed["id"] for feed in feeds)
+                return [], {"feeds": len(feeds), "ok": 0, "failed": len(feeds)}
+
+            with contextlib.redirect_stdout(io.StringIO()), patch(
+                "scripts.wechat_digest.collect_items", side_effect=collect
+            ):
+                result = main(["--catalog", str(catalog_path), "--no-translate", "--no-summarize"])
+
+        self.assertEqual(result, 0)
+        self.assertEqual(selected_ids, ["all-source"])
+
+    def test_workflow_defaults_to_the_complete_catalog(self):
+        self.assertRegex(self.text, r"(?m)^\s+default: all$")
+        self.assertIn('--pack "${{ inputs.pack || \'all\' }}"', self.text)
+
     def test_workflow_runs_at_nine_and_eighteen_beijing_time(self):
         crons = re.findall(r'cron:\s*"([^"]+)"', self.text)
         self.assertEqual(crons, ["0 1 * * *", "0 10 * * *"])  # 09:00 and 18:00 UTC+8

@@ -2,7 +2,7 @@
   <img src="https://tidings.info/apple-touch-icon.png" width="96" height="96" alt="Tidings app icon">
   <h1>Tidings RSS</h1>
   <p><strong>High-quality feeds, organized into OPML bundles you can import directly.</strong></p>
-  <p>Start with the Top 200, then use topic bundles or the 737-source directory when you want more. Top 200 last checked: 2026-08-13.</p>
+  <p>Start with all 737 sources, then narrow your reading with topic bundles or the compact Top 200. Top 200 last checked: 2026-08-13.</p>
   <p><a href="README.zh-CN.md">简体中文</a> · <a href="#downloads">Download OPML</a> · <a href="RSS-GUIDE.md">RSS guide</a> · <a href="#complete-source-directory">Browse every source</a> · <a href="CONTRIBUTING.md">Suggest a feed</a> · <a href="#wechat-user-group">WeChat group</a> · <a href="https://tidings.info/">Get Tidings</a></p>
   <p>
     <a href="https://github.com/fuxiaoai/tidings-rss/actions/workflows/validate.yml"><img alt="Catalog validation" src="https://github.com/fuxiaoai/tidings-rss/actions/workflows/validate.yml/badge.svg"></a>
@@ -11,18 +11,18 @@
   </p>
 </div>
 
-For a first import, choose the Top 200. It keeps established publishers, long-running independent writers, first-party sources, and authors with strong community recognition from the 737-source directory. All 14 categories are represented, without leaving you hundreds of subscriptions to prune.
+For a complete import, choose the Complete collection: all 737 sources across 14 categories are included. If you prefer a smaller starting point, choose the Top 200, a curated subset that keeps established publishers, long-running independent writers, first-party sources, and authors with strong community recognition.
 
-The Top 200 balances Chinese and English sources across AI, engineering, security, technology media, newsletters, research, news, product, business, blogs, communities, culture, video, and podcasts. Use a topic bundle when you want more depth, or the complete collection when you want an archive to organize yourself.
+The Top 200 balances Chinese and English sources across AI, engineering, security, technology media, newsletters, research, news, product, business, blogs, communities, culture, video, and podcasts. Use it for a lighter reading load, or choose a topic bundle for a focused collection.
 
 ## Downloads
 
-If you are unsure, choose the Top 200. Topic bundles overlap; the complete collection contains each feed URL once.
+For every source in one import, choose the Complete collection. Choose the Top 200 for a smaller curated set. Topic bundles overlap; the complete collection contains each feed URL once.
 
 | Collection | Feeds | Download | Best for |
 | --- | ---: | --- | --- |
-| ⭐ Top 200 (recommended) | `200` | [Download `tidings-top200.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-top200.opml) | Broad, high-quality coverage with a much smaller cleanup cost |
-| 📚 Complete collection | `737` | [Download `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | Keeping the full directory or pruning it yourself |
+| 📚 Complete collection (all 737 sources, recommended) | `737` | [Download `tidings-all.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-all.opml) | Every source in the directory, ready to browse or organize |
+| ⭐ Top 200 (smaller curated set) | `200` | [Download `tidings-top200.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-top200.opml) | Broad coverage across all 14 categories with a lighter reading load |
 | ✍️ Chinese independent blogs | `349` | [Download `tidings-blogs.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-blogs.opml) | Active Chinese personal writing |
 | 👥 Technical communities | `14` | [Download `tidings-communities.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-communities.opml) | V2EX, LINUX DO, Reddit, Hacker News, and other active discussions |
 | 🔐 Security | `8` | [Download `tidings-security.opml`](https://github.com/fuxiaoai/tidings-rss/releases/latest/download/tidings-security.opml) | Vulnerabilities, defensive guidance, security research, and news |
@@ -54,7 +54,7 @@ Feeds move and disappear, so the directory is checked regularly. If a source is 
 
 ## Daily digest to WeChat
 
-The repository ships an optional delivery workflow: twice a day, at 09:00 and 18:00 Beijing time, GitHub Actions collects new articles from the catalog, renders them as a portrait, international-magazine style briefing, and sends it to WeChat through pushplus. Long issues are paginated automatically to stay inside the 100,000-character pushplus limit.
+The repository ships an optional delivery workflow: twice a day, at 09:00 and 18:00 Beijing time, GitHub Actions reads all 737 sources in the complete collection by default, gathers new articles, renders them as a portrait, international-magazine style briefing, and sends it to WeChat through pushplus. Long issues are paginated automatically to stay inside the 100,000-character pushplus limit.
 
 An English headline or summary keeps its original wording and gains a Simplified Chinese translation underneath it, so one card reads in both languages. Chinese articles are left as they are, and an unavailable translation service only removes the extra line.
 
