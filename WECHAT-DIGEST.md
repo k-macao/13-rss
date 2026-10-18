@@ -43,7 +43,7 @@ The two windows meet end to end, so they cover exactly 24 hours with almost no o
 
 ## What goes into an issue
 
-- **Sources.** Reads the `top200` bundle from `data/feeds.json` by default; any other OPML bundle (`ai`, `news`, `security`, …) can be selected instead.
+- **Sources.** Reads the `all` bundle—the complete 737-source catalog—from `data/feeds.json` by default; any other OPML bundle (`top200`, `ai`, `news`, `security`, …) can be selected instead.
 - **Filtering.** Keeps only articles inside the time window that carry a real publication date; at most 3 items per feed and 120 items per issue.
 - **Deduplication.** Links (ignoring trailing slashes and anchors) and titles are both deduplicated.
 - **Ordering.** Articles are grouped by catalog category, newest first inside each section.
@@ -211,14 +211,14 @@ python scripts/wechat_digest.py --dry-run --no-translate --out build/digest
 python scripts/wechat_digest.py --probe-translators --out build/probe
 
 # Push for real (locally)
-PUSHPLUS_TOKEN=your-token python scripts/wechat_digest.py --pack top200
+PUSHPLUS_TOKEN=your-token python scripts/wechat_digest.py --pack all
 ```
 
 Common arguments:
 
 | Argument | Default | Purpose |
 | --- | --- | --- |
-| `--pack` | `top200` | OPML bundle to read |
+| `--pack` | `all` | OPML bundle to read; defaults to the complete 737-source catalog |
 | `--edition` | `auto` | `auto` picks morning or afternoon from Beijing time |
 | `--window-hours` | `0` | 0 uses the default window for that edition |
 | `--max-per-feed` | `3` | Maximum items taken from one feed |
